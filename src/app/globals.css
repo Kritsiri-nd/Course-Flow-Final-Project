@@ -3,7 +3,6 @@
 @import "tailwindcss/preflight";
 @import "tailwindcss/utilities";
 
-
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
