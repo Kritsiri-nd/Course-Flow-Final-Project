@@ -83,7 +83,7 @@ export default function register() {
           CourseFlow
         </div>
         <div className="flex gap-6 items-center">
-          <a href="/public/courses" className="no-underline text-gray-500 hover:text-gray-700 transition-colors">Courses</a>
+          <a href="/non-user/courses" className="no-underline text-gray-500 hover:text-gray-700 transition-colors">Courses</a>
           <a href="/auth/login" className="no-underline text-gray-500 hover:text-gray-700 transition-colors">Login</a>
         </div>
       </nav>
