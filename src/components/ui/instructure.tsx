@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import ProtectIcon from "../../assets/protectIcon";
 import HeartIcon from "../../assets/heartIcon";
+import TestimonialCarousel from "./TestimonialCarousel";
 
 export default function Instructure() {
   const router = useRouter();
@@ -432,12 +433,13 @@ export default function Instructure() {
           </div>
         </div>
         
-        <div className="h-[742px] w-[100vw] relative">
+        <div className="min-h-[400px] lg:h-[742px] w-full relative py-8 lg:py-0">
+          {/* Background SVG - Hidden on mobile */}
           <svg
             width="1356"
             height="630"
             viewBox="0 0 1356 630"
-            className="absolute right-[0px]"
+            className="absolute right-[0px] hidden lg:block"
             fill="none"
           >
             <circle cx="1260.17" cy="96.1741" r="13.1741" fill="#C6DCFF" />
@@ -474,17 +476,12 @@ export default function Instructure() {
               </linearGradient>
             </defs>
           </svg>
-          <div className="flex flex-col gap-[60px]">
-            <p className="text-3xl font-bold text-center text-gray-900">
+          
+          <div className="h-[742px] w-[100vw] flex flex-col gap-[30px] sm:gap-[30px] lg:gap-[25px] px-4 sm:px-6 lg:px-8 mt-20">
+            <p className="text-[24px] sm:text-[28px] lg:text-3xl font-semibold text-center text-gray-900">
               Our Graduates
             </p>
-            <div className="flex justify-center">
-              <div className="w-[737px] h-[309px] bg-blue-50 rounded-lg flex items-center justify-center">
-                <span className="text-gray-500">
-                  Testimonial Carousel Placeholder
-                </span>
-              </div>
-            </div>
+            <TestimonialCarousel />
           </div>
         </div>
       </div>
