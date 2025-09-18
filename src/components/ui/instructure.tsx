@@ -206,17 +206,20 @@ export default function Instructure() {
           </svg>
 
           {/* text */}
-          <div className="inline-flex flex-col gap-[120px]">
+          <div className="inline-flex flex-col gap-[120px] ">
             <div className="flex flex-start gap-[119px]">
-              <div className="w-[454px] h-[330px] rounded-lg overflow-hidden">
-                <img
-                  src="/images/learning.png"
-                  alt="Learning experience"
-                  width={454}
-                  height={330}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+            <div className="group w-[454px] h-[330px] rounded-lg overflow-hidden">
+  <img
+    src="/images/learning.png"
+    alt="Learning experience"
+    width={454}
+    height={330}
+    className="w-full h-full object-cover transition-transform duration-300  hover:scale-105"
+  />
+</div>
+
+
+
               <div className="flex flex-col gap-[40px]">
                 <p className="text-[36px] font-medium leading-[125%] tracking-[-2%] text-[#2B2C4F]">
                   Learning experience has been <br />
@@ -373,13 +376,13 @@ export default function Instructure() {
               strokeWidth="3"
             />
           </svg>
-          <div className="flex flex-col gap-[60px]">
+          <div className="flex flex-col gap-[60px] ">
             <p className="text-[36px] font-medium leading-[125%] tracking-[-2%] text-center text-[#000000]">
               Our Professional Instructor
             </p>
             <div className="flex gap-[24px]">
-              <div className="flex flex-col gap-[24px] hover:scale-105 transition-transform">
-                <div className="w-[357px] h-[420px] rounded-lg overflow-hidden">
+              <div className="flex flex-col gap-[24px] hover:scale-105  transition-transform">
+                <div className="w-[357px] h-[420px] rounded-lg overflow-hidden cursor-pointer">
                   <img
                     src="/images/Jane Cooper.png"
                     alt="Jane Cooper"
@@ -389,14 +392,14 @@ export default function Instructure() {
                   />
                 </div>
                 <div className="text-center flex flex-col gap-[10px]">
-                  <p className="text-[24px] font-medium leading-[125%] tracking-[-2%] text-center text-[#000000]">
+                  <p className="cursor-pointer text-[24px] font-medium leading-[125%] tracking-[-2%] text-center text-[#000000]">
                     Jane Cooper
                   </p>
-                  <p className="text-[16px] font-normal leading-[150%] tracking-[0%] text-center text-[#5483D0]">UX/UI Designer</p>
+                  <p className="cursor-pointer text-[16px] font-normal leading-[150%] tracking-[0%] text-center text-[#5483D0]">UX/UI Designer</p>
                 </div>
               </div>
               <div className="flex flex-col gap-[24px] hover:scale-105 transition-transform">
-                <div className="w-[357px] h-[420px] rounded-lg overflow-hidden">
+                <div className="cursor-pointer w-[357px] h-[420px] rounded-lg overflow-hidden">
                   <img
                     src="/images/Esther Howard.png"
                     alt="Esther Howard"
@@ -406,14 +409,14 @@ export default function Instructure() {
                   />
                 </div>
                 <div className="text-center flex flex-col gap-[10px]">
-                <p className="text-[24px] font-medium leading-[125%] tracking-[-2%] text-center text-[#000000]">
+                <p className="cursor-pointer text-[24px] font-medium leading-[125%] tracking-[-2%] text-center text-[#000000]">
                 Esther Howard
                   </p>
-                  <p className="text-[16px] font-normal leading-[150%] tracking-[0%] text-center text-[#5483D0]">Program Manager</p>
+                  <p className="cursor-pointer text-[16px] font-normal leading-[150%] tracking-[0%] text-center text-[#5483D0]">Program Manager</p>
                 </div>
               </div>
               <div className="flex flex-col gap-[24px] hover:scale-105 transition-transform">
-                <div className="w-[357px] h-[420px] rounded-lg overflow-hidden">
+                <div className="cursor-pointer w-[357px] h-[420px] rounded-lg overflow-hidden">
                   <img
                     src="/images/Brooklyn Simmons.png"
                     alt="Brooklyn Simmons"
@@ -423,10 +426,10 @@ export default function Instructure() {
                   />
                 </div>
                 <div className="text-center flex flex-col gap-[10px]">
-                <p className="text-[24px] font-medium leading-[125%] tracking-[-2%] text-center text-[#000000]">
+                <p className="cursor-pointer text-[24px] font-medium leading-[125%] tracking-[-2%] text-center text-[#000000]">
                 Brooklyn Simmons
                   </p>
-                  <p className="text-[16px] font-normal leading-[150%] tracking-[0%] text-center text-[#5483D0]">Software Engineer</p>
+                  <p className="cursor-pointer text-[16px] font-normal leading-[150%] tracking-[0%] text-center text-[#5483D0]">Software Engineer</p>
                 </div>
               </div>
             </div>
