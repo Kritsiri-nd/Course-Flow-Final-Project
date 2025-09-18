@@ -1,9 +1,9 @@
 @import "tailwindcss";
-@import "tw-animate-css";
-@import "tailwindcss/preflight";
-@import "tailwindcss/utilities";
 
-@custom-variant dark (&:is(.dark *));
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
 
 @theme inline {
   --color-background: var(--background);

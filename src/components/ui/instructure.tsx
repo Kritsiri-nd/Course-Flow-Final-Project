@@ -154,6 +154,8 @@ export default function Instructure() {
         </div>
         
         <div className="h-[1111px] w-[80vw] relative flex justify-center items-center">
+
+          {/* blue circle */}
           <svg
             width="1233"
             height="1111"
@@ -168,8 +170,11 @@ export default function Instructure() {
               transform="rotate(-75 44.7032 13.7032)"
               fill="url(#paint0_linear_15_1851)"
             />
+          
             <circle cx="384" cy="110" r="16" fill="#E5ECF8" />
             <circle cx="1135.5" cy="1106.5" r="42.5" fill="#C6DCFF" />
+
+            {/* purple x */}
             <path
               d="M1223.84 399L1218.84 417.68"
               stroke="#9B2FAC"
@@ -182,6 +187,8 @@ export default function Instructure() {
               strokeWidth="3"
               strokeLinecap="round"
             />
+
+            {/* linear gradient for blue circle */}
             <defs>
               <linearGradient
                 id="paint0_linear_15_1851"
@@ -196,24 +203,32 @@ export default function Instructure() {
               </linearGradient>
             </defs>
           </svg>
+
+          {/* text */}
           <div className="inline-flex flex-col gap-[120px]">
             <div className="flex flex-start gap-[119px]">
-              <div className="w-[454px] h-[330px] bg-gray-200 rounded-lg flex items-center justify-center">
-                <span className="text-gray-500">Image Placeholder</span>
+              <div className="w-[454px] h-[330px] rounded-lg overflow-hidden">
+                <img
+                  src="/images/learning.png"
+                  alt="Learning experience"
+                  width={454}
+                  height={330}
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="flex flex-col gap-[40px]">
-                <h1 className="text-3xl font-bold text-gray-900">
+                <p className="text-[36px] font-medium leading-[125%] tracking-[-2%] text-[#2B2C4F]">
                   Learning experience has been <br />
                   enhanced with new technologies
-                </h1>
+                </p>
                 <div className="flex flex-col gap-[24px] w-[547px]">
                   <div className="flex gap-[24px]">
                     <ProtectIcon />
                     <div className="flex flex-col gap-[10px] flex-1">
-                      <h1 className="text-xl font-semibold text-gray-900">
+                      <p className="text-[24px] font-medium leading-[125%] tracking-[-2%] text-[#000000]">
                         Secure & Easy
-                      </h1>
-                      <p className="text-gray-700">
+                      </p>
+                      <p className="text-[16px] font-normal leading-[150%] tracking-[0%] text-[#646D89]">
                         Duis aute irure dolor in reprehenderit in voluptate
                         velit es se cillum dolore eu fugiat nulla pariatur.
                         Excepteur sint.
@@ -223,10 +238,10 @@ export default function Instructure() {
                   <div className="flex gap-[24px]">
                     <HeartIcon />
                     <div className="flex flex-col gap-[10px] flex-1">
-                      <h1 className="text-xl font-semibold text-gray-900">
+                      <p className="text-[24px] font-medium leading-[125%] tracking-[-2%] text-[#000000]">
                         Support All Student
-                      </h1>
-                      <p className="text-gray-700">
+                      </p>
+                      <p className="text-[16px] font-normal leading-[150%] tracking-[0%] text-[#646D89]">
                         Duis aute irure dolor in reprehenderit in voluptate
                         velit es se cillum dolore eu fugiat nulla pariatur.
                         Excepteur sint.
@@ -237,11 +252,11 @@ export default function Instructure() {
               </div>
             </div>
             <div className="flex flex-start gap-[119px]">
-              <div className="flex flex-col gap-[40px]">
-                <h1 className="text-3xl font-bold text-gray-900">
+              <div className="flex flex-col gap-[30px]">
+                <p className="text-[36px] font-medium leading-[125%] tracking-[-2%] text-[#2B2C4F]">
                   Interaction between the tutor <br />
                   and the learners
-                </h1>
+                </p>
                 <div className="flex gap-[24px]">
                   <svg
                     width="36"
@@ -306,10 +321,10 @@ export default function Instructure() {
                     />
                   </svg>
                   <div className="flex flex-col gap-[10px]">
-                    <h1 className="text-xl font-semibold text-gray-900">
+                    <p className="text-[24px] font-medium leading-[125%] tracking-[-2%] text-[#000000]">
                       Purely Collaborative
-                    </h1>
-                    <p className="text-gray-700 w-[487px]">
+                    </p>
+                    <p className="text-[16px] font-normal leading-[150%] tracking-[0%] text-[#646D89] w-[487px]">
                       Duis aute irure dolor in reprehenderit in voluptate velit
                       es se cillum dolore eu fugiat nulla pariatur. Excepteur
                       sint.
@@ -319,10 +334,10 @@ export default function Instructure() {
                 <div className="flex gap-[24px]">
                   <HeartIcon />
                   <div className="flex flex-col gap-[10px]">
-                    <h1 className="text-xl font-semibold text-gray-900">
+                    <p className="text-[24px] font-medium leading-[125%] tracking-[-2%] text-[#000000]">
                       Support All Student
-                    </h1>
-                    <p className="text-gray-700 w-[487px]">
+                    </p>
+                    <p className="text-[16px] font-normal leading-[150%] tracking-[0%] text-[#646D89] w-[487px]">
                       Duis aute irure dolor in reprehenderit in voluptate velit
                       es se cillum dolore eu fugiat nulla pariatur. Excepteur
                       sint.
@@ -331,7 +346,13 @@ export default function Instructure() {
                 </div>
               </div>
               <div className="w-[454px] h-[330px] bg-gray-200 rounded-lg flex items-center justify-center">
-                <span className="text-gray-500">Image Placeholder</span>
+              <img
+                  src="/images/interaction.png"
+                  alt="Learning experience"
+                  width={454}
+                  height={330}
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
           </div>
@@ -352,41 +373,59 @@ export default function Instructure() {
             />
           </svg>
           <div className="flex flex-col gap-[60px]">
-            <h1 className="text-3xl font-bold text-center text-gray-900">
+            <p className="text-[36px] font-medium leading-[125%] tracking-[-2%] text-center text-[#000000]">
               Our Professional Instructor
-            </h1>
+            </p>
             <div className="flex gap-[24px]">
               <div className="flex flex-col gap-[24px] hover:scale-105 transition-transform">
-                <div className="w-[200px] h-[200px] bg-gray-200 rounded-lg flex items-center justify-center">
-                  <span className="text-gray-500">Jane Cooper</span>
+                <div className="w-[357px] h-[420px] rounded-lg overflow-hidden">
+                  <img
+                    src="/images/Jane Cooper.png"
+                    alt="Jane Cooper"
+                    width={357}
+                    height={420}
+                    className="w-full h-full object-cover rounded-lg"
+                  />
                 </div>
-                <div className="text-center">
-                  <h1 className="text-xl font-semibold text-gray-900">
+                <div className="text-center flex flex-col gap-[10px]">
+                  <p className="text-[24px] font-medium leading-[125%] tracking-[-2%] text-center text-[#000000]">
                     Jane Cooper
-                  </h1>
-                  <p className="text-blue-400">UX/UI Designer</p>
+                  </p>
+                  <p className="text-[16px] font-normal leading-[150%] tracking-[0%] text-center text-[#5483D0]">UX/UI Designer</p>
                 </div>
               </div>
               <div className="flex flex-col gap-[24px] hover:scale-105 transition-transform">
-                <div className="w-[200px] h-[200px] bg-gray-200 rounded-lg flex items-center justify-center">
-                  <span className="text-gray-500">Esther Howard</span>
+                <div className="w-[357px] h-[420px] rounded-lg overflow-hidden">
+                  <img
+                    src="/images/Esther Howard.png"
+                    alt="Esther Howard"
+                    width={357}
+                    height={420}
+                    className="w-full h-full object-cover rounded-lg"
+                  />
                 </div>
-                <div className="text-center">
-                  <h1 className="text-xl font-semibold text-gray-900">
-                    Esther Howard
-                  </h1>
-                  <p className="text-blue-400">Program Manager</p>
+                <div className="text-center flex flex-col gap-[10px]">
+                <p className="text-[24px] font-medium leading-[125%] tracking-[-2%] text-center text-[#000000]">
+                Esther Howard
+                  </p>
+                  <p className="text-[16px] font-normal leading-[150%] tracking-[0%] text-center text-[#5483D0]">Program Manager</p>
                 </div>
               </div>
               <div className="flex flex-col gap-[24px] hover:scale-105 transition-transform">
-                <div className="w-[200px] h-[200px] bg-gray-200 rounded-lg flex items-center justify-center">
-                  <span className="text-gray-500">Brooklyn Simmons</span>
+                <div className="w-[357px] h-[420px] rounded-lg overflow-hidden">
+                  <img
+                    src="/images/Brooklyn Simmons.png"
+                    alt="Brooklyn Simmons"
+                    width={357}
+                    height={420}
+                    className="w-full h-full object-cover rounded-lg"
+                  />
                 </div>
-                <div className="text-center">
-                  <h1 className="text-xl font-semibold text-gray-900">
-                    Brooklyn Simmons
-                  </h1>
-                  <p className="text-blue-400">Software Engineer</p>
+                <div className="text-center flex flex-col gap-[10px]">
+                <p className="text-[24px] font-medium leading-[125%] tracking-[-2%] text-center text-[#000000]">
+                Brooklyn Simmons
+                  </p>
+                  <p className="text-[16px] font-normal leading-[150%] tracking-[0%] text-center text-[#5483D0]">Software Engineer</p>
                 </div>
               </div>
             </div>
@@ -436,9 +475,9 @@ export default function Instructure() {
             </defs>
           </svg>
           <div className="flex flex-col gap-[60px]">
-            <h1 className="text-3xl font-bold text-center text-gray-900">
+            <p className="text-3xl font-bold text-center text-gray-900">
               Our Graduates
-            </h1>
+            </p>
             <div className="flex justify-center">
               <div className="w-[737px] h-[309px] bg-blue-50 rounded-lg flex items-center justify-center">
                 <span className="text-gray-500">
