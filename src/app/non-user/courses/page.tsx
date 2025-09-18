@@ -69,7 +69,7 @@ export default function CourseList() {
       <div className="mt-10 px-2 sm:px-4 md:px-6 lg:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCourses.length > 0 ? (
           filteredCourses.map((course) => (
-            <Link key={course.id} href={`/courses/${course.id}`}>
+            <Link key={course.id} href={`/non-user/courses/${course.id}`}>
               <div className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden cursor-pointer">
                 {/* Thumbnail */}
                 <img
