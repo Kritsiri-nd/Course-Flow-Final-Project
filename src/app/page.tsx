@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 import Navbar from "../components/ui/navbar";
 import Instructure from "../components/ui/instructure";
 import SubFooter from "../components/ui/subFooter";
@@ -15,4 +13,3 @@ export default function HomePage() {
     </>
   );
 }
->>>>>>> 0c2ce0e (feat: update dependencies, add new UI components, and restructure layout)
