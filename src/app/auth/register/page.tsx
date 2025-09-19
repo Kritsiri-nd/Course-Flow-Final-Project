@@ -10,10 +10,14 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import * as React from 'react';
 import Popover from '@mui/material/Popover'
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar'
+import { validateFirstName, validateLastName, validateDateOfBirth, validateEmail, validatePassword, validateEducationalBackground } from '@/lib/validators';
+import { useRouter } from 'next/navigation';
 
 export default function register() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     dateOfBirth: '',
     educationalBackground: '',
     email: '',
@@ -22,6 +26,9 @@ export default function register() {
 
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
   const [dobAnchorEl, setDobAnchorEl] = useState<HTMLDivElement | null>(null);
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -29,11 +36,155 @@ export default function register() {
       ...prev,
       [name]: value
     }));
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateField = (name: string, value: string) => {
+    let validation;
+    
+    switch (name) {
+      case 'firstName':
+        validation = validateFirstName(value);
+        break;
+      case 'lastName':
+        validation = validateLastName(value);
+        break;
+      case 'dateOfBirth':
+        validation = validateDateOfBirth(value);
+        break;
+      case 'email':
+        validation = validateEmail(value);
+        break;
+      case 'password':
+        validation = validatePassword(value);
+        break;
+      case 'educationalBackground':
+        validation = validateEducationalBackground(value);
+        break;
+      default:
+        return;
+    }
+    
+    if (!validation.isValid) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: validation.message || ''
+      }));
+    } else {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    validateField(name, value);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+    setIsSubmitting(true);
+    setSubmitMessage(null);
+    
+    // Clear previous errors
+    setErrors({});
+    
+    // Validate all fields
+    // Name validations with field-specific messages
+    const firstNameValidation = validateFirstName(formData.firstName);
+    const lastNameValidation = validateLastName(formData.lastName);
+    const dobValidation = validateDateOfBirth(formData.dateOfBirth);
+    const emailValidation = validateEmail(formData.email);
+    const passwordValidation = validatePassword(formData.password);
+    const backgroundValidation = validateEducationalBackground(formData.educationalBackground);
+    
+    const validationErrors: {[key: string]: string} = {};
+    
+    if (!firstNameValidation.isValid) {
+      validationErrors.firstName = firstNameValidation.message || '';
+    }
+    if (!lastNameValidation.isValid) {
+      validationErrors.lastName = lastNameValidation.message || '';
+    }
+    if (!dobValidation.isValid) {
+      validationErrors.dateOfBirth = dobValidation.message || '';
+    }
+    if (!emailValidation.isValid) {
+      validationErrors.email = emailValidation.message || '';
+    }
+    if (!passwordValidation.isValid) {
+      validationErrors.password = passwordValidation.message || '';
+    }
+    if (!backgroundValidation.isValid) {
+      validationErrors.educationalBackground = backgroundValidation.message || '';
+    }
+    
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      setIsSubmitting(false);
+      return;
+    }
+    
+    // Email uniqueness will be checked on the server side
+    
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setSubmitMessage({
+          type: 'success',
+          text: data.message || 'Registration successful! Please check your email to verify your account.'
+        });
+        // Reset form
+        setFormData({
+          firstName: '',
+          lastName: '',
+          dateOfBirth: '',
+          educationalBackground: '',
+          email: '',
+          password: ''
+        });
+        setSelectedDate(null);
+        // Navigate to success page
+        router.push('/auth/register/success');
+      } else {
+        // Map duplicate email server error to the email field inline error
+        if (data?.message && typeof data.message === 'string' && data.message.toLowerCase().includes('email is already registered')) {
+          setErrors((prev) => ({ ...prev, email: data.message }));
+        } else {
+          setSubmitMessage({
+            type: 'error',
+            text: data.message || 'This email is already registered'
+          });
+        }
+      }
+    } catch (error) {
+      setSubmitMessage({
+        type: 'error',
+        text: 'Network error. Please check your connection and try again.'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -75,8 +226,6 @@ export default function register() {
           className="absolute w-[35px] h-[35px] opacity-100 top-[589px] right-[50px]"
         />
     </div>
-
-        <div className="min-h-screen relative overflow-hidden">
       {/* Navbar */}
       <nav className="w-full h-[88px] opacity-100 flex items-center justify-between px-6 bg-white border-b border-gray-200 box-border">
         <div className="text-2xl font-bold text-gray-800">
@@ -92,28 +241,74 @@ export default function register() {
       <div className="flex items-center justify-center min-h-[calc(100vh-88px)] px-4 relative z-10">
         <div className="w-full max-w-md">
           {/* Form Title */}
-          <h1 className="font-inter font-medium text-[36px] leading-[125%] tracking-[-0.02em] text-[#22269E] text-left mb-8">
+          <h1 className="font-inter font-medium text-[28px] leading-[125%] tracking-[-0.02em] text-[#22269E] text-left mb-6">
             Register to start learning!
           </h1>
 
           {/* Registration Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Name Field */}
-            <div className="grid w-full max-w-sm items-center gap-3">
-              <Label htmlFor="name">Name</Label>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* First Name Field */}
+            <div className="grid w-full items-center gap-2">
+              <Label htmlFor="firstName">First Name</Label>
+              <div className="relative">
               <Input 
                 type="text" 
-                id="name" 
-                name="name"
-                value={formData.name}
+                id="firstName" 
+                name="firstName"
+                value={formData.firstName}
                 onChange={handleInputChange}
-                placeholder="Enter Name and Lastname" 
+                onBlur={handleBlur}
+                placeholder="Enter your First Name" 
                 required
+                className={`${errors.firstName ? 'border-[#9B2FAC] focus:border-[#9B2FAC]' : ''} pr-10`}
               />
+              {errors.firstName && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="8" cy="8" r="8" fill="#9B2FAC"/>
+                    <path d="M8 4.5v5" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round"/>
+                    <circle cx="8" cy="11.5" r="0.75" fill="#FFFFFF"/>
+                  </svg>
+                </span>
+              )}
+              </div>
+              {errors.firstName && (
+                <p className="text-sm leading-none mt-0 text-[#9B2FAC]">{errors.firstName}</p>
+              )}
+            </div>
+
+            {/* Last Name Field */}
+            <div className="grid w-full items-center gap-2">
+              <Label htmlFor="lastName">Last Name</Label>
+              <div className="relative">
+              <Input 
+                type="text" 
+                id="lastName" 
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleInputChange}
+                onBlur={handleBlur}
+                placeholder="Enter your Last Name" 
+                required
+                className={`${errors.lastName ? 'border-[#9B2FAC] focus:border-[#9B2FAC]' : ''} pr-10`}
+              />
+              {errors.lastName && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="8" cy="8" r="8" fill="#9B2FAC"/>
+                    <path d="M8 4.5v5" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round"/>
+                    <circle cx="8" cy="11.5" r="0.75" fill="#FFFFFF"/>
+                  </svg>
+                </span>
+              )}
+              </div>
+              {errors.lastName && (
+                <p className="text-sm leading-none mt-0 text-[#9B2FAC]">{errors.lastName}</p>
+              )}
             </div>
 
             {/* Date of Birth Field */}
-            <div className="grid w-full max-w-sm items-center gap-3">
+            <div className="grid w-full items-center gap-2">
               <Label htmlFor="dateOfBirth">Date of Birth</Label>
               <div
                 className="relative"
@@ -130,17 +325,25 @@ export default function register() {
                   onChange={handleInputChange}
                   placeholder="DD/MM/YY"
                   autoComplete="off"
-                  className="pr-10 cursor-pointer"
+                  className={`pr-10 cursor-pointer ${errors.dateOfBirth ? 'border-[#9B2FAC] focus:border-[#9B2FAC]' : ''}`}
                   readOnly
                   required
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                  <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
-                    <rect x="3" y="5" width="14" height="12" rx="2" stroke="#A0AEC0" strokeWidth="1.2"/>
-                    <path d="M7 3V6" stroke="#A0AEC0" strokeWidth="1.2" strokeLinecap="round"/>
-                    <path d="M13 3V6" stroke="#A0AEC0" strokeWidth="1.2" strokeLinecap="round"/>
-                    <rect x="7" y="9" width="2" height="2" rx="0.5" fill="#A0AEC0"/>
-                  </svg>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                  {errors.dateOfBirth ? (
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="8" fill="#9B2FAC"/>
+                      <path d="M8 4.5v5" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round"/>
+                      <circle cx="8" cy="11.5" r="0.75" fill="#FFFFFF"/>
+                    </svg>
+                  ) : (
+                    <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
+                      <rect x="3" y="5" width="14" height="12" rx="2" stroke="#A0AEC0" strokeWidth="1.2"/>
+                      <path d="M7 3V6" stroke="#A0AEC0" strokeWidth="1.2" strokeLinecap="round"/>
+                      <path d="M13 3V6" stroke="#A0AEC0" strokeWidth="1.2" strokeLinecap="round"/>
+                      <rect x="7" y="9" width="2" height="2" rx="0.5" fill="#A0AEC0"/>
+                    </svg>
+                  )}
                 </span>
               </div>
               <Popover
@@ -164,12 +367,22 @@ export default function register() {
               >
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DateCalendar
-                    value={formData.dateOfBirth ? dayjs(formData.dateOfBirth, 'DD/MM/YY') : null}
+                    value={formData.dateOfBirth ? dayjs(formData.dateOfBirth, 'DD/MM/YY', true) : null}
                     onChange={(newValue) => {
-                      const formatted = newValue ? dayjs(newValue).format('DD/MM/YY') : ''
-                      setFormData((prev) => ({ ...prev, dateOfBirth: formatted }))
-                      setDobAnchorEl(null)
+                      if (newValue) {
+                        const formatted = dayjs(newValue).format('DD/MM/YY')
+                        setFormData((prev) => ({ ...prev, dateOfBirth: formatted }))
+                        setDobAnchorEl(null)
+                        
+                        // Validate the date immediately
+                        validateField('dateOfBirth', formatted)
+                      } else {
+                        setFormData((prev) => ({ ...prev, dateOfBirth: '' }))
+                        setDobAnchorEl(null)
+                      }
                     }}
+                    maxDate={dayjs().subtract(1, 'day')} // Prevent selecting today or future dates
+                    minDate={dayjs().subtract(120, 'year')} // Prevent selecting dates more than 120 years ago
                     sx={{
                       '& .MuiPickersCalendarHeader-label': {
                         fontFamily: 'Inter, sans-serif',
@@ -198,48 +411,99 @@ export default function register() {
                   />
                 </LocalizationProvider>
               </Popover>
+              {errors.dateOfBirth && (
+                <p className="text-sm leading-none mt-0 text-[#9B2FAC]">{errors.dateOfBirth}</p>
+              )}
             </div>
 
             {/* Educational Background Field */}
-            <div className="grid w-full max-w-sm items-center gap-3">
+            <div className="grid w-full items-center gap-2">
               <Label htmlFor="educationalBackground">Educational Background</Label>
+              <div className="relative">
               <Input 
                 type="text" 
                 id="educationalBackground" 
                 name="educationalBackground"
                 value={formData.educationalBackground}
                 onChange={handleInputChange}
+                onBlur={handleBlur}
                 placeholder="Enter Educational Background" 
                 required
+                className={`${errors.educationalBackground ? 'border-[#9B2FAC] focus:border-[#9B2FAC]' : ''} pr-10`}
               />
+              {errors.educationalBackground && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="8" cy="8" r="8" fill="#9B2FAC"/>
+                    <path d="M8 4.5v5" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round"/>
+                    <circle cx="8" cy="11.5" r="0.75" fill="#FFFFFF"/>
+                  </svg>
+                </span>
+              )}
+              </div>
+              {errors.educationalBackground && (
+                <p className="text-sm leading-none mt-0 text-[#9B2FAC]">{errors.educationalBackground}</p>
+              )}
             </div>
 
             {/* Email Field */}
-            <div className="grid w-full max-w-sm items-center gap-3">
+            <div className="grid w-full items-center gap-2">
               <Label htmlFor="email">Email</Label>
+              <div className="relative">
               <Input 
                 type="email" 
                 id="email" 
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
+                onBlur={handleBlur}
                 placeholder="Enter Email" 
                 required
+                className={`${errors.email ? 'border-[#9B2FAC] focus:border-[#9B2FAC]' : ''} pr-10`}
               />
+              {errors.email && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="8" cy="8" r="8" fill="#9B2FAC"/>
+                    <path d="M8 4.5v5" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round"/>
+                    <circle cx="8" cy="11.5" r="0.75" fill="#FFFFFF"/>
+                  </svg>
+                </span>
+              )}
+              </div>
+              {errors.email && (
+                <p className="text-sm leading-none mt-0 text-[#9B2FAC]">{errors.email}</p>
+              )}
             </div>
 
             {/* Password Field */}
-            <div className="grid w-full max-w-sm items-center gap-3">
+            <div className="grid w-full items-center gap-2">
               <Label htmlFor="password">Password</Label>
+              <div className="relative">
               <Input 
                 type="password" 
                 id="password" 
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                placeholder="Enter password" 
+                onBlur={handleBlur}
+                placeholder="Enter Password" 
                 required
+                className={`${errors.password ? 'border-[#9B2FAC] focus:border-[#9B2FAC]' : ''} pr-10`}
               />
+              {errors.password && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="8" cy="8" r="8" fill="#9B2FAC"/>
+                    <path d="M8 4.5v5" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round"/>
+                    <circle cx="8" cy="11.5" r="0.75" fill="#FFFFFF"/>
+                  </svg>
+                </span>
+              )}
+              </div>
+              {errors.password && (
+                <p className="text-sm leading-none mt-0 text-[#9B2FAC]">{errors.password}</p>
+              )}
             </div>
 
             {/* Register Button */}
@@ -248,22 +512,22 @@ export default function register() {
               variant="cta"
               size="cta"
               className="w-full"
+              disabled={isSubmitting}
             >
-              Register
+              {isSubmitting ? 'Registering...' : 'Register'}
             </Button>
           </form>
 
           {/* Login Link */}
-          <div className="text-left mt-6">
-            <p className="font-inter font-normal text-[16px] leading-[150%] tracking-normal text-black">
+          <div className="text-left mt-4">
+            <p className="font-inter font-normal text-[14px] leading-[150%] tracking-normal text-black">
               Already have an account?{' '}
-              <a href="/auth/login" className="font-inter font-bold text-[16px] leading-[150%] tracking-normal text-[#2F5FAC] hover:text-[#2b559c] transition-colors">
+              <a href="/auth/login" className="font-inter font-bold text-[14px] leading-[150%] tracking-normal text-[#2F5FAC] hover:text-[#2b559c] transition-colors">
                 Log in
               </a>
             </p>
           </div>
         </div>
-      </div>
       </div>
     </div>
   );
