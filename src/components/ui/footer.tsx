@@ -33,7 +33,7 @@ export default function Footer() {
               className="text-[16px] font-normal leading-[150%] tracking-[0%] text-[#ACB4C3] hover:text-white transition-colors text-center"
               onClick={(e) => {
                 e.preventDefault()
-                router.push("/public/courses")
+                router.push("/non-user/courses")
               }}
             >
               All Courses
@@ -43,7 +43,7 @@ export default function Footer() {
               className="text-[16px] font-normal leading-[150%] tracking-[0%] text-[#ACB4C3] hover:text-white transition-colors text-center"
               onClick={(e) => {
                 e.preventDefault()
-                router.push("/public/courses")
+                router.push("/non-user/courses")
               }}
             >
               Bundle Package

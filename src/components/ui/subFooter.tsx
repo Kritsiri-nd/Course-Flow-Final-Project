@@ -16,7 +16,7 @@ function SubFooter() {
           <p className="text-[32px] font-bold text-white w-[70%]">
             Want to start learning?
           </p>
-          <Link href="/public/courses" className="inline-block translate-y-[-68px]">
+          <Link href="/auth/register" className="inline-block translate-y-[-68px]">
             <button
               className="cursor-pointer bg-white text-[#F47E20] border border-[#F47E20] rounded-[12px] font-semibold hover:scale-105 transition-transform duration-200 px-[32px] py-[18px] w-[169px] h-[60px] gap-[10px]"
             >
@@ -44,7 +44,7 @@ function SubFooter() {
 
         {/* Right Section */}
         <div className="w-[40vw] self-end relative">
-          <Link href="/public/courses">
+          <Link href="/non-user/courses">
             <Image
               src="/images/subfooter.png"
               alt="Learning"
