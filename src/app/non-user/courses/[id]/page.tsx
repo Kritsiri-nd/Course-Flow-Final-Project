@@ -226,7 +226,7 @@ export default function CourseDetailPage() {
             </div>
 
             {/* Sidebar - responsive แต่รักษา ratio ตาม Figma */}
-            <div className="space-y-6">
+            <div className="space-y-6 md:sticky md:top-24 md:self-start md:h-fit">
               <Card className="!p-0">
                 <div
                   className="flex flex-col justify-between gap-8"
