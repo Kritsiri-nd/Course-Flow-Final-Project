@@ -49,8 +49,6 @@ export default function RegisterSuccess() {
         />
       </div>
 
-      <div className="min-h-screen relative overflow-hidden">
-
         {/* Main Content */}
         <div className="flex items-center justify-center min-h-[calc(100vh-176px)] px-4 relative z-10">
           <div className="w-[739px] h-[354px] bg-white rounded-[8px] p-[24px] shadow-[4px_4px_24px_0px_#00000014] flex flex-col items-center justify-center text-center gap-[16px]">
@@ -73,7 +71,6 @@ export default function RegisterSuccess() {
           </div>
         </div>
       </div>
-    </div>
     </>
   );
 }
