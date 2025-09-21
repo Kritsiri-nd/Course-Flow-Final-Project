@@ -1,14 +1,18 @@
 "use client";
 import Image from "next/image";
-
 import { useEffect, useState } from "react";
 import { PiBookOpenLight } from "react-icons/pi";
 import { LuClock3 } from "react-icons/lu";
 import Link from "next/link";
+import Navbar from "@/components/ui/navbar";
+import SubFooter from "@/components/ui/subFooter";
+import Footer from "@/components/ui/footer";
 
 export default function CourseList() {
   const [courses, setCourses] = useState<any[]>([]);
   const [query, setQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12; // ✅ กำหนดจำนวนคอร์สต่อหน้า
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -29,8 +33,18 @@ export default function CourseList() {
       course.category.toLowerCase().includes(query.toLowerCase())
   );
 
+  // ✅ Pagination logic
+  const totalPages = Math.ceil(filteredCourses.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedCourses = filteredCourses.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
+
   return (
-    <section className="relative py-10 px-4 sm:px-6 md:px-10 lg:px-20 mx-auto max-w-[1240px] w-full">
+    <section>
+      <Navbar/>
+    <div className="relative py-10 px-4 sm:px-6 md:px-10 lg:px-20 mx-auto max-w-[1240px] w-full">
       {/* Background */}
       <Image
         src="/assets/bg-image.png"
@@ -42,7 +56,7 @@ export default function CourseList() {
       />
 
       <div className="flex flex-col items-center gap-8">
-        <h1 className="text-black text-headline2 font-inter">Our Courses</h1>
+        <h1 className="text-black text-h2 font-inter">Our Courses</h1>
 
         {/* Search Bar */}
         <div className="flex items-center border pl-3 gap-3 bg-white border-gray-300 h-[46px] rounded-md max-w-md w-full">
@@ -60,66 +74,95 @@ export default function CourseList() {
             placeholder="Search..."
             className="w-full h-full outline-none text-gray-500 placeholder-gray-500 text-[16px]"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setCurrentPage(1); // ✅ รีเซ็ต pagination เมื่อ search
+            }}
           />
         </div>
       </div>
 
       {/* Course Grid */}
       <div className="mt-10 px-2 sm:px-4 md:px-6 lg:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCourses.length > 0 ? (
-          filteredCourses.map((course) => (
-            <Link key={course.id} href={`/non-user/courses/${course.id}`}>
-              <div className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden cursor-pointer">
-                {/* Thumbnail */}
-                <img
-                  src={course.thumbnail}
-                  alt={course.title}
-                  className="w-full h-60 object-cover rounded"
-                />
+        {paginatedCourses.length > 0 ? (
+          paginatedCourses.map((course) => {
+            const firstSentence = course.description.split(".")[0] + ".";
+            return (
+              <Link key={course.id} href={`/non-user/courses/${course.id}`}>
+  <div className="bg-white rounded-lg shadow hover:shadow-lg transition 
+                  overflow-hidden cursor-pointer h-full flex flex-col">
+    {/* Thumbnail */}
+    <img
+      src={course.thumbnail}
+      alt={course.title}
+      className="w-full h-60 object-cover"
+    />
 
-                {/* Content */}
-                <div className="p-4">
-                  <span className="text-orange-500 text-body3 font-medium">
-                    {course.category}
-                  </span>
-                  <h2 className="text-headline3 text-black mt-1">
-                    {course.title}
-                  </h2>
-                  <p className="text-body2 text-gray-700 mt-1">
-                    {course.description}
-                  </p>
-                  <div className="border-t border-gray-200 my-4 w-full"></div>
+    {/* Content */}
+    <div className="p-4 flex flex-col flex-grow">
+      <p className="text-orange-500 text-b3 pb-4">{course.category}</p>
+      <h2 className="text-h3 text-black pb-4">{course.title}</h2>
 
-                  {/* Lesson + Hours */}
-                  <div className="flex items-center gap-6 mt-4 text-gray-700 text-sm">
-                    <div className="flex items-center gap-1">
-                      <PiBookOpenLight className="size-5 text-blue-600" />
-                      <span className="text-body2 text-gray-700">
-                        {course.modules.reduce(
-                          (acc, m) => acc + m.lessons.length,
-                          0
-                        )}{" "}
-                        Lessons
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <LuClock3 className="size-5 text-blue-600" />
-                      <span className="text-body2 text-gray-700">
-                        {course.durationHours} Hours
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))
+      {/* Description */}
+      <p className="text-b2 text-gray-700 flex-grow leading-relaxed">{firstSentence}</p>
+
+      <div className="border-t border-gray-200 my-4 w-full"></div>
+
+      {/* Lesson + Hours (ดันลงล่างสุดเสมอ) */}
+      <div className="flex items-center gap-6 mt-auto">
+        <div className="flex items-center gap-1">
+          <PiBookOpenLight className="size-5 text-blue-600" />
+          <span className="text-b2 text-gray-700">
+            {(course.modules ?? []).reduce(
+              (acc, m) => acc + (m.lessons?.length ?? 0),
+              0
+            )}{" "}
+            Lessons
+          </span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LuClock3 className="size-5 text-blue-600" />
+          <span className="text-b2 text-gray-700">
+            {course.durationHours} Hours
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</Link>
+
+            );
+          })
         ) : (
           <p className="col-span-full text-center text-gray-500">
             No courses found
           </p>
         )}
       </div>
+
+      {/* ✅ Pagination Controls */}
+      <div className="flex justify-center items-center gap-4 mt-10">
+        <button
+          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => prev - 1)}
+          disabled={currentPage === 1}
+        >
+          Prev
+        </button>
+        <span className="text-gray-700">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => prev + 1)}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+    <SubFooter/>
+    <Footer/>
     </section>
   );
 }

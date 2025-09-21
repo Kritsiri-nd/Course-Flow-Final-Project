@@ -1,12 +1,91 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@layer utilities {
+  :root {
+    --blue-100: #E5ECF8;
+    --blue-200: #C6D6EF;
+    --blue-300: #8DADE0;
+    --blue-400: #5483D0;
+    --blue-500: #2F5FAC;
+    --blue-600: #234781;
+    --blue-700: #183056;
+    --blue-800: #0C182B;
+    --blue-900: #020D1E;
+    --gray--100: #F6F7FC;
+    --gray--200: #F1F2F6;
+    --gray--300: #E4E6ED;
+    --gray--400: #D6D9E4;
+    --gray--500: #C8CCDB;
+    --gray--600: #9AA1B9;
+    --gray--700: #646D89;
+    --gray--800: #424C6B;
+    --gray--900: #2A2E3F;
+    --orange-100: #FBAA1C;
+    --orange-500: #F47E20;
+    --black: #000000;
+    --white: #FFFFFF;
+    --green: #2FAC8E;
+    --linear1: linear-gradient(90deg, #95BEFF, #0040E5);
+    --linear2: linear-gradient(90deg, #2558DD, #5697FF);
+    --H1: 4.125rem; /* 66px = 4.125rem */
+    --H2: 2.25rem; /* 36px = 2.25rem */
+    --H3: 1.5rem; /* 24px = 1.5rem */
+    --B1: 1.25rem; /* 20px = 1.25rem */
+    --B2: 1rem; /* 16px = 1rem */
+    --B3: 0.875rem; /* 14px = 0.875rem */
+    --B4: 0.75rem; /* 12px = 0.75rem */
+    --font-sans: 'Inter';
+  }
+
+  body {
+    font-family: var(--font-sans);
+  }
+
+  .bg-linear1 {
+    background: var(--linear1);
+  }
+  .bg-linear2 {
+    background: var(--linear2);
+  }
+  .text-h1 {
+    font-size: var(--H1);
+    line-height: 66px;
+    font-family: var(--font-sans);
+  }
+  .text-h2 {
+    font-size: var(--H2);
+    line-height: 36px;
+  }
+  .text-h3 {
+    font-size: var(--H3);
+    line-height: 24px;
+  }
+  .text-b1 {
+    font-size: var(--B1);
+    line-height: 20px;
+  }
+  .text-b2 {
+    font-size: var(--B2);
+    line-height: 16px;
+  }
+  .text-b3 {
+    font-size: var(--B3);
+    line-height: 14px;
+  }
+  .text-b4 {
+    font-size: var(--B4);
+    line-height: 12px;
+  }
+
+.box-shadow1 {
+  box-shadow: 2px 2px 12px 0 rgba(0, 0, 0, 0.08);
 }
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+
+.box-shadow2 {
+  box-shadow: 2px 2px 12px 0 rgba(64, 50, 133, 0.12);
+}
 }
 
 @theme inline {
