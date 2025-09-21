@@ -13,7 +13,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import Navbar from "@/components/ui/navbar";
+import Footer from "@/components/ui/footer";
 
+// Shape used in the UI
 interface Course {
   id: number;
   category: string;
@@ -35,6 +38,83 @@ interface Course {
   }[];
 }
 
+// API response shape from /api/courses and /api/courses/[id]
+// Fields are snake_case and lessons are objects
+type ApiLesson = {
+  id: number;
+  title: string;
+  order_index?: number | null;
+  created_at?: string | null;
+};
+
+type ApiModule = {
+  id: number;
+  title: string;
+  order_index?: number | null;
+  created_at?: string | null;
+  lessons?: ApiLesson[] | null;
+};
+
+type ApiCourse = {
+  id: number;
+  category: string;
+  title: string;
+  description: string;
+  price: number | string;
+  currency: string;
+  thumbnail: string;
+  video_url?: string | null;
+  instructor: string;
+  rating: number | string | null;
+  students: number | null;
+  language: string;
+  duration_hours?: number | null;
+  created_at?: string;
+  modules?: ApiModule[] | null;
+};
+
+function mapApiCourseToUiCourse(api: ApiCourse): Course {
+  const safeNumber = (value: unknown, fallback = 0): number => {
+    if (typeof value === "number") return value;
+    if (typeof value === "string") {
+      const n = Number(value);
+      return Number.isNaN(n) ? fallback : n;
+    }
+    return fallback;
+  };
+
+  const modules = (api.modules ?? [])
+    .slice()
+    .sort((a, b) => safeNumber(a.order_index, 0) - safeNumber(b.order_index, 0))
+    .map((m) => ({
+      id: m.id,
+      title: m.title,
+      lessons: (m.lessons ?? [])
+        .slice()
+        .sort(
+          (a, b) => safeNumber(a.order_index, 0) - safeNumber(b.order_index, 0)
+        )
+        .map((l) => l.title),
+    }));
+
+  return {
+    id: api.id,
+    category: api.category,
+    title: api.title,
+    description: api.description,
+    price: safeNumber(api.price, 0),
+    currency: api.currency,
+    thumbnail: api.thumbnail,
+    videoUrl: api.video_url ?? "",
+    instructor: api.instructor,
+    rating: safeNumber(api.rating ?? 0, 0),
+    students: safeNumber(api.students ?? 0, 0),
+    language: api.language,
+    durationHours: safeNumber(api.duration_hours ?? 0, 0),
+    modules,
+  };
+}
+
 export default function CourseDetailPage() {
   const params = useParams();
   const id = params?.id as string;
@@ -48,18 +128,17 @@ export default function CourseDetailPage() {
         // Fetch specific course
         const courseRes = await fetch(`/api/courses/${id}`);
         if (courseRes.ok) {
-          const courseData = await courseRes.json();
-          setCourse(courseData);
+          const courseData: ApiCourse = await courseRes.json();
+          setCourse(mapApiCourseToUiCourse(courseData));
         }
 
         // Fetch all courses for "Other Interesting Courses" section
         const allCoursesRes = await fetch("/api/courses");
         if (allCoursesRes.ok) {
-          const allCoursesData = await allCoursesRes.json();
+          const allCoursesData: ApiCourse[] = await allCoursesRes.json();
+          const mapped = allCoursesData.map(mapApiCourseToUiCourse);
           // Filter out current course
-          const filtered = allCoursesData.filter(
-            (c: Course) => c.id !== parseInt(id)
-          );
+          const filtered = mapped.filter((c) => c.id !== parseInt(id));
           setOtherCourses(filtered);
         }
       } catch (error) {
@@ -88,10 +167,10 @@ export default function CourseDetailPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-foreground mb-2">
+          <h2 className="text-h3 font-bold text-foreground mb-2">
             Course not found
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-b2 text-muted-foreground">
             The course you're looking for doesn't exist.
           </p>
         </div>
@@ -105,12 +184,13 @@ export default function CourseDetailPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50 py-16 px-8">
+      <Navbar />
+      <div className="min-h-screen bg-white py-16 px-8">
         {/* Back Button */}
         <div className="border-none mb-3">
           <div className="max-w-[1240px] mx-auto">
             <Link href="/non-user/courses">
-              <Button variant="ghost" className="gap-2 text-lg text-blue-500">
+              <Button variant="ghost" className="gap-2 text-b2 text-blue-500">
                 <LuArrowLeft className="w-4 h-4" />
                 Back
               </Button>
@@ -152,8 +232,8 @@ export default function CourseDetailPage() {
               <div className="space-y-6 mt-20">
                 {/* Course Detail Text */}
                 <div className="space-y-4">
-                  <h2 className="text-4xl font-semibold">Course Detail</h2>
-                  <div className="text-muted-foreground leading-relaxed space-y-4 mt-8">
+                  <h2 className="text-h2 font-semibold">Course Detail</h2>
+                  <div className="text-b2 text-muted-foreground leading-relaxed space-y-4 mt-8">
                     <p>
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                       Elementum tempus hendrerit eget et, ultrices erat ut
@@ -186,12 +266,8 @@ export default function CourseDetailPage() {
 
                 {/* Module Samples */}
                 <div className="space-y-4 mt-20">
-                  <h2 className="text-4xl font-semibold">Module Samples</h2>
-                  <Accordion
-                    type="single"
-                    collapsible
-                    className="space-y-0 mt-8"
-                  >
+                  <h2 className="text-h2 font-semibold">Module Samples</h2>
+                  <Accordion type="multiple" className="space-y-0 mt-8">
                     {course.modules.map((module, index) => (
                       <AccordionItem
                         key={module.id}
@@ -199,7 +275,7 @@ export default function CourseDetailPage() {
                         className="!border-b !border-gray-200"
                       >
                         <AccordionTrigger className="px-4 py-4 hover:no-underline hover:bg-gray-50 [&[data-state=open]>svg]:rotate-180">
-                          <span className="text-base font-medium text-left">
+                          <span className="text-b2 font-medium text-left">
                             {String(index + 1).padStart(2, "0")}. {module.title}
                           </span>
                         </AccordionTrigger>
@@ -209,7 +285,7 @@ export default function CourseDetailPage() {
                               {module.lessons.map((lesson, i) => (
                                 <li
                                   key={i}
-                                  className="flex items-center gap-3 text-sm text-gray-500"
+                                  className="flex items-center gap-3 text-b3 text-gray-500"
                                 >
                                   <div className="w-1 h-1 bg-gray-500 rounded-full flex-shrink-0"></div>
                                   <span>{lesson}</span>
@@ -226,7 +302,7 @@ export default function CourseDetailPage() {
             </div>
 
             {/* Sidebar - responsive แต่รักษา ratio ตาม Figma */}
-            <div className="space-y-6 md:sticky md:top-24 md:self-start md:h-fit">
+            <div className="md:sticky md:top-24 md:self-start md:h-fit">
               <Card className="!p-0">
                 <div
                   className="flex flex-col justify-between gap-8"
@@ -238,34 +314,34 @@ export default function CourseDetailPage() {
                   <div>
                     {/* Top Section */}
                     <div className="space-y-3">
-                      <span className="text-orange-500 text-sm">
+                      <span className="text-orange-500 text-b3">
                         {course.category}
                       </span>
-                      <h3 className="text-xl font-semibold mt-4">
+                      <h3 className="text-h3 font-semibold mt-4">
                         {course.title}
                       </h3>
-                      <p className="text-sm text-muted-foreground line-clamp-3">
+                      <p className="text-b3 text-gray-700 line-clamp-3">
                         {course.description}
                       </p>
                     </div>
 
                     {/* Middle Section - Price */}
                     <div>
-                      <p className="mt-3 text-2xl font-bold text-gray-700">
+                      <p className="mt-3 text-h3 font-bold text-gray-700">
                         {course.currency} {course.price.toLocaleString()}
                       </p>
                     </div>
                   </div>
 
                   {/* Bottom Section - Buttons */}
-                  <div className="space-y-3">
+                  <div className="space-y-3 pt-10 border-t border-gray-400">
                     <Button
                       variant="outline"
-                      className="w-full py-6 border-orange-500 text-orange-500 hover:bg-blue-50"
+                      className="w-full py-6 bg-white border-orange-500 text-b2 text-orange-500 hover:bg-blue-50"
                     >
                       Add to Wishlist
                     </Button>
-                    <Button className="w-full py-6 bg-blue-500 hover:bg-blue-600">
+                    <Button className="w-full py-6 bg-blue-500 hover:bg-blue-600 text-b2 text-white">
                       Subscribe This Course
                     </Button>
                   </div>
@@ -279,49 +355,51 @@ export default function CourseDetailPage() {
       {/* Other Interesting Courses */}
       <div className="bg-gray-100 py-20">
         <div className="pt-10 px-4 sm:px-6 md:px-10 lg:px-20 mx-auto max-w-[1240px] w-full">
-          <h2 className="text-4xl font-semibold text-center mb-14">
+          <h2 className="text-h2 font-semibold text-center mb-14">
             Other Interesting Courses
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mx-auto">
+          <div className="mt-10 px-2 sm:px-4 md:px-6 lg:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {otherCourses.slice(0, 3).map((c) => {
               const courseLessons = c.modules.reduce(
                 (acc, m) => acc + m.lessons.length,
                 0
               );
+              const firstSentence = (c.description || "").split(".")[0] + ".";
               return (
                 <Link key={c.id} href={`/non-user/courses/${c.id}`}>
-                  <div className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden cursor-pointer">
+                  <div className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden cursor-pointer h-full flex flex-col">
                     {/* Thumbnail */}
                     <img
                       src={c.thumbnail}
                       alt={c.title}
-                      className="w-full h-60 object-cover rounded"
+                      className="w-full h-60 object-cover"
                     />
 
                     {/* Content */}
-                    <div className="p-4">
-                      <span className="text-orange-500 text-body3 font-medium">
+                    <div className="p-4 flex flex-col flex-grow">
+                      <p className="text-orange-500 text-b3 pb-4">
                         {c.category}
-                      </span>
-                      <h2 className="text-headline3 text-black mt-1">
-                        {c.title}
-                      </h2>
-                      <p className="text-body2 text-gray-700 mt-1">
-                        {c.description}
                       </p>
+                      <h2 className="text-h3 text-black pb-4">{c.title}</h2>
+
+                      {/* Description */}
+                      <p className="text-b2 text-gray-700 flex-grow leading-relaxed">
+                        {firstSentence}
+                      </p>
+
                       <div className="border-t border-gray-200 my-4 w-full"></div>
 
-                      {/* Lesson + Hours */}
-                      <div className="flex items-center gap-6 mt-4 text-gray-700 text-sm">
+                      {/* Lesson + Hours (stick to bottom) */}
+                      <div className="flex items-center gap-6 mt-auto">
                         <div className="flex items-center gap-1">
                           <PiBookOpenLight className="size-5 text-blue-600" />
-                          <span className="text-body2 text-gray-700">
+                          <span className="text-b2 text-gray-700">
                             {courseLessons} Lessons
                           </span>
                         </div>
                         <div className="flex items-center gap-1">
                           <LuClock3 className="size-5 text-blue-600" />
-                          <span className="text-body2 text-gray-700">
+                          <span className="text-b2 text-gray-700">
                             {c.durationHours} Hours
                           </span>
                         </div>
@@ -334,6 +412,7 @@ export default function CourseDetailPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 }
