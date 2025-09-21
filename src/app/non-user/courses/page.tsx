@@ -89,50 +89,48 @@ export default function CourseList() {
             const firstSentence = course.description.split(".")[0] + ".";
             return (
               <Link key={course.id} href={`/non-user/courses/${course.id}`}>
-                <div className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden cursor-pointer">
-                  {/* Thumbnail */}
-                  <img
-                    src={course.thumbnail}
-                    alt={course.title}
-                    className="w-full h-60 object-cover rounded"
-                  />
+  <div className="bg-white rounded-lg shadow hover:shadow-lg transition 
+                  overflow-hidden cursor-pointer h-full flex flex-col">
+    {/* Thumbnail */}
+    <img
+      src={course.thumbnail}
+      alt={course.title}
+      className="w-full h-60 object-cover"
+    />
 
-                  {/* Content */}
-                  <div className="p-4 ">
-                    <p className="text-orange-500 text-b3 pb-4">
-                      {course.category}
-                    </p>
-                    <h2 className="text-h3 text-black pb-4">
-                      {course.title}
-                    </h2>
-                    {/* ✅ โชว์แค่ประโยคแรก */}
-                    <p className="text-b2 text-gray-700 ">
-                      {firstSentence}
-                    </p>
-                    <div className="border-t border-gray-200 my-4 w-full"></div>
+    {/* Content */}
+    <div className="p-4 flex flex-col flex-grow">
+      <p className="text-orange-500 text-b3 pb-4">{course.category}</p>
+      <h2 className="text-h3 text-black pb-4">{course.title}</h2>
 
-                    {/* Lesson + Hours */}
-                    <div className="flex items-center gap-6 mt-4">
-                      <div className="flex items-center gap-1">
-                        <PiBookOpenLight className="size-5 text-blue-600" />
-                        <span className="text-b2 text-gray-700">
-                          {(course.modules ?? []).reduce(
-                            (acc, m) => acc + (m.lessons?.length ?? 0),
-                            0
-                          )}{" "}
-                          Lessons
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <LuClock3 className="size-5 text-blue-600" />
-                        <span className="text-b2 text-gray-700">
-                          {course.durationHours} Hours
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Link>
+      {/* Description */}
+      <p className="text-b2 text-gray-700 flex-grow leading-relaxed">{firstSentence}</p>
+
+      <div className="border-t border-gray-200 my-4 w-full"></div>
+
+      {/* Lesson + Hours (ดันลงล่างสุดเสมอ) */}
+      <div className="flex items-center gap-6 mt-auto">
+        <div className="flex items-center gap-1">
+          <PiBookOpenLight className="size-5 text-blue-600" />
+          <span className="text-b2 text-gray-700">
+            {(course.modules ?? []).reduce(
+              (acc, m) => acc + (m.lessons?.length ?? 0),
+              0
+            )}{" "}
+            Lessons
+          </span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LuClock3 className="size-5 text-blue-600" />
+          <span className="text-b2 text-gray-700">
+            {course.durationHours} Hours
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</Link>
+
             );
           })
         ) : (
