@@ -14,7 +14,7 @@ export default function Navbar() {
         </div>
         <div className="flex items-center justify-between gap-6 sm:gap-15">
           <div
-            className="font-inter font-bold text-[14px] leading-[150%] text-center text-[#191C77] cursor-pointer hover:scale-105 transition-transform"
+            className="font-inter font-bold text-[16px] leading-[150%] text-center text-[#191C77] cursor-pointer hover:scale-105 transition-transform"
             onClick={() => router.push("/non-user/courses")}
           >
             Our Courses
