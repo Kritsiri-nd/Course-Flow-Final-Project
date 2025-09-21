@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { courses } from "../route";
+
 
 // GET /api/courses/[id]
 export async function GET(

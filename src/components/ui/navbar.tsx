@@ -15,7 +15,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between gap-15">
           <div
             className="text-base font-bold text-[#191C77] cursor-pointer hover:scale-105 transition-transform"
-            onClick={() => router.push("/public/courses")}
+            onClick={() => router.push("/non-user/courses")}
           >
             Our Courses
           </div>
