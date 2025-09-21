@@ -2,11 +2,14 @@
 
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import Navbar from '@/components/ui/navbar';
 
 export default function RegisterSuccess() {
   const router = useRouter();
 
   return (
+    <>
+      <Navbar />
     <div className="min-h-screen relative overflow-hidden">
       {/* Decorative Elements (same as register page) */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none bg-[#F6F7FC]">
@@ -47,16 +50,6 @@ export default function RegisterSuccess() {
       </div>
 
       <div className="min-h-screen relative overflow-hidden">
-        {/* Navbar (same as register page) */}
-        <nav className="w-full h-[88px] opacity-100 flex items-center justify-between px-6 bg-white border-b border-gray-200 box-border">
-          <div className="text-2xl font-bold text-gray-800">
-            CourseFlow
-          </div>
-          <div className="flex gap-6 items-center">
-            <a href="/non-user/courses" className="no-underline text-gray-500 hover:text-gray-700 transition-colors">Courses</a>
-            <a href="/auth/login" className="no-underline text-gray-500 hover:text-gray-700 transition-colors">Login</a>
-          </div>
-        </nav>
 
         {/* Main Content */}
         <div className="flex items-center justify-center min-h-[calc(100vh-176px)] px-4 relative z-10">
@@ -75,12 +68,13 @@ export default function RegisterSuccess() {
               className="w-[321.5px] h-[60px] rounded-[12px] px-[32px] py-[18px] mt-[24px]"
               onClick={() => router.push('/auth/login')}
             >
-              Continue to login
+              Go to Login
             </Button>
           </div>
         </div>
       </div>
     </div>
+    </>
   );
 }
 

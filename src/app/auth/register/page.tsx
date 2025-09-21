@@ -12,6 +12,7 @@ import Popover from '@mui/material/Popover'
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar'
 import { validateFirstName, validateLastName, validateDateOfBirth, validateEmail, validatePassword, validateEducationalBackground } from '@/lib/validators';
 import { useRouter } from 'next/navigation';
+import Navbar from '@/components/ui/navbar';
 
 export default function register() {
   const router = useRouter();
@@ -188,6 +189,8 @@ export default function register() {
   };
 
   return (
+    <>
+      <Navbar />
     <div className="min-h-screen relative overflow-hidden">
         {/* Decorative Elements */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none bg-[#F6F7FC]">
@@ -226,16 +229,6 @@ export default function register() {
           className="absolute w-[35px] h-[35px] opacity-100 top-[589px] right-[50px]"
         />
     </div>
-      {/* Navbar */}
-      <nav className="w-full h-[88px] opacity-100 flex items-center justify-between px-6 bg-white border-b border-gray-200 box-border">
-        <div className="text-2xl font-bold text-gray-800">
-          CourseFlow
-        </div>
-        <div className="flex gap-6 items-center">
-          <a href="/non-user/courses" className="no-underline text-gray-500 hover:text-gray-700 transition-colors">Courses</a>
-          <a href="/auth/login" className="no-underline text-gray-500 hover:text-gray-700 transition-colors">Login</a>
-        </div>
-      </nav>
 
       {/* Main Content */}
       <div className="flex items-center justify-center min-h-[calc(100vh-88px)] px-4 relative z-10">
@@ -258,7 +251,7 @@ export default function register() {
                 value={formData.firstName}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                placeholder="Enter your First Name" 
+                placeholder="Enter your first name" 
                 required
                 className={`${errors.firstName ? 'border-[#9B2FAC] focus:border-[#9B2FAC]' : ''} pr-10`}
               />
@@ -288,7 +281,7 @@ export default function register() {
                 value={formData.lastName}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                placeholder="Enter your Last Name" 
+                placeholder="Enter your last name" 
                 required
                 className={`${errors.lastName ? 'border-[#9B2FAC] focus:border-[#9B2FAC]' : ''} pr-10`}
               />
@@ -457,7 +450,7 @@ export default function register() {
                 value={formData.email}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                placeholder="Enter Email" 
+                placeholder="Enter your email" 
                 required
                 className={`${errors.email ? 'border-[#9B2FAC] focus:border-[#9B2FAC]' : ''} pr-10`}
               />
@@ -487,7 +480,7 @@ export default function register() {
                 value={formData.password}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                placeholder="Enter Password" 
+                placeholder="Enter your password" 
                 required
                 className={`${errors.password ? 'border-[#9B2FAC] focus:border-[#9B2FAC]' : ''} pr-10`}
               />
@@ -530,5 +523,6 @@ export default function register() {
         </div>
       </div>
     </div>
+    </>
   );
 }
