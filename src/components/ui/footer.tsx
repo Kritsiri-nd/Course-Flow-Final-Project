@@ -1,7 +1,6 @@
 'use client'
 
 import { useRouter } from "next/navigation"
-import CourseFlowIcon from "../../assets/courseFlowIcon"
 import Image from "next/image"
 
 export default function Footer() {
