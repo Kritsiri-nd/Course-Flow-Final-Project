@@ -2,6 +2,8 @@
 
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 @layer utilities {
   :root {
     --blue-100: #E5ECF8;
@@ -201,9 +203,19 @@
   * {
     @apply border-border;
   }
-  *:focus, *:focus-visible {
+  *:focus,
+  *:focus-visible {
     outline: none !important;
     box-shadow: none !important;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
