@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Edit, Plus, Trash } from "lucide-react";
+import Link from "next/link";
 
 export default function Assignments() {
   const [assignments, setAssignments] = useState<[]>([]);
@@ -40,13 +41,15 @@ export default function Assignments() {
               placeholder="Search courses..."
               className="h-12 w-64 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <Button
-              variant="outline"
-              className="bg-blue-500 text-white h-15 rounded-lg px-8"
-            >
-              <Plus className="h-4 w-4" />
-              Add course
-            </Button>
+            <Link href="/admin/assignments/create">
+              <Button
+                variant="outline"
+                className="bg-blue-500 text-white h-15 rounded-lg px-8"
+              >
+                <Plus className="h-4 w-4" />
+                Add Assignment
+              </Button>
+            </Link>
           </div>
         </header>
 
@@ -76,9 +79,7 @@ export default function Assignments() {
               </TableRow>
             </TableHeader>
 
-            <TableBody>
-              
-            </TableBody>
+            <TableBody></TableBody>
           </Table>
         </div>
       </SidebarInset>
