@@ -38,7 +38,7 @@ export function AdminPanel() {
   const pathname = usePathname();
 
   return (
-    <Sidebar className="w-[240px] h-svh border-r border-gray-400 bg-white opacity-100">
+    <Sidebar className="h-svh border-r border-gray-400 bg-white opacity-100">
       <div className="h-[min(100svh,800px)] flex flex-col">
         <SidebarHeader className="flex flex-col items-center justify-center h-[131px] px-6 pt-6">
           <div className="space-y-6">
