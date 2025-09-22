@@ -4,10 +4,10 @@ import { supabase } from "@/lib/supabaseClient";
 // GET /api/courses/[id]
 export async function GET(
     _request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = params;
+        const { id } = await params;
 
         const courseId = parseInt(id, 10);
         if (Number.isNaN(courseId)) {

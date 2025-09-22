@@ -234,33 +234,7 @@ export default function CourseDetailPage() {
                 <div className="space-y-4">
                   <h2 className="text-h2 font-semibold">Course Detail</h2>
                   <div className="text-b2 text-muted-foreground leading-relaxed space-y-4 mt-8">
-                    <p>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                      Elementum tempus hendrerit eget et, ultrices erat ut
-                      tellus massa. Nam venenatis diam, leo. Mauris bibendum at
-                      mauris rhoncus. Sed scelerisque quam et ante finibus
-                      rutrum. Vivamus aliquam, dictum ex quis facilisis id
-                      sodales augue molestie amet lorem posuere.
-                    </p>
-                    <p>
-                      Vel, elit magna sed cum non cursus, sed elit et
-                      ullamcorper magna. Duis sed sapien est, dignissim eget
-                      nibh vestibulum enim placerat convallis. Mauris bibendum
-                      erat sed magna, ac rutrum ex. Sed vulputate pretium et
-                      neque molestie maximus. Pellentesque lacinia mi tellus
-                      lorem elementum et consequat lacinia lacus massa.
-                      Vestibulum molestie elit ut quam ante. Vestibulum
-                      scelerisque consectetur.
-                    </p>
-                    <p>
-                      Eros, ut mattis a et porttitor ante lorem. Pellentesque
-                      pharetra non risus at et. Ut rutrum lacus sed mollit, sed
-                      tincidunt tempor facilisis mattis. Sed sed sem in suscipit
-                      volutpat rutrum lacus eget porta et. Et dictum molestie.
-                      Quis eget consectetur faucibus molestaque sed. Et tellus
-                      molestie expedita libero eget rutrum ligula sagittis. Et
-                      risus, tellus rutrum non.
-                    </p>
+                    <p>{course.description }</p>
                   </div>
                 </div>
 
