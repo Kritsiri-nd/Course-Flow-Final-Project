@@ -292,7 +292,7 @@ export default function Instructure() {
             width="1233"
             height="1111"
             viewBox="0 0 1233 1111"
-            className="absolute hidden sm:block"
+            className="absolute block"
             fill="none"
           >
             <circle
@@ -335,7 +335,7 @@ export default function Instructure() {
           <div className="flex flex-col gap-[40px] sm:gap-[120px] w-full">
             {/* First Feature Row - Responsive */}
             <div className="flex flex-col lg:flex-row gap-[30px] sm:gap-[119px]">
-              <div className="w-full lg:w-[454px] h-[250px] sm:h-[330px] rounded-lg overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300 order-2 lg:order-1">
+              <div className="w-full lg:w-[454px] h-[250px] sm:h-[330px] rounded-lg overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300 order-1 lg:order-1">
                 <img
                   src="/images/learning.png"
                   alt="Learning experience"
@@ -510,7 +510,7 @@ export default function Instructure() {
           
           <div className="flex flex-col gap-[30px] sm:gap-[60px] w-full">
             <p className="text-[24px] sm:text-[36px] font-medium leading-[120%] sm:leading-[125%] tracking-[-2%] text-center text-[#000000]">
-              Our Professional Instructor
+              Our Professional Instructors
             </p>
             
             <div className="flex flex-col sm:flex-row gap-[20px] sm:gap-[24px] justify-center items-center">
@@ -581,10 +581,10 @@ export default function Instructure() {
         <div className="min-h-[400px] lg:h-[742px] w-full relative py-[40px] sm:py-8 lg:py-0">
           {/* Background SVG - Hidden on mobile */}
           <svg
-            width="1356"
-            height="630"
-            viewBox="0 0 1356 630"
-            className="absolute right-[0px] hidden lg:block"
+            width="648"
+            height="315"
+            viewBox="0 20 1356 630"
+            className="absolute block right-[0px] "
             fill="none"
           >
             <circle cx="1260.17" cy="96.1741" r="13.1741" fill="#C6DCFF" />

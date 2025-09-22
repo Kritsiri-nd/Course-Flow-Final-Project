@@ -7,14 +7,14 @@ interface TestimonialCardProps {
   
   export default function TestimonialCard({ name, text, imageSrc, className = '' }: TestimonialCardProps) {
     return (
-      <div className={`w-full max-w-[737px] h-[309px] relative flex items-center ${className}`}>
+      <div className={`w-full max-w-[737px] h-auto sm:h-[309px] relative flex flex-col sm:flex-row items-center ${className}`}>
         {/* Quote SVG - Top */}
         <svg
           width='82'
-          height='57'
+          height='100'
           viewBox='0 0 82 57'
           fill='none'
-          className='absolute top-0 left-0 hidden sm:block'
+          className='absolute block top-[-20px] left-0 '
           >
           <path
             d='M63.5414 56.6975C73.4067 56.6975 81.4316 48.7078 81.4316 38.8858C81.4316 29.4107 73.9631 21.6392 64.5791 21.1023C64.4166 19.3558 64.5385 14.6017 69.1142 7.9884C69.4601 7.48953 69.3973 6.81672 68.9677 6.38901C67.0953 4.52481 65.9381 3.35074 65.1282 2.52958C64.0682 1.45591 63.5844 0.965703 62.8766 0.325895C62.6365 0.109029 62.3338 -2.92365e-05 62.0296 -2.92161e-05C61.7342 -2.91963e-05 61.44 0.102872 61.2024 0.307569C53.2291 7.21506 44.3719 21.4872 45.6534 38.9765C46.4043 49.2446 53.9271 56.6975 63.5414 56.6975ZM62.0174 2.96959C62.3607 3.30656 62.7523 3.70365 63.3296 4.28837C64.0312 5.00033 64.9939 5.97599 66.4539 7.43444C60.9008 15.9536 61.9497 22.0215 62.4088 22.8917C62.6267 23.3048 63.0736 23.583 63.5414 23.583C72.0156 23.583 78.9105 30.4476 78.9105 38.8858C78.9105 47.3229 72.0156 54.1875 63.5414 54.1875C55.2861 54.1875 48.8208 47.7138 48.1672 38.7952C46.7269 19.1242 58.4695 6.35223 62.0174 2.96959Z'
@@ -32,7 +32,7 @@ interface TestimonialCardProps {
           height='37'
           viewBox='0 0 53 37'
           fill='none'
-          className='absolute right-3 bottom-3 hidden sm:block'>
+          className='absolute right-3 bottom-3 block'>
           <path
             d='M11.5847 0.138672C5.20945 0.138672 0.0234375 5.30188 0.0234375 11.6492C0.0234375 17.7724 4.84988 22.7945 10.9141 23.1415C11.0191 24.2701 10.9404 27.3424 7.98339 31.6161C7.75985 31.9385 7.80042 32.3733 8.07805 32.6497C9.28808 33.8544 10.0359 34.6132 10.5593 35.1438C11.2443 35.8377 11.5569 36.1545 12.0144 36.5679C12.1695 36.7081 12.3651 36.7785 12.5617 36.7785C12.7526 36.7785 12.9427 36.712 13.0962 36.5798C18.2489 32.1159 23.9727 22.8927 23.1445 11.5906C22.6593 4.955 17.7978 0.138672 11.5847 0.138672ZM12.5696 34.8595C12.3477 34.6417 12.0947 34.3851 11.7216 34.0072C11.2682 33.5471 10.646 32.9166 9.70255 31.9741C13.2912 26.4688 12.6133 22.5475 12.3167 21.9851C12.1758 21.7182 11.887 21.5384 11.5847 21.5384C6.10838 21.5384 1.65267 17.1023 1.65267 11.6492C1.65267 6.19686 6.10838 1.76074 11.5847 1.76074C16.9196 1.76074 21.0977 5.94422 21.52 11.7078C22.4508 24.4198 14.8623 32.6735 12.5696 34.8595Z'
             fill='#B6BECB'
@@ -44,18 +44,18 @@ interface TestimonialCardProps {
         </svg>
   
         {/* Profile Image */}
-        <div className='flex justify-center items-center w-[200px] h-[240px] overflow-hidden'>
+        <div className='flex justify-center items-center sm:w-[200px] h-[400px] w-[350px] sm:h-[240px] overflow-hidden mb-4 sm:mb-0'>
           <img
             src={imageSrc}
             alt={name}
-            className='min-w-full min-h-full object-cover'
+            className='min-w-full min-h-full object-cover rounded-lg'
           />
         </div>
   
         {/* Content */}
-        <div className='flex flex-col gap-[24px] bg-[#E5ECF8] rounded-[12px] w-[578px] h-[309px] absolute right-0 z-[-1] pt-[30px] pr-[25px] pb-[50px] pl-[72px] justify-center items-start'>
-          <div className='text-[24px] font-medium leading-[125%] tracking-[-0.02em] text-[#2F5FAC]' style={{ fontFamily: 'Inter' }}>{name}</div>
-          <div className='text-[16px] font-normal leading-[150%] text-[#646D89] w-[481px]'>
+        <div className='flex flex-col gap-[16px] sm:gap-[24px] bg-[#E5ECF8] rounded-[12px] w-full sm:w-[578px] h-[auto] sm:h-[309px] relative sm:absolute right-0 z-[-1] sm:z-[-1] pt-[20px] sm:pt-[30px] pr-[20px] sm:pr-[25px] pb-[30px] sm:pb-[50px] pl-[20px] sm:pl-[72px] justify-center items-start'>
+          <div className='text-[20px] sm:text-[24px] font-medium leading-[125%] tracking-[-0.02em] text-[#2F5FAC]' style={{ fontFamily: 'Inter' }}>{name}</div>
+          <div className='text-[14px] sm:text-[16px] font-normal leading-[150%] text-[#646D89] w-full sm:w-[481px]'>
             {text}
           </div>
         </div>

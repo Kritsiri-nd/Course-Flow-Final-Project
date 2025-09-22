@@ -2,7 +2,7 @@
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
-import TestimonialCard from '../../assets/testimonialCard';
+import TestimonialCard from './testimonialCard';
 
 // Import Swiper styles
 import 'swiper/css';
