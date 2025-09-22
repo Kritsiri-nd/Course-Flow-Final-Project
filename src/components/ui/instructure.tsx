@@ -41,31 +41,17 @@ export default function Instructure() {
           </svg>
 
           {/* Mobile Wave */}
-          <svg
-            width="780"
-            height="441"
-            viewBox="0 0 682 541"
-            className="absolute top-[163px] left-[-135px] opacity-100 sm:hidden"
-            fill="none"
-          >
-            <path
-              d="M0 541C0 541 200 400 400 350C600 300 682 200 682 0V541Z"
-              fill="url(#paint0_linear_mobile)"
-            />
-            <defs>
-              <linearGradient
-                id="paint0_linear_mobile"
-                x1="0"
-                y1="270"
-                x2="682"
-                y2="541"
-                gradientUnits="userSpaceOnUse"
-              >
-                <stop stopColor="#95BEFF" offset="18.21%" />
-                <stop stopColor="#0040E6" offset="95.27%" />
-              </linearGradient>
-            </defs>
-          </svg>
+          <img
+            src="/images/wave.png"
+            alt="Wave background"
+            className="absolute opacity-100 sm:hidden"
+            style={{
+              width: '682px',
+              height: '541px',
+              top: '80px',          
+              opacity: 1
+            }}
+          />
 
           {/* Vector image - Desktop */}
           <div
@@ -85,8 +71,8 @@ export default function Instructure() {
           <div
             className="absolute opacity-100 cursor-pointer hover:scale-105 transition-transform z-20 sm:hidden"
             style={{
-              top: '252px',
-              left: '100px',
+              top: '270px',
+              left: '50px',
               width: '317px',
               height: '314px'
             }}
@@ -95,8 +81,8 @@ export default function Instructure() {
             <img
               src="/images/vector.png"
               alt="Educational illustration"
-              width={317}
-              height={314}
+              width={310}
+              height={307}
               className="opacity-100"
             />
           </div>
@@ -162,11 +148,12 @@ export default function Instructure() {
             </defs>
           </svg>
 
+          {/*left blue circle */}
           <svg
             width="69"
             height="104"
             viewBox="0 0 69 104"
-            className="absolute top-[76px] hidden sm:block"
+            className="absolute top-[56px] block"
             fill="none"
           >
             <circle cx="17" cy="52" r="52" fill="#C6D6EF" />
@@ -197,10 +184,10 @@ export default function Instructure() {
           {/* Mobile Decorative Elements*/}
           {/* orange triangle */}
           <svg
-            width="51"
-            height="52"
+            width="49"
+            height="48"
             viewBox="0 0 51 52"
-            className="absolute right-[250px] bottom-[0px] sm:hidden"
+            className="absolute right-[190px] bottom-[0px] sm:hidden"
             fill="none"
           >
             <path
@@ -214,7 +201,7 @@ export default function Instructure() {
           <img
             src="/images/sm-blue circle.png"
             alt="Blue circle"
-            className="absolute right-[450px] bottom-[160px] sm:hidden z-30"
+            className="absolute right-[350px] bottom-[145px] sm:hidden z-30"
             style={{
               width: '26.3482666015625px',
               height: '26.3482666015625px',
@@ -228,7 +215,7 @@ export default function Instructure() {
             width="23"
             height="23"
             viewBox="0 0 23 23"
-            className="absolute right-[220px] bottom-[320px] sm:hidden"
+            className="absolute right-[160px] bottom-[280px] sm:hidden"
             fill="none"
           >
             <path
@@ -250,7 +237,7 @@ export default function Instructure() {
             width="16"
             height="16"
             viewBox="0 0 16 16"
-            className="absolute bottom-[180px] right-[80px] sm:hidden"
+            className="absolute bottom-[190px] right-[70px] sm:hidden"
             fill="none"
           >
             <circle
@@ -280,12 +267,13 @@ export default function Instructure() {
           </div>
 
           {/* Mobile Text*/}
-          <div className="relative z-10 px-6 pt-20 flex flex-col items-start text-left sm:hidden">
+          <div className="relative z-10 px-10 pt-10 flex flex-col items-start text-left sm:hidden">
             <h1 className="text-[32px] font-bold leading-[120%] text-[#1A1A1A] mb-4 max-w-[300px]">
               Best Virtual Classroom Software
             </h1>
-            <p className="text-base font-normal leading-[150%] text-[#646D89] mb-8 max-w-[300px]">
-              Welcome to Schooler! The one-stop online class management system
+            <p className="text-base font-normal leading-[150%] text-[#646D89] mb-6 max-w-[400px]">
+              Welcome to Schooler! <br />
+              The one-stop online class management system <br />
               that caters to all your educational needs!
             </p>
             <button
