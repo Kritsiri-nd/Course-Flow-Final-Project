@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Edit, Plus, Trash } from "lucide-react";
 import Link from "next/link";
+import DeleteModalAlert from "@/components/ui/delete-modal-alert";
 
 export default function Assignments() {
   const [assignments, setAssignments] = useState<[]>([]);
@@ -79,7 +80,27 @@ export default function Assignments() {
               </TableRow>
             </TableHeader>
 
-            <TableBody></TableBody>
+            <TableBody>
+              <TableRow>
+                <TableCell className="text-rigth text-b3">test1</TableCell>
+                <TableCell className="text-rigth text-b3">test2</TableCell>
+                <TableCell className="text-rigth text-b3">test3</TableCell>
+                <TableCell className="text-rigth text-b3">test4</TableCell>
+                <TableCell className="text-rigth text-b3">test5</TableCell>
+                <TableCell className="text-rigth">
+                  <div className="flex gap-2">
+                    <DeleteModalAlert />
+                    <Link
+                      href="#"
+                      className="p-2 hover:bg-gray-200 rounded transition-colors"
+                      title="Edit"
+                    >
+                      <Edit className="h-4 w-4 text-blue-300" />
+                    </Link>
+                  </div>
+                </TableCell>
+              </TableRow>
+            </TableBody>
           </Table>
         </div>
       </SidebarInset>
