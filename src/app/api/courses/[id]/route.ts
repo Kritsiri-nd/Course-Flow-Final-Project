@@ -1,96 +1,71 @@
-import { NextRequest, NextResponse } from "next/server";
-
+import { NextResponse } from "next/server";
+import { supabase } from "@/lib/supabaseClient";
 
 // GET /api/courses/[id]
 export async function GET(
-    request: NextRequest,
+    _request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const { id } = await params;
 
-        // Convert string id to number for comparison
-        const courseId = parseInt(id);
-
-        // Find the course by ID
-        const course = courses.find((c) => c.id === courseId);
-
-        if (!course) {
-            return NextResponse.json(
-                { error: "Course not found" },
-                { status: 404 }
-            );
+        const courseId = parseInt(id, 10);
+        if (Number.isNaN(courseId)) {
+            return NextResponse.json({ error: "Invalid course id" }, { status: 400 });
         }
 
-        return NextResponse.json(course, { status: 200 });
-    } catch (error) {
-        console.error("Error fetching course:", error);
-        return NextResponse.json(
-            { error: "Internal server error" },
-            { status: 500 }
-        );
-    }
-}
+        const { data, error } = await supabase
+            .from("courses")
+            .select(`
+        id,
+        category,
+        title,
+        description,
+        price,
+        currency,
+        thumbnail,
+        video_url,
+        instructor,
+        rating,
+        students,
+        language,
+        duration_hours,
+        created_at,
+        modules (
+          id,
+          title,
+          order_index,
+          created_at,
+          lessons (
+            id,
+            title,
+            order_index,
+            created_at
+          )
+        )
+      `)
+            .eq("id", courseId)
+            .single();
 
-// PUT /api/courses/[id] - Update a course
-export async function PUT(
-    request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
-) {
-    try {
-        const { id } = await params;
-        const body = await request.json();
-        const courseId = parseInt(id);
-
-        const courseIndex = courses.findIndex((c) => c.id === courseId);
-
-        if (courseIndex === -1) {
-            return NextResponse.json(
-                { error: "Course not found" },
-                { status: 404 }
-            );
+        if (error) {
+            if (error.code === "PGRST116" /* No rows returned */) {
+                return NextResponse.json({ error: "Course not found" }, { status: 404 });
+            }
+            console.error("Error fetching course:", error.message);
+            return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        // Update the course
-        courses[courseIndex] = { ...courses[courseIndex], ...body };
+        const normalized = {
+            ...data,
+            modules: (data?.modules ?? []).map((m: any) => ({
+                ...m,
+                lessons: m.lessons ?? [],
+            })),
+        };
 
-        return NextResponse.json(courses[courseIndex], { status: 200 });
-    } catch (error) {
-        console.error("Error updating course:", error);
-        return NextResponse.json(
-            { error: "Internal server error" },
-            { status: 500 }
-        );
-    }
-}
-
-// DELETE /api/courses/[id] - Delete a course
-export async function DELETE(
-    request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
-) {
-    try {
-        const { id } = await params;
-        const courseId = parseInt(id);
-
-        const courseIndex = courses.findIndex((c) => c.id === courseId);
-
-        if (courseIndex === -1) {
-            return NextResponse.json(
-                { error: "Course not found" },
-                { status: 404 }
-            );
-        }
-
-        // Remove the course
-        courses.splice(courseIndex, 1);
-
-        return NextResponse.json(
-            { message: "Course deleted successfully" },
-            { status: 200 }
-        );
-    } catch (error) {
-        console.error("Error deleting course:", error);
+        return NextResponse.json(normalized, { status: 200 });
+    } catch (err: any) {
+        console.error("Error fetching course:", err);
         return NextResponse.json(
             { error: "Internal server error" },
             { status: 500 }
