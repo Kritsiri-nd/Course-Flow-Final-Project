@@ -25,7 +25,7 @@ interface Course {
   price: number;
   currency: string;
   thumbnail: string;
-  video_url: string;
+  videoUrl: string;
   instructor: string;
   durationHours: number;
   modules: {
@@ -59,14 +59,11 @@ type ApiCourse = {
   description: string;
   price: number | string;
   currency: string;
-  thumbnail: string;
+  thumbnail: string | null;
   video_url?: string | null;
-  instructor: string;
-  rating: number | string | null;
-  students: number | null;
-  language: string;
+  instructor: string | null;
   duration_hours?: number | null;
-  created_at?: string;
+  created_at?: string | null;
   modules?: ApiModule[] | null;
 };
 
@@ -101,12 +98,9 @@ function mapApiCourseToUiCourse(api: ApiCourse): Course {
     description: api.description,
     price: safeNumber(api.price, 0),
     currency: api.currency,
-    thumbnail: api.thumbnail,
+    thumbnail: api.thumbnail ?? "",
     videoUrl: api.video_url ?? "",
-    instructor: api.instructor,
-    rating: safeNumber(api.rating ?? 0, 0),
-    students: safeNumber(api.students ?? 0, 0),
-    language: api.language,
+    instructor: api.instructor ?? "",
     durationHours: safeNumber(api.duration_hours ?? 0, 0),
     modules,
   };
@@ -231,7 +225,7 @@ export default function CourseDetailPage() {
                 <div className="space-y-4">
                   <h2 className="text-h2 font-semibold">Course Detail</h2>
                   <div className="text-b2 text-muted-foreground leading-relaxed space-y-4 mt-8">
-                    <p>{course.description }</p>
+                    <p>{course.description}</p>
                   </div>
                 </div>
 
