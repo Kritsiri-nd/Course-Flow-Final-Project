@@ -7,7 +7,7 @@ import TestimonialCarousel from "./TestimonialCarousel";
 
 export default function Instructure() {
   const router = useRouter();
-  
+
   return (
     <>
       <div className="flex flex-col items-center justify-center">
@@ -40,7 +40,10 @@ export default function Instructure() {
           </svg>
 
           {/* vector image */}
-          <div className="absolute top-[151px] left-[1290px] w-[452px] h-[448px]">
+          <div
+            className="absolute top-[151px] left-[1290px] w-[452px] h-[448px] cursor-pointer hover:scale-105 transition-transform"
+            onClick={() => router.push("/non-user/courses")}
+          >
             <img
               src="/images/vector.png"
               alt="Educational illustration"
@@ -111,32 +114,34 @@ export default function Instructure() {
 
           {/* blue circle */}
           <svg
-            width='69'
-            height='104'
-            viewBox='0 0 69 104'
-            className='absolute top-[76px] '
-            fill='none'>
-            <circle cx='17' cy='52' r='52' fill='#C6D6EF' />
+            width="69"
+            height="104"
+            viewBox="0 0 69 104"
+            className="absolute top-[76px] "
+            fill="none"
+          >
+            <circle cx="17" cy="52" r="52" fill="#C6D6EF" />
           </svg>
 
           {/* green x */}
           <svg
-            width='23'
-            height='23'
-            viewBox='0 0 23 23'
-            className='absolute right-[615.32px] bottom-[520.32px]'
-            fill='none'>
+            width="23"
+            height="23"
+            viewBox="0 0 23 23"
+            className="absolute right-[615.32px] bottom-[520.32px]"
+            fill="none"
+          >
             <path
-              d='M13.843 1.99998L8.83754 20.6805'
-              stroke='#2FAC61'
-              strokeWidth='3'
-              strokeLinecap='round'
+              d="M13.843 1.99998L8.83754 20.6805"
+              stroke="#2FAC61"
+              strokeWidth="3"
+              strokeLinecap="round"
             />
             <path
-              d='M1.99986 8.83751L20.6804 13.8429'
-              stroke='#2FAC61'
-              strokeWidth='3'
-              strokeLinecap='round'
+              d="M1.99986 8.83751L20.6804 13.8429"
+              stroke="#2FAC61"
+              strokeWidth="3"
+              strokeLinecap="round"
             />
           </svg>
           {/* text */}
@@ -148,14 +153,16 @@ export default function Instructure() {
               Welcome to Schooler! The one-stop online class management system
               that caters to all your educational needs!
             </p>
-            <div className="w-[193px] h-[60px] rounded-[12px] bg-[#2F5FAC] text-white font-semibold text-base cursor-pointer hover:scale-105 transition-transform flex items-center justify-center">
+            <div
+              onClick={() => router.push("/non-user/courses")}
+              className="w-[193px] h-[60px] rounded-[12px] bg-[#2F5FAC] text-white font-semibold text-base cursor-pointer hover:scale-105 transition-transform flex items-center justify-center"
+            >
               Explore Courses
             </div>
           </div>
         </div>
-        
-        <div className="h-[1111px] w-[80vw] relative flex justify-center items-center">
 
+        <div className="h-[1111px] w-[80vw] relative flex justify-center items-center">
           {/* blue circle */}
           <svg
             width="1233"
@@ -171,7 +178,7 @@ export default function Instructure() {
               transform="rotate(-75 44.7032 13.7032)"
               fill="url(#paint0_linear_15_1851)"
             />
-          
+
             <circle cx="384" cy="110" r="16" fill="#E5ECF8" />
             <circle cx="1135.5" cy="1106.5" r="42.5" fill="#C6DCFF" />
 
@@ -208,17 +215,15 @@ export default function Instructure() {
           {/* text */}
           <div className="inline-flex flex-col gap-[120px] ">
             <div className="flex flex-start gap-[119px]">
-            <div className="group w-[454px] h-[330px] rounded-lg overflow-hidden">
-  <img
-    src="/images/learning.png"
-    alt="Learning experience"
-    width={454}
-    height={330}
-    className="w-full h-full object-cover transition-transform duration-300  hover:scale-105"
-  />
-</div>
-
-
+              <div className="w-[454px] h-[330px] rounded-lg overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300">
+                <img
+                  src="/images/learning.png"
+                  alt="Learning experience"
+                  width={454}
+                  height={330}
+                  className="w-full h-full object-cover"
+                />
+              </div>
 
               <div className="flex flex-col gap-[40px]">
                 <p className="text-[36px] font-medium leading-[125%] tracking-[-2%] text-[#2B2C4F]">
@@ -262,12 +267,7 @@ export default function Instructure() {
                   and the learners
                 </p>
                 <div className="flex gap-[24px]">
-                  <svg
-                    width="36"
-                    height="36"
-                    viewBox="0 0 36 36"
-                    fill="none"
-                  >
+                  <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
                     <path
                       d="M23.9209 16.955C25.2971 16.75 26.3567 15.4985 26.3597 13.9823C26.3597 12.4881 25.3327 11.2492 23.986 11.0148"
                       stroke="#5483D0"
@@ -349,8 +349,8 @@ export default function Instructure() {
                   </div>
                 </div>
               </div>
-              <div className="w-[454px] h-[330px] bg-gray-200 rounded-lg flex items-center justify-center">
-              <img
+              <div className="w-[454px] h-[330px] rounded-lg overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300">
+                <img
                   src="/images/interaction.png"
                   alt="Learning experience"
                   width={454}
@@ -361,7 +361,7 @@ export default function Instructure() {
             </div>
           </div>
         </div>
-        
+
         <div className="h-[823px] w-[80vw] relative flex justify-center items-center">
           <svg
             width="51"
@@ -395,7 +395,9 @@ export default function Instructure() {
                   <p className="cursor-pointer text-[24px] font-medium leading-[125%] tracking-[-2%] text-center text-[#000000]">
                     Jane Cooper
                   </p>
-                  <p className="cursor-pointer text-[16px] font-normal leading-[150%] tracking-[0%] text-center text-[#5483D0]">UX/UI Designer</p>
+                  <p className="cursor-pointer text-[16px] font-normal leading-[150%] tracking-[0%] text-center text-[#5483D0]">
+                    UX/UI Designer
+                  </p>
                 </div>
               </div>
               <div className="flex flex-col gap-[24px] hover:scale-105 transition-transform">
@@ -409,10 +411,12 @@ export default function Instructure() {
                   />
                 </div>
                 <div className="text-center flex flex-col gap-[10px]">
-                <p className="cursor-pointer text-[24px] font-medium leading-[125%] tracking-[-2%] text-center text-[#000000]">
-                Esther Howard
+                  <p className="cursor-pointer text-[24px] font-medium leading-[125%] tracking-[-2%] text-center text-[#000000]">
+                    Esther Howard
                   </p>
-                  <p className="cursor-pointer text-[16px] font-normal leading-[150%] tracking-[0%] text-center text-[#5483D0]">Program Manager</p>
+                  <p className="cursor-pointer text-[16px] font-normal leading-[150%] tracking-[0%] text-center text-[#5483D0]">
+                    Program Manager
+                  </p>
                 </div>
               </div>
               <div className="flex flex-col gap-[24px] hover:scale-105 transition-transform">
@@ -426,16 +430,18 @@ export default function Instructure() {
                   />
                 </div>
                 <div className="text-center flex flex-col gap-[10px]">
-                <p className="cursor-pointer text-[24px] font-medium leading-[125%] tracking-[-2%] text-center text-[#000000]">
-                Brooklyn Simmons
+                  <p className="cursor-pointer text-[24px] font-medium leading-[125%] tracking-[-2%] text-center text-[#000000]">
+                    Brooklyn Simmons
                   </p>
-                  <p className="cursor-pointer text-[16px] font-normal leading-[150%] tracking-[0%] text-center text-[#5483D0]">Software Engineer</p>
+                  <p className="cursor-pointer text-[16px] font-normal leading-[150%] tracking-[0%] text-center text-[#5483D0]">
+                    Software Engineer
+                  </p>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        
+
         <div className="min-h-[400px] lg:h-[742px] w-full relative py-8 lg:py-0">
           {/* Background SVG - Hidden on mobile */}
           <svg
@@ -479,7 +485,7 @@ export default function Instructure() {
               </linearGradient>
             </defs>
           </svg>
-          
+
           <div className="h-[742px] w-[100vw] flex flex-col gap-[30px] sm:gap-[30px] lg:gap-[25px] px-4 sm:px-6 lg:px-8 mt-20">
             <p className="text-[24px] sm:text-[28px] lg:text-3xl font-semibold text-center text-gray-900">
               Our Graduates

@@ -1,16 +1,15 @@
 'use client'
 
 import { useRouter } from "next/navigation"
-import CourseFlowIcon from "../../assets/courseFlowIcon"
 import Image from "next/image"
 
 export default function Footer() {
   const router = useRouter()
-  
+
   return (
     <div className="w-full h-[240px] flex items-center" style={{ backgroundColor: '#183056' }}>
       <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-6 sm:gap-8">
+        <div className="flex flex-col items-start sm:flex-row sm:justify-between sm:items-center gap-6 sm:gap-8">
           <div 
             className="cursor-pointer"
             onClick={() => {
@@ -26,31 +25,31 @@ export default function Footer() {
               className="hover:scale-105 transition-transform"
             />
           </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-20">
+
+          <div className="flex flex-col gap-4 sm:flex-row sm:gap-20">
             <a
               href="#"
-              className="text-[16px] font-normal leading-[150%] tracking-[0%] text-[#ACB4C3] hover:text-white transition-colors text-center"
+              className="text-[16px] font-normal leading-[150%] tracking-[0%] text-white hover:text-[#ACB4C3] transition-colors text-left"
               onClick={(e) => {
                 e.preventDefault()
-                router.push("/public/courses")
+                router.push("/non-user/courses")
               }}
             >
               All Courses
             </a>
             <a
               href="#"
-              className="text-[16px] font-normal leading-[150%] tracking-[0%] text-[#ACB4C3] hover:text-white transition-colors text-center"
+              className="text-[16px] font-normal leading-[150%] tracking-[0%] text-white hover:text-[#ACB4C3] transition-colors text-left"
               onClick={(e) => {
                 e.preventDefault()
-                router.push("/public/courses")
+                router.push("/non-user/courses")
               }}
             >
               Bundle Package
             </a>
           </div>
-          
-          <div className="flex space-x-3">
+
+          <div className="flex space-x-4">
             <a 
               href="https://www.facebook.com" 
               target="_blank" 
