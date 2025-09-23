@@ -91,7 +91,7 @@ export default function Assignments() {
                   <div className="flex gap-2">
                     <DeleteModalAlert />
                     <Link
-                      href="#"
+                      href="/admin/assignments/edit"
                       className="p-2 hover:bg-gray-200 rounded transition-colors"
                       title="Edit"
                     >
