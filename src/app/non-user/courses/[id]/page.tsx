@@ -25,11 +25,8 @@ interface Course {
   price: number;
   currency: string;
   thumbnail: string;
-  videoUrl: string;
+  video_url: string;
   instructor: string;
-  rating: number;
-  students: number;
-  language: string;
   durationHours: number;
   modules: {
     id: number;
