@@ -34,7 +34,7 @@ export default function SubscribeModalAlert({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
-      <AlertDialogContent className="max-w-md p-0 !rounded-xl">
+      <AlertDialogContent className="p-0 !rounded-xl mx-auto">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-b1 font-medium h-14 border-b border-gray-300 py-4 px-6 flex justify-between items-center">
             Confirmation
@@ -52,12 +52,12 @@ export default function SubscribeModalAlert({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="pb-6 pt-2 px-6 flex gap-3 !justify-start">
-          <AlertDialogCancel className="h-15 w-2/8 border border-orange-500 !text-orange-500 hover:bg-orange-100 px-4 py-2 rounded-lg text-b2 font-medium">
+          <AlertDialogCancel className="h-15 sm:w-2/8 w-full border border-orange-500 !text-orange-500 hover:bg-orange-100 px-4 py-2 rounded-lg text-b2 font-medium">
             No, I don’t
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
-            className="h-15 w-5/8 bg-blue-500 hover:bg-blue-600 !text-white px-4 py-2 rounded-lg text-b2 font-medium"
+            className="h-15 sm:w-5/8 w-full bg-blue-500 hover:bg-blue-600 !text-white px-4 py-2 rounded-lg text-b2 font-medium"
           >
             Yes, I want to subscribe
           </AlertDialogAction>
