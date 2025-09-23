@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/accordion";
 import Navbar from "@/components/ui/navbar";
 import Footer from "@/components/ui/footer";
+import SubscribeModalAlert from "@/components/ui/subscribe-modal-alert";
 
 // Shape used in the UI
 interface Course {
@@ -28,6 +29,7 @@ interface Course {
   videoUrl: string;
   instructor: string;
   durationHours: number;
+  summary: string;
   modules: {
     id: number;
     title: string;
@@ -63,6 +65,7 @@ type ApiCourse = {
   video_url?: string | null;
   instructor: string | null;
   duration_hours?: number | null;
+  summary?: string | null;
   created_at?: string | null;
   modules?: ApiModule[] | null;
 };
@@ -96,6 +99,7 @@ function mapApiCourseToUiCourse(api: ApiCourse): Course {
     category: api.category,
     title: api.title,
     description: api.description,
+    summary: api.summary ?? "",
     price: safeNumber(api.price, 0),
     currency: api.currency,
     thumbnail: api.thumbnail ?? "",
@@ -176,7 +180,7 @@ export default function CourseDetailPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-white py-16 px-8">
+      <div className="bg-white pt-2 pb-8 sm:pb-16 sm:pt-16 px-2 sm:px-6 md:px-8">
         {/* Back Button */}
         <div className="border-none mb-3">
           <div className="max-w-[1240px] mx-auto">
@@ -192,7 +196,7 @@ export default function CourseDetailPage() {
         <div className="max-w-[1240px] mx-auto">
           {/* Video + Sidebar */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="md:col-span-2 space-y-6">
+            <div className="col-span-1 md:col-span-2 space-y-6">
               {/* Video/Image */}
               <div className="relative">
                 <Card className="overflow-hidden !p-0">
@@ -220,19 +224,23 @@ export default function CourseDetailPage() {
               </div>
 
               {/* Course Details - ย้ายไปด้านล่าง */}
-              <div className="space-y-6 mt-20">
+              <div className="space-y-6 mt-6 sm:mt-20">
                 {/* Course Detail Text */}
                 <div className="space-y-4">
-                  <h2 className="text-h2 font-semibold">Course Detail</h2>
-                  <div className="text-b2 text-muted-foreground leading-relaxed space-y-4 mt-8">
+                  <h2 className="sm:text-h2 text-h3 font-semibold">
+                    Course Detail
+                  </h2>
+                  <div className="text-b2 text-muted-foreground leading-relaxed space-y-4 mt-4 sm:mt-8">
                     <p>{course.description}</p>
                   </div>
                 </div>
 
                 {/* Module Samples */}
-                <div className="space-y-4 mt-20">
-                  <h2 className="text-h2 font-semibold">Module Samples</h2>
-                  <Accordion type="multiple" className="space-y-0 mt-8">
+                <div className="space-y-4 mt-6 sm:mt-20">
+                  <h2 className="sm:text-h2 text-h3 font-semibold">
+                    Module Samples
+                  </h2>
+                  <Accordion type="multiple" className="space-y-0 mt-4 sm:mt-8">
                     {course.modules.map((module, index) => (
                       <AccordionItem
                         key={module.id}
@@ -266,8 +274,8 @@ export default function CourseDetailPage() {
               </div>
             </div>
 
-            {/* Sidebar - responsive แต่รักษา ratio ตาม Figma */}
-            <div className="md:sticky md:top-24 md:self-start md:h-fit">
+            {/* Sidebar - desktop and tablet*/}
+            <div className="hidden md:block md:sticky md:top-24 md:self-start md:h-fit">
               <Card className="!p-0">
                 <div
                   className="flex flex-col justify-between gap-8"
@@ -306,9 +314,18 @@ export default function CourseDetailPage() {
                     >
                       Add to Wishlist
                     </Button>
-                    <Button className="w-full py-6 bg-blue-500 hover:bg-blue-600 text-b2 text-white">
-                      Subscribe This Course
-                    </Button>
+                    <SubscribeModalAlert
+                      courseTitle={course.title}
+                      onConfirm={() => {
+                        // Add your subscription logic here
+                        console.log(`Subscribing to course: ${course.title}`);
+                        // You can add API calls, navigation, etc. here
+                      }}
+                    >
+                      <Button className="w-full py-6 bg-blue-500 hover:bg-blue-600 text-b2 text-white">
+                        Subscribe This Course
+                      </Button>
+                    </SubscribeModalAlert>
                   </div>
                 </div>
               </Card>
@@ -318,12 +335,12 @@ export default function CourseDetailPage() {
       </div>
 
       {/* Other Interesting Courses */}
-      <div className="bg-gray-100 py-20">
-        <div className="pt-10 px-4 sm:px-6 md:px-10 lg:px-20 mx-auto max-w-[1240px] w-full">
-          <h2 className="text-h2 font-semibold text-center mb-14">
+      <div className="bg-gray-100 py-8 sm:py-20">
+        <div className="pt-0 sm:pt-10 sm:px-6 md:px-8 mx-auto max-w-[1240px] w-full">
+          <h2 className="sm:text-h2 text-h3 font-semibold text-center mb-6 sm:mb-14">
             Other Interesting Courses
           </h2>
-          <div className="mt-10 px-2 sm:px-4 md:px-6 lg:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="mt-0 sm:mt-10 px-2 sm:px-4 md:px-6 lg:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {otherCourses.slice(0, 3).map((c) => {
               const courseLessons = c.modules.reduce(
                 (acc, m) => acc + m.lessons.length,
@@ -377,7 +394,63 @@ export default function CourseDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
       <Footer />
+
+      {/* Sidebar - mobile floating bottom */}
+      <div className="sticky bottom-0 block sm:hidden bg-white rounded-t-lg z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1),0_-2px_4px_-1px_rgba(0,0,0,0.06)]">
+        <div className="px-4 py-4">
+          <Accordion type="single" collapsible>
+            <AccordionItem value="course" className="border-none">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <AccordionTrigger className="hover:no-underline py-0 gap-2 group">
+                    <div className="text-left flex flex-col gap-2">
+                      {/* Tag that appears when expanded */}
+                      <p className="text-orange-500 text-b4 group-data-[state=open]:opacity-100 group-data-[state=closed]:opacity-0">
+                        {course?.category}
+                      </p>
+                      <h3 className="text-b2 text-black">
+                        {course?.title || "Service Design Essentials"}
+                      </h3>
+                    </div>
+                  </AccordionTrigger>
+                </div>
+              </div>
+              <AccordionContent className="pt-2 pb-0">
+                <div className="space-y-3">
+                  <p className="text-b4 text-gray-700">{course?.summary}</p>
+                </div>
+              </AccordionContent>
+              <div className="pt-2">
+                <p className="text-b2 text-gray-700">
+                  {course?.currency}{" "}
+                  {course?.price?.toLocaleString() || "3,559.00"}
+                </p>
+                <div className="flex gap-3 mt-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-orange-500 !text-orange-500 hover:bg-orange-50 text-b4"
+                  >
+                    Add to Wishlist
+                  </Button>
+                  <SubscribeModalAlert
+                    courseTitle={course?.title || "Service Design Essentials"}
+                    onConfirm={() => {
+                      console.log(`Subscribing to course: ${course?.title}`);
+                    }}
+                  >
+                    <Button className="flex-1 bg-blue-500 hover:bg-blue-600 !text-white text-b4">
+                      Subscribe This Course
+                    </Button>
+                  </SubscribeModalAlert>
+                </div>
+              </div>
+            </AccordionItem>
+          </Accordion>
+        </div>
+      </div>
     </>
   );
 }
