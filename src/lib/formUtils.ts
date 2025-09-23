@@ -63,7 +63,12 @@ export const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
 export const validateCourseForm = (
   formData: any,
   lessons: any[],
-  errors: ValidationErrors
+  errors: ValidationErrors,
+  options?: {
+    allowExistingMedia?: boolean;
+    existingThumbnailUrl?: string | null;
+    existingVideoUrl?: string | null;
+  }
 ): { isValid: boolean; newErrors: ValidationErrors } => {
   const newErrors: ValidationErrors = {};
 
@@ -119,9 +124,10 @@ export const validateCourseForm = (
   }
 
   // Cover image validation
-  if (!formData.thumbnail) {
+  const hasExistingThumbnail = options?.allowExistingMedia && !!options?.existingThumbnailUrl;
+  if (!formData.thumbnail && !hasExistingThumbnail) {
     newErrors.thumbnail = 'Cover image is required';
-  } else {
+  } else if (formData.thumbnail) {
     const allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png'];
     if (!allowedImageTypes.includes(formData.thumbnail.type)) {
       newErrors.thumbnail = 'Cover image must be in .jpg, .png, or .jpeg format';
@@ -131,9 +137,10 @@ export const validateCourseForm = (
   }
 
   // Video trailer validation
-  if (!formData.video_url) {
+  const hasExistingVideo = options?.allowExistingMedia && !!options?.existingVideoUrl;
+  if (!formData.video_url && !hasExistingVideo) {
     newErrors.video_url = 'Video trailer is required';
-  } else {
+  } else if (formData.video_url) {
     const allowedVideoTypes = ['video/mp4', 'video/mov', 'video/avi', 'video/quicktime'];
     if (!allowedVideoTypes.includes(formData.video_url.type)) {
       newErrors.video_url = 'Video trailer must be in .mp4, .mov, or .avi format';
