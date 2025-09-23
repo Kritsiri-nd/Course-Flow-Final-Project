@@ -1,5 +1,5 @@
 import Navbar from "../components/ui/navbar";
-import Instructure from "../components/ui/instructure";
+import Instructure from "../components/ui/main";
 import SubFooter from "../components/ui/subFooter";
 import Footer from "../components/ui/footer";
 
