@@ -81,13 +81,15 @@ export default function AdminCourses() {
               placeholder="Search courses..."
               className="h-12 w-64 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <Button
-              variant="outline"
-              className="bg-blue-500 text-white h-15 rounded-lg px-8"
-            >
-              <Plus className="h-4 w-4" />
-              Add course
-            </Button>
+            <Link href="/admin/courses/create">
+              <Button
+                variant="outline"
+                className="bg-blue-500 text-white h-15 rounded-lg px-8"
+              >
+                <Plus className="h-4 w-4" />
+                Add course
+              </Button>
+            </Link>
           </div>
         </header>
 
