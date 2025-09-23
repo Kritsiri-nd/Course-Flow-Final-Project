@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 
-import Navbar from "@/components/ui/navbar";
+
 
 const CalendarIcon = () => (
   <svg

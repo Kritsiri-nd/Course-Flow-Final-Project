@@ -4,9 +4,7 @@ import "./globals.css";
 
 
 import { createSupabaseServerClient } from "@/lib/createSupabaseServerClient";
-import Navbar from "@/components/ui/navbar";
-import Navbar_test from "@/components/ui/Navbar_test";
-import NonuserNav from "@/components/ui/navbar/NonuserNav";
+import HeaderNav from "@/components/ui/navbar/HeaderNav";
 import UserNav from "@/components/ui/navbar/UserNav";
 
 
@@ -50,8 +48,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <UserNav session={session} userProfile={userProfile} />
-
+        <HeaderNav session={session} userProfile={userProfile} />
         {children}
       </body>
     </html>
@@ -59,3 +56,5 @@ export default async function RootLayout({
 }
 
 //<Navbar_test session={session} userProfile={userProfile} />
+//<HeaderNav session={session} userProfile={userProfile} />
+

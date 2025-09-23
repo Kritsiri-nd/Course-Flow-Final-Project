@@ -8,7 +8,7 @@ export default function LoginSuccess() {
 
     return (
         <>
-            <h1> Login success</h1>
+            <h1 className='text-red-500'>Login success</h1>
         </>
     );
 }
