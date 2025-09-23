@@ -408,7 +408,7 @@ export default function CourseDetailPage() {
                   <AccordionTrigger className="hover:no-underline py-0 gap-2 group">
                     <div className="text-left flex flex-col gap-2">
                       {/* Tag that appears when expanded */}
-                      <p className="text-orange-500 text-b4 group-data-[state=open]:opacity-100 group-data-[state=closed]:opacity-0">
+                      <p className="text-orange-500 text-b4 group-data-[state=closed]:hidden">
                         {course?.category}
                       </p>
                       <h3 className="text-b2 text-black">
