@@ -16,14 +16,50 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit, Plus, Trash } from "lucide-react";
+import { Edit, Plus } from "lucide-react";
 import Link from "next/link";
+import { Assignment } from "@/types";
+import { assignmentService } from "@/services/assignmentService";
 import DeleteModalAlert from "@/components/ui/delete-modal-alert";
 
 export default function Assignments() {
-  const [assignments, setAssignments] = useState<[]>([]);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
+
+  // Fetch assignments from API
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      try {
+        setLoading(true);
+        const data = await assignmentService.getAssignments();
+        setAssignments(data);
+      } catch (err) {
+        console.error("Error fetching assignments:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAssignments();
+  }, []);
+
+  // Filter assignments based on search query
+  const filteredAssignments = useMemo(() => {
+    if (!query.trim()) return assignments;
+
+    return assignments.filter(
+      (assignment) =>
+        assignment.question.toLowerCase().includes(query.toLowerCase()) ||
+        assignment.lesson?.title.toLowerCase().includes(query.toLowerCase()) ||
+        assignment.lesson?.module?.title
+          .toLowerCase()
+          .includes(query.toLowerCase()) ||
+        assignment.lesson?.module?.course?.title
+          .toLowerCase()
+          .includes(query.toLowerCase())
+    );
+  }, [assignments, query]);
 
   return (
     <SidebarProvider>
@@ -81,25 +117,56 @@ export default function Assignments() {
             </TableHeader>
 
             <TableBody>
-              <TableRow>
-                <TableCell className="text-rigth text-b3">test1</TableCell>
-                <TableCell className="text-rigth text-b3">test2</TableCell>
-                <TableCell className="text-rigth text-b3">test3</TableCell>
-                <TableCell className="text-rigth text-b3">test4</TableCell>
-                <TableCell className="text-rigth text-b3">test5</TableCell>
-                <TableCell className="text-rigth">
-                  <div className="flex gap-2">
-                    <DeleteModalAlert />
-                    <Link
-                      href="/admin/assignments/edit"
-                      className="p-2 hover:bg-gray-200 rounded transition-colors"
-                      title="Edit"
-                    >
-                      <Edit className="h-4 w-4 text-blue-300" />
-                    </Link>
-                  </div>
-                </TableCell>
-              </TableRow>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8">
+                    Loading assignments...
+                  </TableCell>
+                </TableRow>
+              ) : filteredAssignments.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="text-center py-8 text-gray-500"
+                  >
+                    No assignments available.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredAssignments.map((assignment) => (
+                  <TableRow key={assignment.id}>
+                    <TableCell className="text-rigth text-b3">
+                      {assignment.question.length > 50
+                        ? assignment.question.substring(0, 50) + "..."
+                        : assignment.question}
+                    </TableCell>
+                    <TableCell className="text-rigth text-b3">
+                      {assignment.lesson?.module?.course?.title || "N/A"}
+                    </TableCell>
+                    <TableCell className="text-rigth text-b3">
+                      {assignment.lesson?.module?.title || "N/A"}
+                    </TableCell>
+                    <TableCell className="text-rigth text-b3">
+                      {assignment.lesson?.title || "N/A"}
+                    </TableCell>
+                    <TableCell className="text-rigth text-b3">
+                      {new Date(assignment.created_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-rigth">
+                      <div className="flex gap-2">
+                        <DeleteModalAlert delText="assignment" />
+                        <Link
+                          href={`/admin/assignments/${assignment.id}/edit`}
+                          className="p-2 hover:bg-gray-200 rounded transition-colors"
+                          title="Edit"
+                        >
+                          <Edit className="h-4 w-4 text-blue-300" />
+                        </Link>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
