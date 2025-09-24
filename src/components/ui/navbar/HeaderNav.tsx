@@ -52,6 +52,6 @@ export default async function HeaderNav() {
   } else {
     // สำหรับ role อื่นๆ ทั้งหมด (เช่น 'admin')
 
-    return <AdminNav session={session} userProfile={userProfile} />;
+    return <UserNav session={session} userProfile={userProfile} />;
   }
 }

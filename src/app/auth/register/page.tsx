@@ -48,60 +48,102 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
     setMessage('');
-    setIsLoading(true);
     
+    // VALIDATION LOGIC START HERE DER P'NON
+    const validationErrors: string[] = [];
 
-  const supabase = createClient();
-
-  const  { error: signUpError } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-      first_name: firstName,    
-      last_name: lastName,      
-      date_of_birth: dob,       
-      education: education 
-      },
+    //FIRSTNAME, LASTNAME VALIDATION
+    const nameRegex = /^[a-zA-Z-'ก-๏\s]+$/; // Allows English, Thai, hyphen, apostrophe, space
+    if (!nameRegex.test(firstName)) {
+      validationErrors.push('First name contains invalid characters.');
     }
-});
+    if (!nameRegex.test(lastName)) {
+      validationErrors.push('Last name contains invalid characters.');
+    }
 
-if (signUpError) {
-  setError(signUpError.message);
-}else{
-  setMessage('Register success! Please check your email to confirm your account.');
-  setFirstName('');
-  setLastName('');
-  setDob('');
-  setEducation('');
-  setEmail('');
-  setPassword(''); 
-  
-  // router.push('/auth/login');
+    // เริ่มเรียนตั้งแต่ 7 ขวบละกัน
+    if (dob) {
+      const today = new Date();
+      const birthDate = new Date(dob);
+      // Calculate the date 7 years ago from today
+      const sevenYearsAgo = new Date(today.getFullYear() - 7, today.getMonth(), today.getDate());
+      
+      if (birthDate > sevenYearsAgo) {
+        validationErrors.push('You must be at least 7 years old to register.');
+      }
+    } else {
+        validationErrors.push('Date of Birth is required.');
+    }
 
-}
+    // 3. Email Validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      validationErrors.push('Please enter a valid email address.');
+    }
 
-setIsLoading(false);
+    // 4. Password Validation
+    if (password.length < 7) {
+      validationErrors.push('Password must be at least 7 characters long.');
+    }
+    if (!/[A-Z]/.test(password)) {
+      validationErrors.push('Password must contain at least one uppercase letter.');
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      validationErrors.push('Password must contain at least one special character.');
+    }
 
-};
+    // If there are any validation errors, show them and stop the function
+    if (validationErrors.length > 0) {
+      setError(validationErrors.join(' '));
+      return; // Stop the registration process
+    }
+    // --- END: VALIDATION LOGIC ---
 
 
-return(
-<>
-  <Navbar />
-    
+    setIsLoading(true);
+
+    const supabase = createClient();
+
+    const  { error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+        first_name: firstName,    
+        last_name: lastName,      
+        date_of_birth: dob,       
+        education: education 
+        },
+      }
+    });
+
+    if (signUpError) {
+      setError(signUpError.message);
+    } else {
+      setMessage('Register success! Please check your email to confirm your account.');
+      setFirstName('');
+      setLastName('');
+      setDob('');
+      setEducation('');
+      setEmail('');
+      setPassword(''); 
+      
+      // router.push('/auth/login');
+    }
+
+    setIsLoading(false);
+  };
+
+
+  return(
+  <>
     <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 font-sans">
-
       <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 ">
-
         <div>
           <h1 className="text-center text-3xl font-bold text-blue-500">Register to start leaning!</h1>
         </div>
-
         <form onSubmit={handleRegister} className="mt-8 space-y-6">
-
           <div className="grid grid-cols-1 gap-y-6 sm:gap-x-4">
-
             <div>
               <label  htmlFor="firstName" className="block text-sm font-medium text-gray-700">
                 First Name</label>
@@ -194,9 +236,7 @@ return(
               >
               {isLoading ? 'Registering...' : 'Register'}
               </button>
-
           </div>
-
             <p className="mt-6 text-center text-sm text-gray-600">
               Already have an account?{' '}
               <Link href="/auth/login" className="font-semibold text-blue-600 hover:underline">
@@ -204,12 +244,8 @@ return(
               </Link>
             </p>
         </form>
-
       </div>
-
     </main>
-
-</>
-)
+  </>
+  )
 }
-
