@@ -154,7 +154,7 @@ export default function Assignments() {
                     </TableCell>
                     <TableCell className="text-rigth">
                       <div className="flex gap-2">
-                        <DeleteModalAlert />
+                        <DeleteModalAlert delText="assignment" />
                         <Link
                           href={`/admin/assignments/${assignment.id}/edit`}
                           className="p-2 hover:bg-gray-200 rounded transition-colors"
