@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Trash2, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,7 @@ interface LessonManagementProps {
 }
 
 export function LessonManagement({ lessons, errors, onLessonsChange }: LessonManagementProps) {
+  const router = useRouter();
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
   const [showAddLessonForm, setShowAddLessonForm] = useState(false);
   const [newLessonName, setNewLessonName] = useState('');
@@ -46,7 +48,6 @@ export function LessonManagement({ lessons, errors, onLessonsChange }: LessonMan
     onLessonsChange([...lessons, newLesson]);
     setNewLessonName('');
     setNewLessonSubLessons('1');
-    setShowAddLessonForm(false);
   };
 
   const editLesson = (lesson: Lesson) => {
@@ -87,9 +88,7 @@ export function LessonManagement({ lessons, errors, onLessonsChange }: LessonMan
       return;
     }
 
-    if (confirm('Are you sure you want to delete this lesson?')) {
-      onLessonsChange(lessons.filter(lesson => lesson.id !== lessonId));
-    }
+    onLessonsChange(lessons.filter(lesson => lesson.id !== lessonId));
   };
 
   const cancelEdit = () => {
@@ -106,10 +105,7 @@ export function LessonManagement({ lessons, errors, onLessonsChange }: LessonMan
         <button
           type="button"
           onClick={() => {
-            setEditingLesson(null);
-            setNewLessonName('');
-            setNewLessonSubLessons('1');
-            setShowAddLessonForm(true);
+            router.push('/Admin/lessons');
           }}
           className="w-full sm:w-[171px] h-[60px] pt-[18px] pr-[32px] pb-[18px] pl-[32px] gap-[10px] rounded-[12px] bg-[#2F5FAC] text-white shadow-[4px_4px_24px_0px_#00000014] opacity-100 flex items-center justify-center transition-all duration-200 hover:bg-[#2F5FAC] hover:scale-105 cursor-pointer"
         >
@@ -156,16 +152,19 @@ export function LessonManagement({ lessons, errors, onLessonsChange }: LessonMan
             >
               {editingLesson ? 'Update Lesson' : 'Add Lesson'}
             </Button>
-            {editingLesson && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={cancelEdit}
-                className="border-gray-300 text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </Button>
-            )}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setEditingLesson(null);
+                setNewLessonName('');
+                setNewLessonSubLessons('1');
+                setShowAddLessonForm(false);
+              }}
+              className="border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              {editingLesson ? 'Cancel' : 'Close'}
+            </Button>
           </div>
         </div>
       )}
