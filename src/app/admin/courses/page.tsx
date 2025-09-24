@@ -34,7 +34,6 @@ type Course = {
   created_at?: string;
   updated_at?: string | null;
 };
-import DeleteModalAlert from "@/components/ui/delete-modal-alert";
 
 export default function AdminCourses() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -190,7 +189,12 @@ export default function AdminCourses() {
                       </TableCell>
                       <TableCell className="text-rigth">
                         <div className="flex gap-2">
-                          <DeleteModalAlert />
+                          <button
+                            className="p-2 hover:bg-gray-200 rounded transition-colors"
+                            title="Delete"
+                          >
+                            <Trash className="h-4 w-4 text-blue-300" />
+                          </button>
                           <Link
                             href="/admin/courses/edit"
                             className="p-2 hover:bg-gray-200 rounded transition-colors"

@@ -10,7 +10,6 @@ import { CourseInformation } from "@/components/course/CourseInformation";
 import { PromoCodeSection } from "@/components/course/PromoCodeSection";
 import { FileUploadSection } from "@/components/course/FileUploadSection";
 import { LessonManagement } from "@/components/course/LessonManagement";
-import { DEFAULT_LESSONS } from "@/lib/constants";
 import { validateCourseForm } from "@/lib/formUtils";
 
 interface CourseFormData {
@@ -91,7 +90,7 @@ export default function AddCoursePage() {
   });
 
   // Lessons state
-  const [lessons, setLessons] = useState<Lesson[]>(DEFAULT_LESSONS);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
 
   // File input refs
   const thumbnailInputRef = useRef<HTMLInputElement>(null);

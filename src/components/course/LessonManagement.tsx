@@ -46,7 +46,6 @@ export function LessonManagement({ lessons, errors, onLessonsChange }: LessonMan
     onLessonsChange([...lessons, newLesson]);
     setNewLessonName('');
     setNewLessonSubLessons('1');
-    setShowAddLessonForm(false);
   };
 
   const editLesson = (lesson: Lesson) => {
@@ -87,9 +86,7 @@ export function LessonManagement({ lessons, errors, onLessonsChange }: LessonMan
       return;
     }
 
-    if (confirm('Are you sure you want to delete this lesson?')) {
-      onLessonsChange(lessons.filter(lesson => lesson.id !== lessonId));
-    }
+    onLessonsChange(lessons.filter(lesson => lesson.id !== lessonId));
   };
 
   const cancelEdit = () => {
@@ -156,16 +153,19 @@ export function LessonManagement({ lessons, errors, onLessonsChange }: LessonMan
             >
               {editingLesson ? 'Update Lesson' : 'Add Lesson'}
             </Button>
-            {editingLesson && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={cancelEdit}
-                className="border-gray-300 text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </Button>
-            )}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setEditingLesson(null);
+                setNewLessonName('');
+                setNewLessonSubLessons('1');
+                setShowAddLessonForm(false);
+              }}
+              className="border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              {editingLesson ? 'Cancel' : 'Close'}
+            </Button>
           </div>
         </div>
       )}
