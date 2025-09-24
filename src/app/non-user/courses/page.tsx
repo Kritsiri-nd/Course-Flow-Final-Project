@@ -43,7 +43,7 @@ export default function CourseList() {
 
   return (
     <section>
-      <Navbar/>
+      
     <div className="relative py-10 px-4 sm:px-6 md:px-10 lg:px-20 mx-auto max-w-[1240px] w-full">
       {/* Background */}
       <Image
