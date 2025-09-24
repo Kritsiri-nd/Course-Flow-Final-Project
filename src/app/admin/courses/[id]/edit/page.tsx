@@ -133,7 +133,23 @@ export default function EditCoursePage() {
         setUploadedThumbnailUrl(data?.thumbnail ?? null);
         setUploadedVideoUrl(data?.video_url ?? null);
 
-        // Optionally map modules->lessons if needed later; keep defaults for now
+        // Map modules -> lessons from API to LessonManagement format
+        try {
+          const apiLessons = (data?.modules ?? [])
+            .flatMap((m: any) => m?.lessons ?? [])
+            .map((l: any, idx: number) => ({
+              id: typeof l?.id === "number" ? l.id : idx + 1,
+              name: l?.title ?? `Lesson ${idx + 1}`,
+              // Backend schema doesn't expose sub-lesson count yet; default to 10 for UI
+              subLessons: 10,
+            }));
+
+          if (apiLessons.length > 0) {
+            setLessons(apiLessons);
+          }
+        } catch (mapErr) {
+          console.warn("Failed to map lessons from API; using defaults", mapErr);
+        }
       } catch (e) {
         console.error(e);
         const msg = e instanceof Error ? e.message : "Unknown error";

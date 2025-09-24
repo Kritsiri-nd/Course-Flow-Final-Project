@@ -200,7 +200,7 @@ export function LessonManagement({ lessons, errors, onLessonsChange }: LessonMan
                       className="p-2 hover:bg-gray-200 rounded transition-colors"
                       title="Delete"
                     >
-                      <Trash2 className="h-4 w-4 text-red-500" />
+                      <Trash2 className="h-4 w-4 text-blue-300" />
                     </button>
                     <button
                       type="button"
@@ -208,7 +208,7 @@ export function LessonManagement({ lessons, errors, onLessonsChange }: LessonMan
                       className="p-2 hover:bg-gray-200 rounded transition-colors"
                       title="Edit"
                     >
-                      <Edit className="h-4 w-4 text-blue-500" />
+                      <Edit className="h-4 w-4 text-blue-300" />
                     </button>
                   </div>
                 </td>
