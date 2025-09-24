@@ -18,6 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import DeleteModalAlert from "@/components/ui/delete-modal-alert";
 
 type Course = {
   id: number;
@@ -189,12 +190,7 @@ export default function AdminCourses() {
                       </TableCell>
                       <TableCell className="text-rigth">
                         <div className="flex gap-2">
-                          <button
-                            className="p-2 hover:bg-gray-200 rounded transition-colors"
-                            title="Delete"
-                          >
-                            <Trash className="h-4 w-4 text-blue-300" />
-                          </button>
+                          <DeleteModalAlert delText="course" />
                           <Link
                             href={`/admin/courses/${c.id}/edit`}
                             className="p-2 hover:bg-gray-200 rounded transition-colors"
