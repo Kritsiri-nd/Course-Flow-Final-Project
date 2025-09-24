@@ -196,7 +196,7 @@ export default function AdminCourses() {
                             <Trash className="h-4 w-4 text-blue-300" />
                           </button>
                           <Link
-                            href="/admin/courses/edit"
+                            href={`/admin/courses/${c.id}/edit`}
                             className="p-2 hover:bg-gray-200 rounded transition-colors"
                             title="Edit"
                           >
