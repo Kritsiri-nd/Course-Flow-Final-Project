@@ -26,6 +26,7 @@ export default function Assignments() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   // Fetch assignments from API
   useEffect(() => {
@@ -60,6 +61,28 @@ export default function Assignments() {
           .includes(query.toLowerCase())
     );
   }, [assignments, query]);
+
+  const handleDelete = async (assignmentId: number) => {
+    try {
+      setDeletingId(assignmentId);
+      const response = await fetch(`/api/assignments/${assignmentId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete assignment");
+      }
+
+      // Remove from local state
+      setAssignments(prev => prev.filter(a => a.id !== assignmentId));
+    } catch (error) {
+      console.error("Error deleting assignment:", error);
+      alert(`Failed to delete assignment: ${error instanceof Error ? error.message : "Unknown error"}`);
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   return (
     <SidebarProvider>
@@ -154,7 +177,11 @@ export default function Assignments() {
                     </TableCell>
                     <TableCell className="text-rigth">
                       <div className="flex gap-2">
-                        <DeleteModalAlert delText="assignment" />
+                        <DeleteModalAlert 
+                          delText="assignment" 
+                          onDelete={() => handleDelete(assignment.id)}
+                          isDeleting={deletingId === assignment.id}
+                        />
                         <Link
                           href={`/admin/assignments/${assignment.id}/edit`}
                           className="p-2 hover:bg-gray-200 rounded transition-colors"

@@ -11,7 +11,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Trash, X } from "lucide-react";
 
-export default function DeleteModalAlert(props: { delText: string }) {
+interface DeleteModalAlertProps {
+  delText: string;
+  onDelete?: () => void;
+  isDeleting?: boolean;
+}
+
+export default function DeleteModalAlert({ delText, onDelete, isDeleting = false }: DeleteModalAlertProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -36,16 +42,21 @@ export default function DeleteModalAlert(props: { delText: string }) {
             </AlertDialogCancel>
           </AlertDialogTitle>
           <AlertDialogDescription className="text-b2 text-gray-700 pt-4 px-6">
-            Are you sure you want to delete this {props.delText}?
+            Are you sure you want to delete this {delText}?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="pb-6 pt-2 px-6 flex gap-3 !justify-center">
-          <AlertDialogCancel className="h-15 w-2/3 border border-orange-500 !text-orange-500 hover:bg-orange-100 px-4 py-2 rounded-lg text-b2 font-medium">
-            Yes, I want to delete the {props.delText}
-          </AlertDialogCancel>
-          <AlertDialogAction className="h-15 w-1/3 bg-blue-500 hover:bg-blue-600 !text-white px-4 py-2 rounded-lg text-b2 font-medium">
-            No, keep it
+          <AlertDialogAction
+            asChild
+            className="h-15 w-2/3 border border-orange-500 !text-orange-500 bg-transparent hover:bg-orange-100 px-4 py-2 rounded-lg text-b2 font-medium"
+          >
+            <button onClick={onDelete} disabled={isDeleting}>
+              {isDeleting ? "Deleting..." : `Yes, I want to delete the ${delText}`}
+            </button>
           </AlertDialogAction>
+          <AlertDialogCancel className="h-15 w-1/3 bg-blue-500 hover:bg-blue-600 !text-white px-4 py-2 rounded-lg text-b2 font-medium">
+            No, keep it
+          </AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

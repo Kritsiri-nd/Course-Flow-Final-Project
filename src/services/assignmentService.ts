@@ -25,6 +25,28 @@ export const assignmentService = {
         }
     },
 
+    // Fetch single assignment
+    async getAssignment(id: string): Promise<Assignment> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/assignments/${id}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error("Error fetching assignment:", error);
+            throw error;
+        }
+    },
+
     // Create new assignment
     async createAssignment(assignmentData: {
         question: string;
@@ -51,6 +73,51 @@ export const assignmentService = {
             return data;
         } catch (error) {
             console.error("Error creating assignment:", error);
+            throw error;
+        }
+    },
+
+    // Update assignment
+    async updateAssignment(id: string, assignmentData: {
+        question: string;
+        answer?: string;
+        lesson_id: number;
+    }): Promise<Assignment> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/assignments/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(assignmentData),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error("Error updating assignment:", error);
+            throw error;
+        }
+    },
+
+    // Delete assignment
+    async deleteAssignment(id: string): Promise<void> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/assignments/${id}`, {
+                method: "DELETE",
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error("Error deleting assignment:", error);
             throw error;
         }
     },

@@ -9,45 +9,43 @@ import {
 } from "@/components/ui/sidebar";
 import { AdminPanel } from "@/components/layouts/sidebar-admin-panel";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { assignmentService } from "@/services/assignmentService";
 import { AlertCircle, Loader2 } from "lucide-react";
 
-// Define types based on the actual API structure
-interface Lesson {
-  id: number;
-  title: string;
-  order_index: number;
-  created_at: string;
-}
-
-interface Module {
-  id: number;
-  title: string;
-  order_index: number;
-  created_at: string;
-  lessons: Lesson[];
+interface AssignmentFormData {
+  question: string;
+  answer: string;
+  lesson_id: string;
 }
 
 interface Course {
   id: number;
   title: string;
-  category: string;
   modules: Module[];
+}
+
+interface Module {
+  id: number;
+  title: string;
+  lessons: Lesson[];
+}
+
+interface Lesson {
+  id: number;
+  title: string;
 }
 
 export default function CreateAssignmentPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [courses, setCourses] = useState<Course[]>([]);
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-  const [allLessons, setAllLessons] = useState<Lesson[]>([]);
+  const [selectedCourseId, setSelectedCourseId] = useState<string>("");
+  const [selectedModuleId, setSelectedModuleId] = useState<string>("");
+  const [selectedLessonId, setSelectedLessonId] = useState<string>("");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [formData, setFormData] = useState({
-    course: "",
-    lesson: "",
-    subLesson: "",
-    assignment: "",
+  const [formData, setFormData] = useState<AssignmentFormData>({
+    question: "",
+    answer: "",
+    lesson_id: "",
   });
 
   // Fetch courses from API
@@ -67,87 +65,87 @@ export default function CreateAssignmentPage() {
     fetchCourses();
   }, []);
 
-  const handleInputChange = (field: string, value: string) => {
-    // Clear error when user starts typing
+  const handleInputChange = (field: keyof AssignmentFormData, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value,
+    }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }));
     }
-
-    if (field === "course") {
-      const course = courses.find(c => c.id.toString() === value);
-      setSelectedCourse(course || null);
-      
-      // Flatten all lessons from all modules of the selected course
-      const lessons = course?.modules.flatMap(module => module.lessons) || [];
-      setAllLessons(lessons);
-      
-      setFormData(prev => ({
-        ...prev,
-        [field]: value,
-        lesson: "",
-        subLesson: ""
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [field]: value
-      }));
-    }
   };
 
-  const validateForm = () => {
+  const handleCourseChange = (courseId: string) => {
+    setSelectedCourseId(courseId);
+    setSelectedModuleId("");
+    setSelectedLessonId("");
+    setFormData(prev => ({ ...prev, lesson_id: "" }));
+  };
+
+  const handleModuleChange = (moduleId: string) => {
+    setSelectedModuleId(moduleId);
+    setSelectedLessonId("");
+    setFormData(prev => ({ ...prev, lesson_id: "" }));
+  };
+
+  const handleLessonChange = (lessonId: string) => {
+    setSelectedLessonId(lessonId);
+    setFormData(prev => ({ ...prev, lesson_id: lessonId }));
+  };
+
+  const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.assignment.trim()) {
-      newErrors.assignment = "Please enter assignment details";
+    if (!formData.question.trim()) {
+      newErrors.question = "Assignment question is required";
     }
 
-    if (!formData.course) {
-      newErrors.course = "Please select a course";
+    if (!selectedCourseId) {
+      newErrors.course_id = "Please select a course";
     }
 
-    if (!formData.lesson) {
-      newErrors.lesson = "Please select a lesson";
+    if (!selectedModuleId) {
+      newErrors.lesson_id = "Please select a lesson";
     }
 
-    if (!formData.subLesson) {
-      newErrors.subLesson = "Please select a sub-lesson";
+    if (!selectedLessonId) {
+      newErrors.sub_lesson = "Please select a sub-lesson";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
 
     setLoading(true);
-    
     try {
-      const selectedLesson = allLessons.find(l => l.id.toString() === formData.lesson);
-      
-      console.log("Creating assignment with data:", {
-        question: formData.assignment,
-        answer: "",
-        lesson_id: formData.lesson,
-        course: selectedCourse?.title,
-        lesson: selectedLesson?.title,
-        sub_lesson: formData.subLesson,
+      const response = await fetch("/api/assignments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: formData.question,
+          answer: formData.answer,
+          lesson_id: parseInt(formData.lesson_id),
+        }),
       });
 
-      const result = await assignmentService.createAssignment({
-        question: formData.assignment,
-        answer: "",
-        lesson_id: formData.lesson,
-      });
-      
-      console.log("Assignment created successfully:", result);
-      
-      // Success - redirect to assignments list
+      if (!response.ok) {
+        let message = "Failed to create assignment";
+        try {
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const errorData = await response.json();
+            message = errorData?.error || message;
+          } else {
+            message = `HTTP ${response.status}: ${response.statusText}`;
+          }
+        } catch {}
+        throw new Error(message);
+      }
+
+      await response.json();
       router.push("/admin/assignments");
     } catch (error) {
       console.error("Error creating assignment:", error);
@@ -161,6 +159,15 @@ export default function CreateAssignmentPage() {
   const handleCancel = () => {
     router.push("/admin/assignments");
   };
+
+  // Get selected course
+  const selectedCourse = courses.find(c => c.id.toString() === selectedCourseId);
+  
+  // Get selected module
+  const selectedModule = selectedCourse?.modules.find(m => m.id.toString() === selectedModuleId);
+  
+  // Get selected lesson
+  const selectedLesson = selectedModule?.lessons.find(l => l.id.toString() === selectedLessonId);
 
   return (
     <SidebarProvider>
@@ -201,146 +208,132 @@ export default function CreateAssignmentPage() {
 
         {/* Form Content */}
         <div className="flex-1 overflow-auto p-8">
-          <div className="max-w-4xl mx-auto bg-white rounded-lg p-6 shadow-sm border border-gray-200 space-y-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Course Selection */}
-              <div className="space-y-2">
-                <Label htmlFor="course" className="block text-b3 font-medium text-gray-700">
-                  Course <span className="text-red-500">*</span>
-                </Label>
+          <div className="max-w-4xl mx-auto bg-white rounded-lg p-6 shadow-sm border border-gray-200 space-y-6">
+            {/* Course Selection */}
+            <div>
+              <label className="block text-b3 font-medium text-gray-700 mb-2">
+                Course <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <select
+                  className={`w-full h-12 p-3 pr-10 border rounded-lg focus:ring-2 ${
+                    errors.course_id
+                      ? "border-[#9B2FAC] focus:border-[#9B2FAC] focus:ring-[#9B2FAC]"
+                      : "border-gray-300 focus:ring-orange-500 focus:border-orange-500"
+                  }`}
+                  value={selectedCourseId}
+                  onChange={(e) => handleCourseChange(e.target.value)}
+                >
+                  <option value="">Select a Course</option>
+                  {courses.map((course) => (
+                    <option key={course.id} value={course.id}>
+                      {course.title}
+                    </option>
+                  ))}
+                </select>
+                {errors.course_id && (
+                  <AlertCircle className="absolute right-3 top-3 h-4 w-4 text-[#9B2FAC]" />
+                )}
+              </div>
+              {errors.course_id && (
+                <p className="text-[#9B2FAC] text-sm mt-1">{errors.course_id}</p>
+              )}
+            </div>
+
+            {/* Module Selection (Lesson in table) */}
+            <div>
+              <label className="block text-b3 font-medium text-gray-700 mb-2">
+                Lesson <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <select
+                  className={`w-full h-12 p-3 pr-10 border rounded-lg focus:ring-2 ${
+                    errors.lesson_id
+                      ? "border-[#9B2FAC] focus:border-[#9B2FAC] focus:ring-[#9B2FAC]"
+                      : "border-gray-300 focus:ring-orange-500 focus:border-orange-500"
+                  }`}
+                  value={selectedModuleId}
+                  onChange={(e) => handleModuleChange(e.target.value)}
+                  disabled={!selectedCourse}
+                >
+                  <option value="">Select Lesson</option>
+                  {selectedCourse?.modules.map((module) => (
+                    <option key={module.id} value={module.id}>
+                      {module.title}
+                    </option>
+                  ))}
+                </select>
+                {errors.lesson_id && (
+                  <AlertCircle className="absolute right-3 top-3 h-4 w-4 text-[#9B2FAC]" />
+                )}
+              </div>
+              {errors.lesson_id && (
+                <p className="text-[#9B2FAC] text-sm mt-1">{errors.lesson_id}</p>
+              )}
+            </div>
+
+            {/* Sub-lesson Selection (Sub-lesson in table) */}
+            <div>
+              <label className="block text-b3 font-medium text-gray-700 mb-2">
+                Sub-lesson <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <select
+                  className={`w-full h-12 p-3 pr-10 border rounded-lg focus:ring-2 ${
+                    errors.sub_lesson
+                      ? "border-[#9B2FAC] focus:border-[#9B2FAC] focus:ring-[#9B2FAC]"
+                      : "border-gray-300 focus:ring-orange-500 focus:border-orange-500"
+                  }`}
+                  value={selectedLessonId}
+                  onChange={(e) => handleLessonChange(e.target.value)}
+                  disabled={!selectedModule}
+                >
+                  <option value="">Select Sub-lesson</option>
+                  {selectedModule?.lessons.map((lesson) => (
+                    <option key={lesson.id} value={lesson.id}>
+                      {lesson.title}
+                    </option>
+                  ))}
+                </select>
+                {errors.sub_lesson && (
+                  <AlertCircle className="absolute right-3 top-3 h-4 w-4 text-[#9B2FAC]" />
+                )}
+              </div>
+              {errors.sub_lesson && (
+                <p className="text-[#9B2FAC] text-sm mt-1">{errors.sub_lesson}</p>
+              )}
+            </div>
+
+            {/* Assignment Detail */}
+            <div>
+              <h3 className="text-b1 font-bold text-gray-700 mb-4">Assignment detail</h3>
+              <div>
+                <label className="block text-b3 font-medium text-gray-700 mb-2">
+                  Assignment <span className="text-red-500">*</span>
+                </label>
                 <div className="relative">
-                  <select
-                    id="course"
-                    value={formData.course}
-                    onChange={(e) => handleInputChange("course", e.target.value)}
-                    className={`w-full px-3 py-2 pr-10 border rounded-lg focus:ring-2 ${
-                      errors.course 
-                        ? 'border-[#9B2FAC] focus:border-[#9B2FAC] focus:ring-[#9B2FAC]' 
-                        : 'border-gray-300 focus:ring-orange-500 focus:border-orange-500'
+                  <textarea
+                    placeholder="Enter assignment question"
+                    className={`w-full h-32 p-3 pr-10 border rounded-lg resize-none focus:ring-2 ${
+                      errors.question
+                        ? "border-[#9B2FAC] focus:border-[#9B2FAC] focus:ring-[#9B2FAC]"
+                        : "border-gray-300 focus:ring-orange-500 focus:border-orange-500"
                     }`}
-                    disabled={loading}
-                    required
-                  >
-                    <option value="">Select a course</option>
-                    {courses.map((course) => (
-                      <option key={course.id} value={course.id}>
-                        {course.title} ({course.category})
-                      </option>
-                    ))}
-                  </select>
-                  {errors.course && (
+                    value={formData.question}
+                    onChange={(e) => handleInputChange("question", e.target.value)}
+                  />
+                  {errors.question && (
                     <AlertCircle className="absolute right-3 top-3 h-4 w-4 text-[#9B2FAC]" />
                   )}
                 </div>
-                {errors.course && (
-                  <p className="text-[#9B2FAC] text-sm mt-1">{errors.course}</p>
+                {errors.question && (
+                  <p className="text-[#9B2FAC] text-sm mt-1">{errors.question}</p>
                 )}
               </div>
-
-              {/* Lesson and Sub-lesson Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="lesson" className="block text-b3 font-medium text-gray-700">
-                    Lesson <span className="text-red-500">*</span>
-                  </Label>
-                  <div className="relative">
-                    <select
-                      id="lesson"
-                      value={formData.lesson}
-                      onChange={(e) => handleInputChange("lesson", e.target.value)}
-                      className={`w-full px-3 py-2 pr-10 border rounded-lg focus:ring-2 ${
-                        errors.lesson 
-                          ? 'border-[#9B2FAC] focus:border-[#9B2FAC] focus:ring-[#9B2FAC]' 
-                          : 'border-gray-300 focus:ring-orange-500 focus:border-orange-500'
-                      }`}
-                      disabled={loading || !selectedCourse}
-                      required
-                    >
-                      <option value="">Select a lesson</option>
-                      {allLessons.map((lesson) => (
-                        <option key={lesson.id} value={lesson.id}>
-                          {lesson.title}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.lesson && (
-                      <AlertCircle className="absolute right-3 top-3 h-4 w-4 text-[#9B2FAC]" />
-                    )}
-                  </div>
-                  {errors.lesson && (
-                    <p className="text-[#9B2FAC] text-sm mt-1">{errors.lesson}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="subLesson" className="block text-b3 font-medium text-gray-700">
-                    Sub-lesson <span className="text-red-500">*</span>
-                  </Label>
-                  <div className="relative">
-                    <select
-                      id="subLesson"
-                      value={formData.subLesson}
-                      onChange={(e) => handleInputChange("subLesson", e.target.value)}
-                      className={`w-full px-3 py-2 pr-10 border rounded-lg focus:ring-2 ${
-                        errors.subLesson 
-                          ? 'border-[#9B2FAC] focus:border-[#9B2FAC] focus:ring-[#9B2FAC]' 
-                          : 'border-gray-300 focus:ring-orange-500 focus:border-orange-500'
-                      }`}
-                      disabled={loading}
-                      required
-                    >
-                      <option value="">Select a sub-lesson</option>
-                      <option value="1">Introduction</option>
-                      <option value="2">Basic Concepts</option>
-                      <option value="3">Advanced Topics</option>
-                      <option value="4">Practical Exercises</option>
-                      <option value="5">Final Project</option>
-                    </select>
-                    {errors.subLesson && (
-                      <AlertCircle className="absolute right-3 top-3 h-4 w-4 text-[#9B2FAC]" />
-                    )}
-                  </div>
-                  {errors.subLesson && (
-                    <p className="text-[#9B2FAC] text-sm mt-1">{errors.subLesson}</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Assignment Detail Section */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900">Assignment detail</h3>
-                <div className="space-y-2">
-                  <Label htmlFor="assignment" className="block text-b3 font-medium text-gray-700">
-                    Assignment <span className="text-red-500">*</span>
-                  </Label>
-                  <div className="relative">
-                    <textarea
-                      id="assignment"
-                      value={formData.assignment}
-                      onChange={(e) => handleInputChange("assignment", e.target.value)}
-                      placeholder="Enter assignment details..."
-                      rows={6}
-                      className={`w-full px-3 py-2 pr-10 border rounded-lg resize-none focus:ring-2 ${
-                        errors.assignment 
-                          ? 'border-[#9B2FAC] focus:border-[#9B2FAC] focus:ring-[#9B2FAC]' 
-                          : 'border-gray-300 focus:ring-orange-500 focus:border-orange-500'
-                      }`}
-                      required
-                      disabled={loading}
-                    />
-                    {errors.assignment && (
-                      <AlertCircle className="absolute right-3 top-3 h-4 w-4 text-[#9B2FAC]" />
-                    )}
-                  </div>
-                  {errors.assignment && (
-                    <p className="text-[#9B2FAC] text-sm mt-1">{errors.assignment}</p>
-                  )}
-                </div>
-              </div>
-            </form>
+            </div>
           </div>
         </div>
       </SidebarInset>
     </SidebarProvider>
   );
-} 
+}
