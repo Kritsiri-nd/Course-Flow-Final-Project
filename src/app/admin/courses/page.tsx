@@ -40,6 +40,7 @@ export default function AdminCourses() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -64,6 +65,32 @@ export default function AdminCourses() {
       )
     );
   }, [courses, query]);
+
+  const handleDelete = async (courseId: number) => {
+    try {
+      setDeletingId(courseId);
+      const response = await fetch(`/api/courses/${courseId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete assignment");
+      }
+
+      // Remove from local state
+      setCourses((prev) => prev.filter((a) => a.id !== courseId));
+    } catch (error) {
+      console.error("Error deleting assignment:", error);
+      alert(
+        `Failed to delete assignment: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   return (
     <SidebarProvider>
@@ -190,7 +217,11 @@ export default function AdminCourses() {
                       </TableCell>
                       <TableCell className="text-rigth">
                         <div className="flex gap-2">
-                          <DeleteModalAlert delText="course" />
+                          <DeleteModalAlert
+                            delText="course"
+                            onDelete={() => handleDelete(c.id)}
+                            isDeleting={deletingId === c.id}
+                          />
                           <Link
                             href={`/admin/courses/${c.id}/edit`}
                             className="p-2 hover:bg-gray-200 rounded transition-colors"
