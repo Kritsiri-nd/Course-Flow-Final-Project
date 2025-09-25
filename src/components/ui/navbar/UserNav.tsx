@@ -44,7 +44,7 @@ export default function UserNav({ session, userProfile, onLogout }: { session: S
 
     await supabase.auth.signOut();
     router.refresh();
-    // router.push('/auth/login');
+    router.push('/');
   }
 
   
