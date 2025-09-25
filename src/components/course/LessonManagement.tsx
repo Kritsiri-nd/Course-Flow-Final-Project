@@ -17,9 +17,10 @@ interface LessonManagementProps {
   lessons: Lesson[];
   errors: Record<string, string>;
   onLessonsChange: (lessons: Lesson[]) => void;
+  courseId?: string;
 }
 
-export function LessonManagement({ lessons, errors, onLessonsChange }: LessonManagementProps) {
+export function LessonManagement({ lessons, errors, onLessonsChange, courseId }: LessonManagementProps) {
   const router = useRouter();
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
   const [showAddLessonForm, setShowAddLessonForm] = useState(false);
@@ -105,7 +106,11 @@ export function LessonManagement({ lessons, errors, onLessonsChange }: LessonMan
         <button
           type="button"
           onClick={() => {
-            router.push('/Admin/lessons');
+            if (courseId) {
+              router.push(`/admin/lessons/${courseId}`);
+            } else {
+              router.push('/admin/lessons');
+            }
           }}
           className="w-full sm:w-[171px] h-[60px] pt-[18px] pr-[32px] pb-[18px] pl-[32px] gap-[10px] rounded-[12px] bg-[#2F5FAC] text-white shadow-[4px_4px_24px_0px_#00000014] opacity-100 flex items-center justify-center transition-all duration-200 hover:bg-[#2F5FAC] hover:scale-105 cursor-pointer"
         >

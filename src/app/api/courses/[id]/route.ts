@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/createSupabaseServerClient";
 import { createClient } from "@supabase/supabase-js";
+import { createSupabaseServerClient } from "@/lib/createSupabaseServerClient";
 
 // GET /api/courses/[id]
 export async function GET(
@@ -15,8 +15,8 @@ export async function GET(
             return NextResponse.json({ error: "Invalid course id" }, { status: 400 });
         }
 
-        const supabase = createSupabaseServerClient();
-        
+        const supabase = await createSupabaseServerClient();
+
         const { data, error } = await supabase
             .from("courses")
             .select(`

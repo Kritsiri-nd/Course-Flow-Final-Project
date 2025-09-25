@@ -21,15 +21,6 @@ export const COURSE_CATEGORIES = [
   "Other"
 ] as const;
 
-export const DEFAULT_LESSONS = [
-  { id: 1, name: "Introduction", subLessons: 10 },
-  { id: 2, name: "Service Design Theories and Principles", subLessons: 10 },
-  { id: 3, name: "Understanding Users and Finding Opportunities", subLessons: 10 },
-  { id: 4, name: "Identifying and Validating Opportunities for Design", subLessons: 10 },
-  { id: 5, name: "Prototyping", subLessons: 10 },
-  { id: 6, name: "Course Summary", subLessons: 10 },
-];
-
 export const FILE_CONSTRAINTS = {
   IMAGE: {
     MAX_SIZE: 5 * 1024 * 1024, // 5MB

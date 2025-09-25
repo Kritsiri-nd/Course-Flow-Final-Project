@@ -4,7 +4,7 @@ import LoginForm from './LoginForm';
 
 export default async function LoginPage() {
   // สร้าง Server Client เพื่ออ่าน Cookie
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   // ตรวจสอบ Session จากฝั่ง Server
   const { data: { session } } = await supabase.auth.getSession();
