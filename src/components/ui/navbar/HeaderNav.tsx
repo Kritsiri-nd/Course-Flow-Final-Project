@@ -1,5 +1,4 @@
 import { createSupabaseServerClient } from "@/lib/createSupabaseServerClient";
-import { cookies } from 'next/headers';
 
 
 import AdminNav from '@/components/ui/navbar/AdminNav';
@@ -20,7 +19,7 @@ type Profile = {
 } | null;
 
 export default async function HeaderNav() {
-  const supabase = createSupabaseServerClient({ cookies });
+  const supabase = await createSupabaseServerClient();
 
   // ดึงข้อมูล session ของผู้ใช้
   const { data: { session } } = await supabase.auth.getSession();
