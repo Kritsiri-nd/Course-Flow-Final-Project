@@ -72,3 +72,63 @@ export async function GET() {
     return NextResponse.json(normalized, { status: 200 });
 }
 
+export async function POST(request: Request) {
+    try {
+        console.log("POST /api/assignments - Starting...");
+        
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+            (process.env.SUPABASE_SERVICE_ROLE_KEY as string) || (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string)
+        );
+
+        const body = await request.json();
+        console.log("Request body:", body);
+        
+        const { question, answer, lesson_id } = body;
+
+        // Validate required fields
+        if (!question || !lesson_id) {
+            console.log("Validation failed - missing required fields");
+            return NextResponse.json(
+                { error: "Question and lesson_id are required" },
+                { status: 400 }
+            );
+        }
+
+        console.log("Creating assignment with:", { question, answer, lesson_id });
+
+        // Insert new assignment - only use columns that exist in database
+        const { data, error } = await supabase
+            .from("assignments")
+            .insert([
+                {
+                    question,
+                    answer: answer || null,
+                    lesson_id: parseInt(lesson_id),
+                }
+            ])
+            .select()
+            .single();
+
+        if (error) {
+            console.error("Supabase error:", error);
+            return NextResponse.json({ 
+                error: `Database error: ${error.message}`,
+                details: error
+            }, { status: 500 });
+        }
+
+        console.log("Assignment created successfully:", data);
+        return NextResponse.json(data, { status: 201 });
+    } catch (error) {
+        console.error("Error in POST /api/assignments:", error);
+        return NextResponse.json(
+            { 
+                error: "Internal server error",
+                details: error instanceof Error ? error.message : "Unknown error"
+            },
+            { status: 500 }
+        );
+    }
+}
+
