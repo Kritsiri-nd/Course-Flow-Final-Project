@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, ArrowLeft } from "lucide-react";
 import { CourseInformation } from "@/components/course/CourseInformation";
 import { PromoCodeSection } from "@/components/course/PromoCodeSection";
 import { FileUploadSection } from "@/components/course/FileUploadSection";
@@ -366,7 +366,14 @@ export default function EditCoursePage() {
       <SidebarInset className="bg-gray-100">
         <header className="flex h-23 shrink-0 items-center gap-2 bg-white border-b border-gray-300 px-4 sticky top-0 z-20">
           <SidebarTrigger className="-ml-1" />
-          <h1 className="text-h3 font-semibold">Edit Course</h1>
+          <div className="flex items-center gap-2">
+            <ArrowLeft 
+              className="h-[24px] w-[24px] text-[#9AA1B9] cursor-pointer hover:text-gray-600 transition-colors" 
+              onClick={() => router.push("/admin/courses")}
+            />
+            <span className="text-[#9AA1B9] font-inter font-medium text-2xl leading-[125%] tracking-[-0.02em] align-middle">Course</span>
+            <span className="text-black font-inter font-bold text-2xl leading-[125%] tracking-[-0.02em] align-middle">'{formData.title || `ID: ${courseId}`}'</span>
+          </div>
 
           <div className="ml-auto gap-4 flex items-center">
             <Button
