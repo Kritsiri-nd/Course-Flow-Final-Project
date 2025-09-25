@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
 import { createClient } from "@supabase/supabase-js";
 
 // GET /api/courses/[id]
@@ -14,6 +13,11 @@ export async function GET(
         if (Number.isNaN(courseId)) {
             return NextResponse.json({ error: "Invalid course id" }, { status: 400 });
         }
+
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
+        );
 
         const { data, error } = await supabase
             .from("courses")

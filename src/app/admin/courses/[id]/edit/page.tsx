@@ -21,7 +21,6 @@ import { CourseInformation } from "@/components/course/CourseInformation";
 import { PromoCodeSection } from "@/components/course/PromoCodeSection";
 import { FileUploadSection } from "@/components/course/FileUploadSection";
 import { LessonManagement } from "@/components/course/LessonManagement";
-import { DEFAULT_LESSONS } from "@/lib/constants";
 import { validateCourseForm } from "@/lib/formUtils";
 
 interface CourseFormData {
@@ -88,7 +87,7 @@ export default function EditCoursePage() {
     discountValue: "",
   });
 
-  const [lessons, setLessons] = useState<Lesson[]>(DEFAULT_LESSONS);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
 
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -140,15 +139,12 @@ export default function EditCoursePage() {
             .map((l: any, idx: number) => ({
               id: typeof l?.id === "number" ? l.id : idx + 1,
               name: l?.title ?? `Lesson ${idx + 1}`,
-              // Backend schema doesn't expose sub-lesson count yet; default to 10 for UI
               subLessons: 10,
             }));
-
-          if (apiLessons.length > 0) {
-            setLessons(apiLessons);
-          }
+          setLessons(apiLessons);
         } catch (mapErr) {
-          console.warn("Failed to map lessons from API; using defaults", mapErr);
+          console.warn("Failed to map lessons from API; defaulting to empty", mapErr);
+          setLessons([]);
         }
       } catch (e) {
         console.error(e);
@@ -482,6 +478,7 @@ export default function EditCoursePage() {
             lessons={lessons}
             errors={errors}
             onLessonsChange={handleLessonsChange}
+            courseId={courseId}
           />
           {/* Bottom actions */}
           <div className="max-w-4xl mx-auto mt-6 flex justify-end">
