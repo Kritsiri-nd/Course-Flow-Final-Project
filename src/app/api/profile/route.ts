@@ -19,15 +19,16 @@ export async function PUT(req: Request) {
   const last_name = formData.get("last_name") as string | null;
   const date_of_birth = formData.get("date_of_birth") as string | null;
   const education = formData.get("education") as string | null;
+  const email = formData.get("email") as string | null;
   const avatarFile = formData.get("avatar") as File | null;
 
   let photo_url: string | null = null;
 
-  // ถ้ามีการอัปโหลดไฟล์ใหม่
+  // ✅ Upload Avatar ถ้ามี
   if (avatarFile && avatarFile.size > 0) {
     const fileName = `${session.user.id}-${Date.now()}.${avatarFile.name.split(".").pop()}`;
     const { error: uploadError } = await supabase.storage
-      .from("avatars") // bucket
+      .from("avatars")
       .upload(fileName, avatarFile, {
         cacheControl: "3600",
         upsert: true,
@@ -41,7 +42,7 @@ export async function PUT(req: Request) {
     photo_url = publicUrlData.publicUrl;
   }
 
-  // update profile table
+  // ✅ Update profiles table
   const { error: updateError } = await supabase
     .from("profiles")
     .update({
@@ -49,12 +50,20 @@ export async function PUT(req: Request) {
       last_name,
       date_of_birth,
       education,
-      ...(photo_url ? { photo_url } : {}), // อัปเดต photo_url เฉพาะตอนมีรูป
+      ...(photo_url ? { photo_url } : {}),
     })
     .eq("id", session.user.id);
 
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 500 });
+  }
+
+  // ✅ Update email (Auth table)
+  if (email && email !== session.user.email) {
+    const { error: emailError } = await supabase.auth.updateUser({ email });
+    if (emailError) {
+      return NextResponse.json({ error: emailError.message }, { status: 500 });
+    }
   }
 
   return NextResponse.json({ success: true });
