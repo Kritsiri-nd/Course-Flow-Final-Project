@@ -18,9 +18,11 @@ interface LessonManagementProps {
   errors: Record<string, string>;
   onLessonsChange: (lessons: Lesson[]) => void;
   courseId?: string;
+  // When true, render mock-only UI and disable actions (for create page)
+  mockOnly?: boolean;
 }
 
-export function LessonManagement({ lessons, errors, onLessonsChange, courseId }: LessonManagementProps) {
+export function LessonManagement({ lessons, errors, onLessonsChange, courseId, mockOnly }: LessonManagementProps) {
   const router = useRouter();
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
   const [showAddLessonForm, setShowAddLessonForm] = useState(false);
@@ -83,28 +85,13 @@ export function LessonManagement({ lessons, errors, onLessonsChange, courseId }:
     setShowAddLessonForm(false);
   };
 
-  const deleteLesson = async (lessonId: number) => {
+  const deleteLesson = (lessonId: number) => {
     if (lessons.length <= 1) {
-      // Keep at least one lesson; silently no-op
+      alert('Course must have at least 1 lesson');
       return;
     }
 
-    // If no courseId provided, operate on local state only (used in create course flow)
-    if (!courseId) {
-      onLessonsChange(lessons.filter(lesson => lesson.id !== lessonId));
-      return;
-    }
-
-    try {
-      const res = await fetch(`/api/lessons/${lessonId}`, { method: 'DELETE' });
-      if (!res.ok) {
-        try { const b = await res.json(); console.error('Delete lesson failed:', b?.error || res.statusText); } catch {}
-        return;
-      }
-      onLessonsChange(lessons.filter(lesson => lesson.id !== lessonId));
-    } catch (e: any) {
-      console.error('Delete lesson error:', e?.message || e);
-    }
+    onLessonsChange(lessons.filter(lesson => lesson.id !== lessonId));
   };
 
   const cancelEdit = () => {
@@ -121,13 +108,18 @@ export function LessonManagement({ lessons, errors, onLessonsChange, courseId }:
         <button
           type="button"
           onClick={() => {
+            if (mockOnly) {
+              setShowAddLessonForm(true);
+              return;
+            }
             if (courseId) {
               router.push(`/admin/lessons/${courseId}`);
             } else {
               router.push('/admin/lessons');
             }
           }}
-          className="w-full sm:w-[171px] h-[60px] pt-[18px] pr-[32px] pb-[18px] pl-[32px] gap-[10px] rounded-[12px] bg-[#2F5FAC] text-white shadow-[4px_4px_24px_0px_#00000014] opacity-100 flex items-center justify-center transition-all duration-200 hover:bg-[#2F5FAC] hover:scale-105 cursor-pointer"
+          title={mockOnly ? 'Add lesson locally (for course creation)' : undefined}
+          className={`w-full sm:w-[171px] h-[60px] pt-[18px] pr-[32px] pb-[18px] pl-[32px] gap-[10px] rounded-[12px] bg-[#2F5FAC] text-white shadow-[4px_4px_24px_0px_#00000014] opacity-100 flex items-center justify-center transition-all duration-200 hover:bg-[#2F5FAC] hover:scale-105 cursor-pointer`}
         >
           <Plus className="h-4 w-4" />
           Add Lesson
@@ -216,8 +208,12 @@ export function LessonManagement({ lessons, errors, onLessonsChange, courseId }:
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => deleteLesson(lesson.id)}
-                      className="p-2 hover:bg-gray-200 rounded transition-colors"
+                      onClick={() => {
+                        if (mockOnly) return;
+                        deleteLesson(lesson.id);
+                      }}
+                      disabled={!!mockOnly}
+                      className={`p-2 rounded transition-colors ${mockOnly ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200'}`}
                       title="Delete"
                     >
                       <Trash2 className="h-4 w-4 text-blue-300" />
@@ -225,13 +221,15 @@ export function LessonManagement({ lessons, errors, onLessonsChange, courseId }:
                     <button
                       type="button"
                       onClick={() => {
+                        if (mockOnly) return;
                         if (courseId) {
                           router.push(`/admin/lessons/${courseId}/${lesson.id}/edit`);
                         } else {
                           editLesson(lesson);
                         }
                       }}
-                      className="p-2 hover:bg-gray-200 rounded transition-colors"
+                      disabled={!!mockOnly}
+                      className={`p-2 rounded transition-colors ${mockOnly ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200'}`}
                       title="Edit"
                     >
                       <Edit className="h-4 w-4 text-blue-300" />

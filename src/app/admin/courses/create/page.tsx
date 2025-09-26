@@ -115,7 +115,9 @@ export default function AddCoursePage() {
 
   // Validate form
   const validateForm = (): boolean => {
-    const { isValid, newErrors } = validateCourseForm(formData, lessons, errors);
+    const { isValid, newErrors } = validateCourseForm(formData, lessons, errors, {
+      skipLessonValidation: true,
+    });
     setErrors(newErrors);
     return isValid;
   };
@@ -409,11 +411,12 @@ export default function AddCoursePage() {
             />
           </div>
 
-        {/* Lesson Management */}
+        {/* Lesson Management (mock-only on create) */}
         <LessonManagement
           lessons={lessons}
           errors={errors}
           onLessonsChange={handleLessonsChange}
+          mockOnly
         />
         </div>
       </SidebarInset>
