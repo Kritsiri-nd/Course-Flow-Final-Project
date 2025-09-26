@@ -1,4 +1,3 @@
-// src/app/user/profile/profile-form.tsx
 "use client";
 
 import { useState } from "react";
@@ -11,6 +10,7 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
     setIsSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
+    console.log("FormData values:", [...formData.entries()]); // ✅ debug ดูค่าก่อนส่ง
 
     const res = await fetch("/api/profile", {
       method: "PUT",
@@ -18,6 +18,7 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
     });
 
     setIsSubmitting(false);
+
     if (!res.ok) {
       const data = await res.json();
       alert("❌ Error: " + data.error);
@@ -28,7 +29,12 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-md">
+    <form
+      onSubmit={handleSubmit}
+      method="POST" // 👈 กัน browser ยิง GET
+      noValidate
+      className="space-y-4 w-full max-w-md"
+    >
       <div>
         <label className="block mb-1">First Name</label>
         <input
@@ -78,6 +84,8 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
           className="w-full border px-3 py-2 rounded-md bg-gray-100"
         />
       </div>
+
+     
 
       <button
         type="submit"
