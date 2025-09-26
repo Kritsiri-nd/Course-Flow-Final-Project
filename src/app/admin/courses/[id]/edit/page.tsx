@@ -132,14 +132,13 @@ export default function EditCoursePage() {
         setUploadedThumbnailUrl(data?.thumbnail ?? null);
         setUploadedVideoUrl(data?.video_url ?? null);
 
-        // Map modules -> lessons from API to LessonManagement format
+        // Map modules -> a single row per module (lesson), count its sub-lessons
         try {
           const apiLessons = (data?.modules ?? [])
-            .flatMap((m: any) => m?.lessons ?? [])
-            .map((l: any, idx: number) => ({
-              id: typeof l?.id === "number" ? l.id : idx + 1,
-              name: l?.title ?? `Lesson ${idx + 1}`,
-              subLessons: 10,
+            .map((m: any, idx: number) => ({
+              id: typeof m?.id === "number" ? m.id : idx + 1,
+              name: m?.title ?? `Lesson ${idx + 1}`,
+              subLessons: Array.isArray(m?.lessons) ? m.lessons.length : 0,
             }));
           setLessons(apiLessons);
         } catch (mapErr) {

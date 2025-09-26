@@ -83,13 +83,28 @@ export function LessonManagement({ lessons, errors, onLessonsChange, courseId }:
     setShowAddLessonForm(false);
   };
 
-  const deleteLesson = (lessonId: number) => {
+  const deleteLesson = async (lessonId: number) => {
     if (lessons.length <= 1) {
-      alert('Course must have at least 1 lesson');
+      // Keep at least one lesson; silently no-op
       return;
     }
 
-    onLessonsChange(lessons.filter(lesson => lesson.id !== lessonId));
+    // If no courseId provided, operate on local state only (used in create course flow)
+    if (!courseId) {
+      onLessonsChange(lessons.filter(lesson => lesson.id !== lessonId));
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/lessons/${lessonId}`, { method: 'DELETE' });
+      if (!res.ok) {
+        try { const b = await res.json(); console.error('Delete lesson failed:', b?.error || res.statusText); } catch {}
+        return;
+      }
+      onLessonsChange(lessons.filter(lesson => lesson.id !== lessonId));
+    } catch (e: any) {
+      console.error('Delete lesson error:', e?.message || e);
+    }
   };
 
   const cancelEdit = () => {
@@ -209,7 +224,13 @@ export function LessonManagement({ lessons, errors, onLessonsChange, courseId }:
                     </button>
                     <button
                       type="button"
-                      onClick={() => editLesson(lesson)}
+                      onClick={() => {
+                        if (courseId) {
+                          router.push(`/admin/lessons/${courseId}/${lesson.id}/edit`);
+                        } else {
+                          editLesson(lesson);
+                        }
+                      }}
                       className="p-2 hover:bg-gray-200 rounded transition-colors"
                       title="Edit"
                     >
