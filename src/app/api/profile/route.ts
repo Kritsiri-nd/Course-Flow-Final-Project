@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/createSupabaseServerClient";
 import { validateFirstName, validateLastName, validateDateOfBirth, validateEmail, validateEducationalBackground } from "@/lib/validators";
+import { revalidatePath } from "next/cache";
 
 export async function PUT(req: Request) {
   const supabase = await createSupabaseServerClient();
@@ -117,6 +118,9 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: emailError.message }, { status: 500 });
     }
   }
+
+  // ✅ Revalidate profile page เพื่อให้ข้อมูลใหม่โหลด
+  revalidatePath('/user/profile');
 
   return NextResponse.json({ success: true });
 }
