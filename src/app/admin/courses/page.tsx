@@ -5,7 +5,6 @@ import {
   SidebarInset,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-
 import { AdminPanel } from "@/components/layouts/sidebar-admin-panel";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -19,6 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import DeleteModalAlert from "@/components/ui/delete-modal-alert";
 
 type Course = {
   id: number;
@@ -40,6 +40,7 @@ export default function AdminCourses() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -65,6 +66,32 @@ export default function AdminCourses() {
     );
   }, [courses, query]);
 
+  const handleDelete = async (courseId: number) => {
+    try {
+      setDeletingId(courseId);
+      const response = await fetch(`/api/courses/${courseId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete assignment");
+      }
+
+      // Remove from local state
+      setCourses((prev) => prev.filter((a) => a.id !== courseId));
+    } catch (error) {
+      console.error("Error deleting assignment:", error);
+      alert(
+        `Failed to delete assignment: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <SidebarProvider>
       <AdminPanel />
@@ -82,13 +109,15 @@ export default function AdminCourses() {
               placeholder="Search courses..."
               className="h-12 w-64 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <Button
-              variant="outline"
-              className="bg-blue-500 text-white h-15 rounded-lg px-8"
-            >
-              <Plus className="h-4 w-4" />
-              Add course
-            </Button>
+            <Link href="/admin/courses/create">
+              <Button
+                variant="outline"
+                className="bg-blue-500 text-white h-15 rounded-lg px-8"
+              >
+                <Plus className="h-4 w-4" />
+                Add course
+              </Button>
+            </Link>
           </div>
         </header>
 
@@ -187,14 +216,12 @@ export default function AdminCourses() {
                         {updated}
                       </TableCell>
                       <TableCell className="text-rigth">
-                        <div className="flex items-center justify-end gap-2">
-                          <Link
-                            href={`/non-user/courses/${c.id}`}
-                            className="p-2 hover:bg-gray-200 rounded transition-colors"
-                            title="View"
-                          >
-                            <Trash className="h-4 w-4 text-blue-300" />
-                          </Link>
+                        <div className="flex gap-2">
+                          <DeleteModalAlert
+                            delText="course"
+                            onDelete={() => handleDelete(c.id)}
+                            isDeleting={deletingId === c.id}
+                          />
                           <Link
                             href={`/admin/courses/${c.id}/edit`}
                             className="p-2 hover:bg-gray-200 rounded transition-colors"
