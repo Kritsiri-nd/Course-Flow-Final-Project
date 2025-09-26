@@ -1,9 +1,8 @@
 // src/app/user/profile/page.tsx
-import Image from "next/image";
 import { createSupabaseServerClient } from "@/lib/createSupabaseServerClient";
 import Footer from "@/components/ui/footer";
 import ProfileForm from "./profile-form";
-import UploadPhoto from "./upload-photo"; // component ใหม่
+import UploadPhoto from "./upload-photo";
 
 export default async function ProfilePage() {
   const supabase = await createSupabaseServerClient();
@@ -20,7 +19,6 @@ export default async function ProfilePage() {
     .maybeSingle();
 
   const email = session.user.email;
-  const avatarSrc = profile?.photo_url || "/assets/defaultUser.png";
 
   return (
     <section className="min-h-screen flex flex-col">
@@ -28,23 +26,10 @@ export default async function ProfilePage() {
         <h1 className="text-h2 mb-10">Profile</h1>
 
         <div className="flex flex-row gap-12 max-w-4xl w-full">
-          {/* User photo + ปุ่ม */}
-          <div className="flex flex-col items-center">
-            <div className="rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
-              <Image
-                src={avatarSrc}
-                alt="User photo"
-                width={400}
-                height={400}
-                className="object-cover"
-              />
-            </div>
+          {/* ✅ ให้ UploadPhoto จัดการรูปทั้งหมด */}
+          <UploadPhoto profile={profile} />
 
-            {/* ปุ่ม upload/remove */}
-            <UploadPhoto profile={profile} />
-          </div>
-
-          {/* Form */}
+          {/* ฟอร์ม */}
           <ProfileForm profile={profile} email={email} />
         </div>
       </main>
