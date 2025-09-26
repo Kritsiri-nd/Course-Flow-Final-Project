@@ -3,17 +3,69 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabaseClient"; // 👈 client-side supabase
+import { validateFirstName, validateLastName, validateDateOfBirth, validateEmail, validateEducationalBackground } from "@/lib/validators";
 
 export default function ProfileForm({ profile, email }: { profile: any; email: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string>('');
+  const [message, setMessage] = useState<string>('');
   const router = useRouter();
   const supabase = createClient();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError('');
+    setMessage('');
     setIsSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
+    
+    // Get form values
+    const firstName = formData.get("first_name") as string;
+    const lastName = formData.get("last_name") as string;
+    const dateOfBirth = formData.get("date_of_birth") as string;
+    const education = formData.get("education") as string;
+    const emailValue = formData.get("email") as string;
+
+    // Client-side validation
+    const validationErrors: string[] = [];
+
+    // First name validation
+    const firstNameValidation = validateFirstName(firstName);
+    if (!firstNameValidation.isValid) {
+      validationErrors.push(firstNameValidation.message!);
+    }
+
+    // Last name validation
+    const lastNameValidation = validateLastName(lastName);
+    if (!lastNameValidation.isValid) {
+      validationErrors.push(lastNameValidation.message!);
+    }
+
+    // Date of birth validation
+    const dobValidation = validateDateOfBirth(dateOfBirth);
+    if (!dobValidation.isValid) {
+      validationErrors.push(dobValidation.message!);
+    }
+
+    // Email validation
+    const emailValidation = validateEmail(emailValue);
+    if (!emailValidation.isValid) {
+      validationErrors.push(emailValidation.message!);
+    }
+
+    // Education validation
+    const educationValidation = validateEducationalBackground(education);
+    if (!educationValidation.isValid) {
+      validationErrors.push(educationValidation.message!);
+    }
+
+    // If there are validation errors, show them and stop
+    if (validationErrors.length > 0) {
+      setError(validationErrors.join(' '));
+      setIsSubmitting(false);
+      return;
+    }
 
     // ✅ ยิงไป API /api/profile เพื่ออัปเดต profiles + รูป
     const res = await fetch("/api/profile", {
@@ -23,7 +75,7 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
 
     if (!res.ok) {
       const data = await res.json();
-      alert("❌ Error: " + data.error);
+      setError("❌ Error: " + data.error);
       setIsSubmitting(false);
       return;
     }
@@ -34,7 +86,7 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
       const { error: emailError } = await supabase.auth.updateUser({ email: newEmail });
 
       if (emailError) {
-        alert("❌ Error updating email: " + emailError.message);
+        setError("❌ Error updating email: " + emailError.message);
         setIsSubmitting(false);
         return;
       }
@@ -44,7 +96,7 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
     }
 
     setIsSubmitting(false);
-    alert("✅ Profile updated!");
+    setMessage("✅ Profile updated!");
     router.refresh(); // refresh หน้า profile เพื่อโหลด session + profile ใหม่
   };
 
@@ -105,12 +157,13 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
         />
       </div>
 
-    
+      {message && <p className="text-green-500 text-sm">{message}</p>}
+      {error && <p className="text-red-500 text-sm">{error}</p>}
 
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-blue-600 text-white py-2 rounded-md"
+        className="w-full bg-blue-600 text-white py-2 rounded-md disabled:opacity-60"
       >
         {isSubmitting ? "Updating..." : "Update Profile"}
       </button>

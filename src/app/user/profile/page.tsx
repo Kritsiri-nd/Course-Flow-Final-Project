@@ -18,7 +18,7 @@ export default async function ProfilePage() {
     .eq("id", session.user.id)
     .maybeSingle();
 
-  const email = session.user.email;
+  const email = session.user.email || '';
 
   return (
     <section className="min-h-screen flex flex-col">
