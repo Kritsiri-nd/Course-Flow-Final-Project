@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/createSupabaseServerClient";
+import { validateFirstName, validateLastName, validateDateOfBirth, validateEmail, validateEducationalBackground } from "@/lib/validators";
 
 export async function PUT(req: Request) {
   const supabase = await createSupabaseServerClient();
@@ -21,6 +22,57 @@ export async function PUT(req: Request) {
   const education = formData.get("education") as string | null;
   const email = formData.get("email") as string | null;
   const avatarFile = formData.get("avatar") as File | null;
+
+  // Server-side validation
+  const validationErrors: string[] = [];
+
+  // First name validation
+  if (first_name) {
+    const firstNameValidation = validateFirstName(first_name);
+    if (!firstNameValidation.isValid) {
+      validationErrors.push(firstNameValidation.message!);
+    }
+  }
+
+  // Last name validation
+  if (last_name) {
+    const lastNameValidation = validateLastName(last_name);
+    if (!lastNameValidation.isValid) {
+      validationErrors.push(lastNameValidation.message!);
+    }
+  }
+
+  // Date of birth validation
+  if (date_of_birth) {
+    const dobValidation = validateDateOfBirth(date_of_birth);
+    if (!dobValidation.isValid) {
+      validationErrors.push(dobValidation.message!);
+    }
+  }
+
+  // Email validation
+  if (email) {
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.isValid) {
+      validationErrors.push(emailValidation.message!);
+    }
+  }
+
+  // Education validation
+  if (education) {
+    const educationValidation = validateEducationalBackground(education);
+    if (!educationValidation.isValid) {
+      validationErrors.push(educationValidation.message!);
+    }
+  }
+
+  // If there are validation errors, return them
+  if (validationErrors.length > 0) {
+    return NextResponse.json(
+      { error: validationErrors.join(' ') },
+      { status: 400 }
+    );
+  }
 
   let photo_url: string | null = null;
 
