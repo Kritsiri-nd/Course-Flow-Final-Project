@@ -30,12 +30,12 @@ export default async function ProfilePage() {
         <div className="flex flex-row gap-12 max-w-4xl w-full">
           {/* User photo + ปุ่ม */}
           <div className="flex flex-col items-center">
-            <div className="w-[200px] h-[200px] rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+            <div className="rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
               <Image
                 src={avatarSrc}
                 alt="User photo"
-                width={200}
-                height={200}
+                width={400}
+                height={400}
                 className="object-cover"
               />
             </div>
