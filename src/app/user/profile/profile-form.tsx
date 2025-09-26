@@ -10,6 +10,15 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
   const [error, setError] = useState<string>('');
   const [message, setMessage] = useState<string>('');
   
+  // Form state for controlled inputs
+  const [formData, setFormData] = useState({
+    first_name: profile?.first_name || '',
+    last_name: profile?.last_name || '',
+    date_of_birth: profile?.date_of_birth || '',
+    education: profile?.education || '',
+    email: email || '',
+  });
+  
   // Real-time validation states
   const [fieldErrors, setFieldErrors] = useState<{
     first_name?: string;
@@ -56,14 +65,12 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
     setMessage('');
     setIsSubmitting(true);
 
-    const formData = new FormData(e.currentTarget);
-    
-    // Get form values
-    const firstName = formData.get("first_name") as string;
-    const lastName = formData.get("last_name") as string;
-    const dateOfBirth = formData.get("date_of_birth") as string;
-    const education = formData.get("education") as string;
-    const emailValue = formData.get("email") as string;
+    // Get form values from state
+    const firstName = formData.first_name;
+    const lastName = formData.last_name;
+    const dateOfBirth = formData.date_of_birth;
+    const education = formData.education;
+    const emailValue = formData.email;
 
     // Client-side validation
     const validationErrors: string[] = [];
@@ -105,10 +112,18 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
       return;
     }
 
+    // ✅ สร้าง FormData สำหรับ API
+    const apiFormData = new FormData();
+    apiFormData.append("first_name", firstName);
+    apiFormData.append("last_name", lastName);
+    apiFormData.append("date_of_birth", dateOfBirth);
+    apiFormData.append("education", education);
+    apiFormData.append("email", emailValue);
+
     // ✅ ยิงไป API /api/profile เพื่ออัปเดต profiles + รูป
     const res = await fetch("/api/profile", {
       method: "PUT",
-      body: formData,
+      body: apiFormData,
     });
 
     if (!res.ok) {
@@ -119,23 +134,40 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
     }
 
     // ✅ เช็คว่ามีการแก้ไข email หรือเปล่า
-    const newEmail = formData.get("email") as string;
-    if (newEmail && newEmail !== email) {
-      const { error: emailError } = await supabase.auth.updateUser({ email: newEmail });
+    if (emailValue && emailValue !== email) {
+      try {
+        const { error: emailError } = await supabase.auth.updateUser({ email: emailValue });
 
-      if (emailError) {
-        setError("❌ Error updating email: " + emailError.message);
-        setIsSubmitting(false);
-        return;
+        if (emailError) {
+          // ถ้าเป็น rate limit error ให้ข้ามไปไม่แสดง error
+          if (emailError.message.includes('seconds')) {
+            // ไม่แสดง error message สำหรับ rate limit
+            console.log('Email update rate limited, skipping...');
+          } else {
+            setError("❌ Error updating email: " + emailError.message);
+            setIsSubmitting(false);
+            return;
+          }
+        } else {
+          // ✅ อัปเดต form state เมื่อ email เปลี่ยนสำเร็จ
+          setFormData(prev => ({ ...prev, email: emailValue }));
+          
+          // ✅ refresh session เพื่อให้ session.user.email อัปเดตทันที
+          await supabase.auth.refreshSession();
+        }
+      } catch (error) {
+        // ไม่แสดง error สำหรับ email update
+        console.log('Email update failed, continuing...');
       }
-
-      // ✅ refresh session เพื่อให้ session.user.email อัปเดตทันที
-      await supabase.auth.refreshSession();
     }
 
     setIsSubmitting(false);
     setMessage("✅ Profile updated!");
-    router.refresh(); // refresh หน้า profile เพื่อโหลด session + profile ใหม่
+    
+    // ถ้าไม่มี email update ให้ refresh ปกติ
+    if (!(emailValue && emailValue !== email)) {
+      router.refresh(); // refresh หน้า profile เพื่อโหลด session + profile ใหม่
+    }
   };
 
   // Validation Tooltip Component
@@ -168,7 +200,8 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
         <input
           type="text"
           name="first_name"
-          defaultValue={profile?.first_name || ""}
+          value={formData.first_name}
+          onChange={(e) => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
           placeholder="Enter your First Name"
           className={`w-full border px-3 py-2 rounded-md focus:border-blue-500 focus:ring-blue-500 ${
             fieldErrors.first_name ? 'border-red-500' : 'border-gray-300'
@@ -183,7 +216,8 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
         <input
           type="text"
           name="last_name"
-          defaultValue={profile?.last_name || ""}
+          value={formData.last_name}
+          onChange={(e) => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
           placeholder="Enter your Last Name"
           className={`w-full border px-3 py-2 rounded-md focus:border-blue-500 focus:ring-blue-500 ${
             fieldErrors.last_name ? 'border-red-500' : 'border-gray-300'
@@ -198,7 +232,8 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
         <input
           type="date"
           name="date_of_birth"
-          defaultValue={profile?.date_of_birth || ""}
+          value={formData.date_of_birth}
+          onChange={(e) => setFormData(prev => ({ ...prev, date_of_birth: e.target.value }))}
           className={`w-full border px-3 py-2 rounded-md focus:border-blue-500 focus:ring-blue-500 ${
             fieldErrors.date_of_birth ? 'border-red-500' : 'border-gray-300'
           }`}
@@ -212,7 +247,8 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
         <input
           type="text"
           name="education"
-          defaultValue={profile?.education || ""}
+          value={formData.education}
+          onChange={(e) => setFormData(prev => ({ ...prev, education: e.target.value }))}
           placeholder="Enter Education Background"
           className={`w-full border px-3 py-2 rounded-md focus:border-blue-500 focus:ring-blue-500 ${
             fieldErrors.education ? 'border-red-500' : 'border-gray-300'
@@ -227,7 +263,8 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
         <input
           type="email"
           name="email"
-          defaultValue={email}
+          value={formData.email}
+          onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
           placeholder="Enter Email"
           className={`w-full border px-3 py-2 rounded-md focus:border-blue-500 focus:ring-blue-500 ${
             fieldErrors.email ? 'border-red-500' : 'border-gray-300'

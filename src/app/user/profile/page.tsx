@@ -6,19 +6,22 @@ import UploadPhoto from "./upload-photo";
 
 export default async function ProfilePage() {
   const supabase = await createSupabaseServerClient();
+  
+  // ใช้ getUser() แทน getSession() เพื่อให้ได้ข้อมูลล่าสุด
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
-  if (!session) return <p>Please log in</p>;
+  if (userError || !user) return <p>Please log in</p>;
 
   const { data: profile } = await supabase
     .from("profiles")
     .select("first_name, last_name, date_of_birth, education, role, photo_url")
-    .eq("id", session.user.id)
+    .eq("id", user.id)
     .maybeSingle();
 
-  const email = session.user.email || '';
+  const email = user.email || '';
 
   return (
     <section className="min-h-screen flex flex-col">
