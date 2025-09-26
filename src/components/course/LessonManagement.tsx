@@ -18,9 +18,11 @@ interface LessonManagementProps {
   errors: Record<string, string>;
   onLessonsChange: (lessons: Lesson[]) => void;
   courseId?: string;
+  // When true, render mock-only UI and disable actions (for create page)
+  mockOnly?: boolean;
 }
 
-export function LessonManagement({ lessons, errors, onLessonsChange, courseId }: LessonManagementProps) {
+export function LessonManagement({ lessons, errors, onLessonsChange, courseId, mockOnly }: LessonManagementProps) {
   const router = useRouter();
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
   const [showAddLessonForm, setShowAddLessonForm] = useState(false);
@@ -106,13 +108,16 @@ export function LessonManagement({ lessons, errors, onLessonsChange, courseId }:
         <button
           type="button"
           onClick={() => {
+            if (mockOnly) return;
             if (courseId) {
               router.push(`/admin/lessons/${courseId}`);
             } else {
               router.push('/admin/lessons');
             }
           }}
-          className="w-full sm:w-[171px] h-[60px] pt-[18px] pr-[32px] pb-[18px] pl-[32px] gap-[10px] rounded-[12px] bg-[#2F5FAC] text-white shadow-[4px_4px_24px_0px_#00000014] opacity-100 flex items-center justify-center transition-all duration-200 hover:bg-[#2F5FAC] hover:scale-105 cursor-pointer"
+          disabled={!!mockOnly}
+          title={mockOnly ? 'Available after creating the course' : undefined}
+          className={`w-full sm:w-[171px] h-[60px] pt-[18px] pr-[32px] pb-[18px] pl-[32px] gap-[10px] rounded-[12px] bg-[#2F5FAC] text-white shadow-[4px_4px_24px_0px_#00000014] opacity-100 flex items-center justify-center transition-all duration-200 ${mockOnly ? 'cursor-not-allowed' : 'hover:bg-[#2F5FAC] hover:scale-105 cursor-pointer'}`}
         >
           <Plus className="h-4 w-4" />
           Add Lesson
@@ -120,7 +125,7 @@ export function LessonManagement({ lessons, errors, onLessonsChange, courseId }:
       </div>
 
       {/* Add/Edit Lesson Form */}
-      {(showAddLessonForm || editingLesson) && (
+      {!mockOnly && (showAddLessonForm || editingLesson) && (
         <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
@@ -175,7 +180,7 @@ export function LessonManagement({ lessons, errors, onLessonsChange, courseId }:
       )}
 
       {/* Lesson Error Display */}
-      {errors.lessons && (
+      {!mockOnly && errors.lessons && (
         <div className="mb-4 p-3 bg-purple-50 border border-[#9B2FAC] rounded-lg">
           <p className="text-[#9B2FAC] text-sm">{errors.lessons}</p>
         </div>
@@ -201,16 +206,18 @@ export function LessonManagement({ lessons, errors, onLessonsChange, courseId }:
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => deleteLesson(lesson.id)}
-                      className="p-2 hover:bg-gray-200 rounded transition-colors"
+                      onClick={() => !mockOnly && deleteLesson(lesson.id)}
+                      disabled={!!mockOnly}
+                      className={`p-2 rounded transition-colors ${mockOnly ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200'}`}
                       title="Delete"
                     >
                       <Trash2 className="h-4 w-4 text-blue-300" />
                     </button>
                     <button
                       type="button"
-                      onClick={() => editLesson(lesson)}
-                      className="p-2 hover:bg-gray-200 rounded transition-colors"
+                      onClick={() => !mockOnly && editLesson(lesson)}
+                      disabled={!!mockOnly}
+                      className={`p-2 rounded transition-colors ${mockOnly ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200'}`}
                       title="Edit"
                     >
                       <Edit className="h-4 w-4 text-blue-300" />

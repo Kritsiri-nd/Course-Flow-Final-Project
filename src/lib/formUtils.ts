@@ -68,6 +68,8 @@ export const validateCourseForm = (
     allowExistingMedia?: boolean;
     existingThumbnailUrl?: string | null;
     existingVideoUrl?: string | null;
+    // When true, lesson validations are skipped (used on create page where lessons are added later)
+    skipLessonValidation?: boolean;
   }
 ): { isValid: boolean; newErrors: ValidationErrors } => {
   const newErrors: ValidationErrors = {};
@@ -150,12 +152,14 @@ export const validateCourseForm = (
   }
 
   // Lesson validation
-  if (lessons.length === 0) {
-    newErrors.lessons = 'Course must have at least 1 lesson';
-  } else {
-    const totalSubLessons = lessons.reduce((sum, lesson) => sum + lesson.subLessons, 0);
-    if (totalSubLessons === 0) {
-      newErrors.lessons = 'Course must have at least 1 sub-lesson';
+  if (!options?.skipLessonValidation) {
+    if (lessons.length === 0) {
+      newErrors.lessons = 'Course must have at least 1 lesson';
+    } else {
+      const totalSubLessons = lessons.reduce((sum, lesson) => sum + lesson.subLessons, 0);
+      if (totalSubLessons === 0) {
+        newErrors.lessons = 'Course must have at least 1 sub-lesson';
+      }
     }
   }
 
