@@ -170,19 +170,16 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
     }
   };
 
-  // Validation Tooltip Component
-  const ValidationTooltip = ({ error, fieldName }: { error?: string; fieldName: string }) => {
+  // Error Message Component
+  const ErrorMessage = ({ error }: { error?: string }) => {
     if (!error) return null;
     
     return (
-      <div className="absolute right-0 top-0 transform translate-x-full -translate-y-1 z-10">
-        <div className="bg-gray-100 border border-gray-300 rounded-lg px-2 py-1 shadow-lg">
-          <div className="flex items-center gap-1">
-            <span className="text-orange-500 text-base font-bold">!</span>
-            <span className="text-xs text-gray-700">โปรดกรอกฟิลด์นี้</span>
-          </div>
-          <div className="absolute left-0 top-1/2 transform -translate-x-1 -translate-y-1/2 w-1.5 h-1.5 bg-gray-100 border-l border-b border-gray-300 rotate-45"></div>
+      <div className="flex items-center gap-2 mt-1 p-2 rounded-lg bg-[#9B2FAC33] ">
+        <div className="flex items-center justify-center w-5 h-5 rounded-full bg-[#9B2FAC]">
+          <span className="text-white text-xs font-bold">!</span>
         </div>
+        <span className="text-[#9B2FAC] text-sm">{error}</span>
       </div>
     );
   };
@@ -195,7 +192,7 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
         noValidate
         className="mt-8 space-y-6"
       >
-      <div className="relative">
+      <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
         <input
           type="text"
@@ -208,10 +205,10 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
           }`}
           onBlur={(e) => validateField('first_name', e.target.value)}
         />
-        <ValidationTooltip error={fieldErrors.first_name} fieldName="first_name" />
+        <ErrorMessage error={fieldErrors.first_name} />
       </div>
 
-      <div className="relative">
+      <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
         <input
           type="text"
@@ -224,10 +221,10 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
           }`}
           onBlur={(e) => validateField('last_name', e.target.value)}
         />
-        <ValidationTooltip error={fieldErrors.last_name} fieldName="last_name" />
+        <ErrorMessage error={fieldErrors.last_name} />
       </div>
 
-      <div className="relative">
+      <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
         <input
           type="date"
@@ -239,10 +236,10 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
           }`}
           onBlur={(e) => validateField('date_of_birth', e.target.value)}
         />
-        <ValidationTooltip error={fieldErrors.date_of_birth} fieldName="date_of_birth" />
+        <ErrorMessage error={fieldErrors.date_of_birth} />
       </div>
 
-      <div className="relative">
+      <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Educational Background</label>
         <input
           type="text"
@@ -255,10 +252,10 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
           }`}
           onBlur={(e) => validateField('education', e.target.value)}
         />
-        <ValidationTooltip error={fieldErrors.education} fieldName="education" />
+        <ErrorMessage error={fieldErrors.education} />
       </div>
 
-      <div className="relative">
+      <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
         <input
           type="email"
@@ -271,7 +268,7 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
           }`}
           onBlur={(e) => validateField('email', e.target.value)}
         />
-        <ValidationTooltip error={fieldErrors.email} fieldName="email" />
+        <ErrorMessage error={fieldErrors.email} />
       </div>
 
       {message && <p className="text-green-500 text-sm">{message}</p>}
