@@ -189,6 +189,7 @@ export default function EditLessonPage() {
             subLessons={subLessons}
             onSubLessonsChange={(items) => setSubLessons(items as SubLessonState[])}
             errors={errors}
+            moduleId={moduleId}
           />
         </div>
       </SidebarInset>
