@@ -30,7 +30,7 @@ export default async function ProfilePage() {
 
         <div className="flex flex-row gap-12 max-w-4xl w-full">
           {/* ✅ ให้ UploadPhoto จัดการรูปทั้งหมด */}
-          <UploadPhoto profile={profile} />
+          <UploadPhoto profile={profile}/>
 
           {/* ฟอร์ม */}
           <ProfileForm profile={profile} email={email} />
