@@ -203,8 +203,8 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
           value={formData.first_name}
           onChange={(e) => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
           placeholder="Enter your First Name"
-          className={`w-full border px-3 py-2 rounded-md focus:border-blue-500 focus:ring-blue-500 ${
-            fieldErrors.first_name ? 'border-red-500' : 'border-gray-300'
+          className={`w-full border px-3 py-2 rounded-md focus:border-orange-500 focus:ring-orange-500 ${
+            fieldErrors.first_name ? 'border-[#9B2FAC]' : 'border-gray-300'
           }`}
           onBlur={(e) => validateField('first_name', e.target.value)}
         />
@@ -219,8 +219,8 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
           value={formData.last_name}
           onChange={(e) => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
           placeholder="Enter your Last Name"
-          className={`w-full border px-3 py-2 rounded-md focus:border-blue-500 focus:ring-blue-500 ${
-            fieldErrors.last_name ? 'border-red-500' : 'border-gray-300'
+          className={`w-full border px-3 py-2 rounded-md focus:border-orange-500 focus:ring-orange-500 ${
+            fieldErrors.last_name ? 'border-[#9B2FAC]' : 'border-gray-300'
           }`}
           onBlur={(e) => validateField('last_name', e.target.value)}
         />
@@ -234,8 +234,8 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
           name="date_of_birth"
           value={formData.date_of_birth}
           onChange={(e) => setFormData(prev => ({ ...prev, date_of_birth: e.target.value }))}
-          className={`w-full border px-3 py-2 rounded-md focus:border-blue-500 focus:ring-blue-500 ${
-            fieldErrors.date_of_birth ? 'border-red-500' : 'border-gray-300'
+          className={`w-full border px-3 py-2 rounded-md focus:border-orange-500 focus:ring-orange-500 ${
+            fieldErrors.date_of_birth ? 'border-[#9B2FAC]' : 'border-gray-300'
           }`}
           onBlur={(e) => validateField('date_of_birth', e.target.value)}
         />
@@ -250,8 +250,8 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
           value={formData.education}
           onChange={(e) => setFormData(prev => ({ ...prev, education: e.target.value }))}
           placeholder="Enter Education Background"
-          className={`w-full border px-3 py-2 rounded-md focus:border-blue-500 focus:ring-blue-500 ${
-            fieldErrors.education ? 'border-red-500' : 'border-gray-300'
+          className={`w-full border px-3 py-2 rounded-md focus:border-orange-500 focus:ring-orange-500 ${
+            fieldErrors.education ? 'border-[#9B2FAC]' : 'border-gray-300'
           }`}
           onBlur={(e) => validateField('education', e.target.value)}
         />
@@ -266,8 +266,8 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
           value={formData.email}
           onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
           placeholder="Enter Email"
-          className={`w-full border px-3 py-2 rounded-md focus:border-blue-500 focus:ring-blue-500 ${
-            fieldErrors.email ? 'border-red-500' : 'border-gray-300'
+          className={`w-full border px-3 py-2 rounded-md focus:border-orange-500 focus:ring-orange-500 ${
+            fieldErrors.email ? 'border-[#9B2FAC]' : 'border-gray-300'
           }`}
           onBlur={(e) => validateField('email', e.target.value)}
         />
