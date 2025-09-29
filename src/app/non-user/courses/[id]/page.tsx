@@ -13,7 +13,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import Navbar from "@/components/ui/navbar";
 import Footer from "@/components/ui/footer";
 import SubscribeModalAlert from "@/components/ui/subscribe-modal-alert";
 
@@ -179,7 +178,6 @@ export default function CourseDetailPage() {
 
   return (
     <>
-      <Navbar />
       <div className="bg-white pt-2 pb-8 sm:pb-16 sm:pt-16 px-2 sm:px-6 md:px-8">
         {/* Back Button */}
         <div className="border-none mb-3">
