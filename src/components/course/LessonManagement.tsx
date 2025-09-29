@@ -2,10 +2,29 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, Edit } from "lucide-react";
+import { Plus, Trash2, Edit, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatNumberInput, handleKeyDown } from "@/lib/formUtils";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface Lesson {
   id: number;
@@ -22,12 +41,140 @@ interface LessonManagementProps {
   mockOnly?: boolean;
 }
 
+interface SortableLessonRowProps {
+  lesson: Lesson;
+  index: number;
+  onEdit: (lesson: Lesson) => void;
+  onDelete: (lessonId: number) => void;
+  courseId?: string;
+  mockOnly?: boolean;
+}
+
+function SortableLessonRow({ lesson, index, onEdit, onDelete, courseId, mockOnly }: SortableLessonRowProps) {
+  const router = useRouter();
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: lesson.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <tr 
+      ref={setNodeRef} 
+      style={style}
+      className={`border-t border-gray-200 hover:bg-gray-50 ${isDragging ? 'z-50' : ''}`}
+    >
+      <td className="px-4 py-3">
+        <button
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-200 rounded"
+          disabled={!!mockOnly}
+        >
+          <GripVertical className="h-4 w-4 text-gray-400" />
+        </button>
+      </td>
+      <td className="px-4 py-3 text-b3 text-gray-700">{index + 1}</td>
+      <td className="px-4 py-3 text-b3 text-gray-900">{lesson.name}</td>
+      <td className="px-4 py-3 text-b3 text-gray-900">{lesson.subLessons}</td>
+      <td className="px-4 py-3">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              if (mockOnly) return;
+              onDelete(lesson.id);
+            }}
+            disabled={!!mockOnly}
+            className={`p-2 rounded transition-colors ${mockOnly ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200'}`}
+            title="Delete"
+          >
+            <Trash2 className="h-4 w-4 text-blue-300" />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (mockOnly) return;
+              if (courseId) {
+                router.push(`/admin/lessons/${courseId}/${lesson.id}/edit`);
+              } else {
+                onEdit(lesson);
+              }
+            }}
+            disabled={!!mockOnly}
+            className={`p-2 rounded transition-colors ${mockOnly ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200'}`}
+            title="Edit"
+          >
+            <Edit className="h-4 w-4 text-blue-300" />
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
 export function LessonManagement({ lessons, errors, onLessonsChange, courseId, mockOnly }: LessonManagementProps) {
   const router = useRouter();
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
   const [showAddLessonForm, setShowAddLessonForm] = useState(false);
   const [newLessonName, setNewLessonName] = useState('');
   const [newLessonSubLessons, setNewLessonSubLessons] = useState('1');
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = lessons.findIndex((lesson) => lesson.id === active.id);
+      const newIndex = lessons.findIndex((lesson) => lesson.id === over.id);
+
+      const newLessons = arrayMove(lessons, oldIndex, newIndex);
+      onLessonsChange(newLessons);
+
+      // If we have a courseId and we're not in mock mode, persist the order to the database
+      if (courseId && !mockOnly) {
+        try {
+          const lessonOrders = newLessons.map((lesson, index) => ({
+            id: lesson.id,
+            order_index: index + 1
+          }));
+
+          const response = await fetch('/api/lessons/reorder', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              courseId: courseId,
+              lessonOrders: lessonOrders
+            }),
+          });
+
+          if (!response.ok) {
+            console.error('Failed to update lesson order');
+            // Optionally show a toast notification or error message
+          }
+        } catch (error) {
+          console.error('Error updating lesson order:', error);
+        }
+      }
+    }
+  };
 
   const addLesson = () => {
     if (!newLessonName.trim()) {
@@ -189,57 +336,38 @@ export function LessonManagement({ lessons, errors, onLessonsChange, courseId, m
       )}
 
       <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
-        <table className="min-w-full">
-          <thead>
-            <tr className="bg-gray-300 border-none">
-              <th className="px-4 py-3 text-left text-b3 font-medium text-gray-700 w-12">#</th>
-              <th className="px-4 py-3 text-left text-b3 font-medium text-gray-700">Lesson name</th>
-              <th className="px-4 py-3 text-left text-b3 font-medium text-gray-700">Sub-lesson</th>
-              <th className="px-4 py-3 text-left text-b3 font-medium text-gray-700 w-32">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {lessons.map((lesson, idx) => (
-              <tr key={lesson.id} className="border-t border-gray-200 hover:bg-gray-50">
-                <td className="px-4 py-3 text-b3 text-gray-700">{idx + 1}</td>
-                <td className="px-4 py-3 text-b3 text-gray-900">{lesson.name}</td>
-                <td className="px-4 py-3 text-b3 text-gray-900">{lesson.subLessons}</td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (mockOnly) return;
-                        deleteLesson(lesson.id);
-                      }}
-                      disabled={!!mockOnly}
-                      className={`p-2 rounded transition-colors ${mockOnly ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200'}`}
-                      title="Delete"
-                    >
-                      <Trash2 className="h-4 w-4 text-blue-300" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (mockOnly) return;
-                        if (courseId) {
-                          router.push(`/admin/lessons/${courseId}/${lesson.id}/edit`);
-                        } else {
-                          editLesson(lesson);
-                        }
-                      }}
-                      disabled={!!mockOnly}
-                      className={`p-2 rounded transition-colors ${mockOnly ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200'}`}
-                      title="Edit"
-                    >
-                      <Edit className="h-4 w-4 text-blue-300" />
-                    </button>
-                  </div>
-                </td>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <table className="min-w-full">
+            <thead>
+              <tr className="bg-gray-300 border-none">
+                <th className="px-4 py-3 text-left text-b3 font-medium text-gray-700 w-16"></th>
+                <th className="px-4 py-3 text-left text-b3 font-medium text-gray-700 w-12"></th>
+                <th className="px-4 py-3 text-left text-b3 font-medium text-gray-700">Lesson name</th>
+                <th className="px-4 py-3 text-left text-b3 font-medium text-gray-700">Sub-lesson</th>
+                <th className="px-4 py-3 text-left text-b3 font-medium text-gray-700 w-32">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <SortableContext items={lessons.map(lesson => lesson.id)} strategy={verticalListSortingStrategy}>
+              <tbody>
+                {lessons.map((lesson, idx) => (
+                  <SortableLessonRow
+                    key={lesson.id}
+                    lesson={lesson}
+                    index={idx}
+                    onEdit={editLesson}
+                    onDelete={deleteLesson}
+                    courseId={courseId}
+                    mockOnly={mockOnly}
+                  />
+                ))}
+              </tbody>
+            </SortableContext>
+          </table>
+        </DndContext>
       </div>
     </div>
   );
