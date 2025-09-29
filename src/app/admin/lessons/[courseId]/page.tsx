@@ -22,6 +22,7 @@ export default function AddLessonPage() {
   const [subLessons, setSubLessons] = useState<{ id: number; name: string; file: File | null; previewUrl?: string | null; }[]>([
     { id: 1, name: "", file: null, previewUrl: null },
   ]);
+  const [lessonId, setLessonId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -40,6 +41,38 @@ export default function AddLessonPage() {
 
   const handleCancel = () => {
     router.push(`/admin/courses/${courseId}/edit`);
+  };
+
+  const handleDeleteLesson = async () => {
+    if (!lessonId) {
+      alert('No lesson to delete');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`/api/lessons/${lessonId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        let message = 'Failed to delete lesson';
+        try {
+          const errorData = await response.json();
+          message = errorData?.error || message;
+        } catch {}
+        throw new Error(message);
+      }
+
+      // Redirect back to course edit page
+      router.push(`/admin/courses/${courseId}/edit`);
+    } catch (error) {
+      console.error('Error deleting lesson:', error);
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Failed to delete lesson: ${msg}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCreate = async () => {
@@ -155,6 +188,8 @@ export default function AddLessonPage() {
             subLessons={subLessons}
             onSubLessonsChange={setSubLessons}
             errors={errors}
+            onDeleteLesson={lessonId ? handleDeleteLesson : undefined}
+            isDeleting={isSubmitting}
           />
         </div>
       </SidebarInset>
