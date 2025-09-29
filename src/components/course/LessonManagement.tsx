@@ -127,7 +127,7 @@ export function LessonManagement({ lessons, errors, onLessonsChange, courseId, m
       </div>
 
       {/* Add/Edit Lesson Form */}
-      {(showAddLessonForm || editingLesson) && (
+      {!mockOnly && (showAddLessonForm || editingLesson) && (
         <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
@@ -182,7 +182,7 @@ export function LessonManagement({ lessons, errors, onLessonsChange, courseId, m
       )}
 
       {/* Lesson Error Display */}
-      {errors.lessons && (
+      {!mockOnly && errors.lessons && (
         <div className="mb-4 p-3 bg-purple-50 border border-[#9B2FAC] rounded-lg">
           <p className="text-[#9B2FAC] text-sm">{errors.lessons}</p>
         </div>
