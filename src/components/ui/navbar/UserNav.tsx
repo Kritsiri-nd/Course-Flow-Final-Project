@@ -30,12 +30,12 @@ const ChevronDownIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20"
 type Profile = {
   first_name: string | null;
   last_name: string | null;
-  avatar_url: string | null;
+  photo_url: string | null;
   role: string | null;
 } | null;
 
 // --- Main Component ---
-export default function UserNav({ session, userProfile, onLogout }: { session: Session | null, userProfile: Profile, onLogout: () => void }) {
+export default function UserNav({ session, userProfile }: { session: Session | null, userProfile: Profile }) {
   
   const router = useRouter();
   const supabase = createClient();
@@ -71,7 +71,7 @@ export default function UserNav({ session, userProfile, onLogout }: { session: S
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-2 rounded-full p-1 text-gray-600 hover:text-blue-600 focus:outline-none">
                 <Image
-                  src={userProfile?.avatar_url || '/default-avatar.png'}
+                  src={userProfile?.photo_url || '/assets/defaultUser.png'}
                   alt={userProfile?.first_name || 'User Avatar'}
                   width={40}
                   height={40}

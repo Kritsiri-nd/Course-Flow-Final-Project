@@ -33,8 +33,19 @@ export const validateDateOfBirth = (dateString: string): { isValid: boolean; mes
     return { isValid: false, message: 'Date of birth is required' };
   }
   
-  // Parse the date with strict format validation
-  const selectedDate = dayjs(dateString, 'DD/MM/YY', true);
+  // Parse the date - try different formats
+  let selectedDate = dayjs(dateString, 'DD/MM/YY', true);
+  
+  // If DD/MM/YY format doesn't work, try YYYY-MM-DD format (from HTML date input)
+  if (!selectedDate.isValid()) {
+    selectedDate = dayjs(dateString, 'YYYY-MM-DD', true);
+  }
+  
+  // If still not valid, try parsing as ISO string
+  if (!selectedDate.isValid()) {
+    selectedDate = dayjs(dateString);
+  }
+  
   const today = dayjs();
   
   // Check if date is valid

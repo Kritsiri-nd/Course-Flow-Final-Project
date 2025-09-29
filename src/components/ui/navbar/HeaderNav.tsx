@@ -1,7 +1,7 @@
 import { createSupabaseServerClient } from "@/lib/createSupabaseServerClient";
 
 
-import AdminNav from '@/components/ui/navbar/AdminNav';
+// import AdminNav from '@/components/ui/navbar/AdminNav';
 import UserNav from '@/components/ui/navbar/UserNav';
 import NonuserNav from '@/components/ui/navbar/NonuserNav';
 
@@ -14,7 +14,7 @@ type Profile = {
   id: string;
   first_name: string | null;
   last_name: string | null;
-  avatar_url: string | null;
+  photo_url: string | null;
   role: string | null;
 } | null;
 
@@ -46,11 +46,9 @@ export default async function HeaderNav() {
   // เงื่อนไขเพื่อเลือก Navbar ที่จะแสดงผล
   if (userProfile.role === 'user') {
     // ถ้า role เป็น 'user'
-
     return <UserNav session={session} userProfile={userProfile} />;
   } else {
     // สำหรับ role อื่นๆ ทั้งหมด (เช่น 'admin')
-
     return <UserNav session={session} userProfile={userProfile} />;
   }
 }
