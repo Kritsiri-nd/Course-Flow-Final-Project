@@ -204,7 +204,7 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
         className="mt-8 space-y-6"
       >
       <div className="relative">
-        <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+        <label className="block b2 text-black mb-1">First Name</label>
         <input
           type="text"
           name="first_name"
@@ -212,7 +212,7 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
           onChange={(e) => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
           placeholder="Enter your First Name"
           className={`w-full border px-3 py-2 pr-10 rounded-md focus:border-orange-500 focus:ring-orange-500 ${
-            fieldErrors.first_name ? 'border-[#9B2FAC]' : 'border-gray-300'
+            fieldErrors.first_name ? 'border-[#9B2FAC]' : 'border-gray-400'
           }`}
           onBlur={(e) => validateField('first_name', e.target.value)}
         />
@@ -221,7 +221,7 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
       </div>
 
       <div className="relative">
-        <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+        <label className="block b2 text-black mb-1">Last Name</label>
         <input
           type="text"
           name="last_name"
@@ -229,7 +229,7 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
           onChange={(e) => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
           placeholder="Enter your Last Name"
           className={`w-full border px-3 py-2 pr-10 rounded-md focus:border-orange-500 focus:ring-orange-500 ${
-            fieldErrors.last_name ? 'border-[#9B2FAC]' : 'border-gray-300'
+            fieldErrors.last_name ? 'border-[#9B2FAC]' : 'border-gray-400'
           }`}
           onBlur={(e) => validateField('last_name', e.target.value)}
         />
@@ -237,15 +237,15 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
         <ErrorMessage error={fieldErrors.last_name} />
       </div>
 
-      <div className="relative">
-        <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+      <div className="relative">  
+        <label className="block b2 text-black mb-1">Date of Birth</label>
         <input
           type="date"
           name="date_of_birth"
           value={formData.date_of_birth}
           onChange={(e) => setFormData(prev => ({ ...prev, date_of_birth: e.target.value }))}
           className={`w-full border px-3 py-2 pr-10 rounded-md focus:border-orange-500 focus:ring-orange-500 ${
-            fieldErrors.date_of_birth ? 'border-[#9B2FAC]' : 'border-gray-300'
+            fieldErrors.date_of_birth ? 'border-[#9B2FAC]' : 'border-gray-400'
           }`}
           onBlur={(e) => validateField('date_of_birth', e.target.value)}
         />
@@ -254,7 +254,7 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
       </div>
 
       <div className="relative">
-        <label className="block text-sm font-medium text-gray-700 mb-1">Educational Background</label>
+        <label className="block b2 text-black mb-1">Educational Background</label>
         <input
           type="text"
           name="education"
@@ -262,7 +262,7 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
           onChange={(e) => setFormData(prev => ({ ...prev, education: e.target.value }))}
           placeholder="Enter Education Background"
           className={`w-full border px-3 py-2 pr-10 rounded-md focus:border-orange-500 focus:ring-orange-500 ${
-            fieldErrors.education ? 'border-[#9B2FAC]' : 'border-gray-300'
+            fieldErrors.education ? 'border-[#9B2FAC]' : 'border-gray-400'
           }`}
           onBlur={(e) => validateField('education', e.target.value)}
         />
@@ -271,7 +271,7 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
       </div>
 
       <div className="relative">
-        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <label className="block b2 text-black mb-1">Email</label>
         <input
           type="email"
           name="email"
@@ -279,7 +279,7 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
           onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
           placeholder="Enter Email"
           className={`w-full border px-3 py-2 pr-10 rounded-md focus:border-orange-500 focus:ring-orange-500 ${
-            fieldErrors.email ? 'border-[#9B2FAC]' : 'border-gray-300'
+            fieldErrors.email ? 'border-[#9B2FAC]' : 'border-gray-400'
           }`}
           onBlur={(e) => validateField('email', e.target.value)}
         />
@@ -293,7 +293,7 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-lg bg-blue-600 py-3.5 font-semibold text-white shadow-lg hover:bg-blue-700 disabled:opacity-60"
+          className="text-[16px] w-full rounded-lg bg-blue-500 py-3.5 font-bold text-white shadow-lg hover:bg-blue-600 disabled:opacity-60"
         >
           {isSubmitting ? "Updating..." : "Update Profile"}
         </button>

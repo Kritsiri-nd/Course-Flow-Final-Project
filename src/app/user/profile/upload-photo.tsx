@@ -59,13 +59,13 @@ export default function UploadPhoto({ profile }: { profile: any }) {
   return (
     <div className="flex flex-col items-center">
       {/* ✅ render รูปจาก state ตรงนี้เลย */}
-      <div className="w-[200px] h-[200px] rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+      <div className="w-[358px] h-[358px] rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
         <Image
           key={photoUrl}
           src={photoUrl}
           alt="User photo"
-          width={200}
-          height={200}
+          width={358}
+          height={358}
           className="object-cover"
         />
       </div>
@@ -83,7 +83,7 @@ export default function UploadPhoto({ profile }: { profile: any }) {
           <button
             onClick={handleUpload}
             disabled={loading}
-            className="bg-blue-600 text-white px-6 py-2 rounded-md"
+            className="bg-blue-500 hover:bg-blue-600 text-[18px] font-bold text-white px-6 py-2 rounded-md"
           >
             {loading ? "Uploading..." : "Upload photo"}
           </button>
@@ -92,14 +92,14 @@ export default function UploadPhoto({ profile }: { profile: any }) {
             <button
               onClick={handleUpload}
               disabled={loading}
-              className="bg-blue-600 text-white px-6 py-2 rounded-md"
+              className="bg-blue-500 hover:bg-blue-600 text-[18px] font-bold text-white px-6 py-2 rounded-md"
             >
               {loading ? "Uploading..." : "Change photo"}
             </button>
             <button
               onClick={handleRemove}
               disabled={loading}
-              className="text-blue-500 text-[16px] font-medium hover:underline"
+              className="text-blue-500 text-[18px] font-bold hover:underline"
             >
               {loading ? "Removing..." : "Remove photo"}
             </button>
