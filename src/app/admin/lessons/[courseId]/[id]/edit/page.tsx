@@ -63,6 +63,33 @@ export default function EditLessonPage() {
     router.push(`/admin/courses/${courseId}/edit`);
   };
 
+  const handleDeleteLesson = async () => {
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`/api/lessons/${moduleId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        let message = 'Failed to delete lesson';
+        try {
+          const errorData = await response.json();
+          message = errorData?.error || message;
+        } catch {}
+        throw new Error(message);
+      }
+
+      // Redirect back to course edit page
+      router.push(`/admin/courses/${courseId}/edit`);
+    } catch (error) {
+      console.error('Error deleting lesson:', error);
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Failed to delete lesson: ${msg}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!lessonName.trim()) {
       setErrors(prev => ({ ...prev, lessonName: "Please enter lesson name" }));
@@ -190,6 +217,8 @@ export default function EditLessonPage() {
             onSubLessonsChange={(items) => setSubLessons(items as SubLessonState[])}
             errors={errors}
             moduleId={moduleId}
+            onDeleteLesson={handleDeleteLesson}
+            isDeleting={isSubmitting}
           />
         </div>
       </SidebarInset>

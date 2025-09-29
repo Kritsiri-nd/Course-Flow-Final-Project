@@ -5,6 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GripVertical, Plus, X, AlertCircle } from "lucide-react";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   DndContext,
   closestCenter,
   KeyboardSensor,
@@ -38,6 +49,8 @@ interface SubLessonFormProps {
   onSubLessonsChange: (items: SubLesson[]) => void;
   errors?: Record<string, string>;
   moduleId?: string;
+  onDeleteLesson?: () => void;
+  isDeleting?: boolean;
 }
 
 interface SortableSubLessonProps {
@@ -147,6 +160,8 @@ export function SubLessonForm({
   onSubLessonsChange,
   errors = {},
   moduleId,
+  onDeleteLesson,
+  isDeleting = false,
 }: SubLessonFormProps) {
   const fileInputsRef = useRef<Record<number, HTMLInputElement | null>>({});
 
@@ -291,6 +306,51 @@ export function SubLessonForm({
           + Add Sub-lesson
         </Button>
       </div>
+
+      {/* Delete Lesson Button */}
+      {onDeleteLesson && (
+        <div className="flex justify-end mt-6">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button
+                type="button"
+                className="p-0 m-0 bg-transparent border-0 text-[#2F5FAC] font-inter font-bold text-base leading-[150%] tracking-normal cursor-pointer"
+              >
+                Delete Lesson
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="w-[528px] h-[212px] p-0 !rounded-xl">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-b1 font-medium h-14 border-b border-gray-300 py-2 px-6 flex justify-between items-center">
+                  Confirmation
+                  <AlertDialogCancel
+                    asChild
+                    className="!border-none !bg-none !shadow-none"
+                  >
+                    <button className="text-gray-500">×</button>
+                  </AlertDialogCancel>
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-b2 text-gray-700 pt-4 px-6">
+                  Are you sure you want to delete this lesson?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="pb-2 pt-2 px-6 flex gap-3 !justify-center">
+                <AlertDialogAction
+                  asChild
+                  className="h-15 w-2/3 border border-orange-500 !text-orange-500 bg-transparent hover:bg-orange-100 px-4 py-2 rounded-lg text-b2 font-medium"
+                >
+                  <button onClick={onDeleteLesson} disabled={isDeleting}>
+                    {isDeleting ? "Deleting..." : "Yes, I want to delete this lesson"}
+                  </button>
+                </AlertDialogAction>
+                <AlertDialogCancel className="h-15 w-1/3 bg-[#2F5FAC] hover:bg-[#2F5FAC] !text-white px-4 py-2 rounded-lg text-b2 font-medium">
+                  No, keep it
+                </AlertDialogCancel>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      )}
     </div>
   );
 }
