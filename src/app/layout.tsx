@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 
@@ -36,7 +35,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body>
-        <HeaderNav session={session} userProfile={userProfile} />
+        <HeaderNav />
         {children}
       </body>
     </html>

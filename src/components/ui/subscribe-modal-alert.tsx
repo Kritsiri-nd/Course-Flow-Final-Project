@@ -57,7 +57,7 @@ export default function SubscribeModalAlert({
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
-            className="h-15 sm:w-5/8 w-full bg-blue-500 hover:bg-blue-600 !text-white px-4 py-2 rounded-lg text-b2 font-medium"
+            className="h-15 sm:w-5/8 w-full bg-primary hover:bg-primary/90 !text-primary-foreground px-4 py-2 rounded-lg text-b2 font-medium"
           >
             Yes, I want to subscribe
           </AlertDialogAction>

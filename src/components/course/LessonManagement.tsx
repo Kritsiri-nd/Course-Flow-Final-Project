@@ -266,7 +266,7 @@ export function LessonManagement({ lessons, errors, onLessonsChange, courseId, m
             }
           }}
           title={mockOnly ? 'Add lesson locally (for course creation)' : undefined}
-          className={`w-full sm:w-[171px] h-[60px] pt-[18px] pr-[32px] pb-[18px] pl-[32px] gap-[10px] rounded-[12px] bg-[#2F5FAC] text-white shadow-[4px_4px_24px_0px_#00000014] opacity-100 flex items-center justify-center transition-all duration-200 hover:bg-[#2F5FAC] hover:scale-105 cursor-pointer`}
+          className={`w-full sm:w-auto h-[60px] pt-[18px] pr-[32px] pb-[18px] pl-[32px] gap-[10px] rounded-[12px] bg-primary text-primary-foreground shadow-[4px_4px_24px_0px_#00000014] opacity-100 flex items-center justify-center whitespace-nowrap transition-all duration-200 hover:bg-primary/90 hover:scale-105 cursor-pointer`}
         >
           <Plus className="h-4 w-4" />
           Add Lesson
@@ -307,7 +307,7 @@ export function LessonManagement({ lessons, errors, onLessonsChange, courseId, m
             <Button
               type="button"
               onClick={editingLesson ? updateLesson : addLesson}
-              className="bg-[#2F5FAC] text-white hover:bg-[#2F5FAC]"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {editingLesson ? 'Update Lesson' : 'Add Lesson'}
             </Button>

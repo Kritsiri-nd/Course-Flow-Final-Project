@@ -53,20 +53,35 @@
   }
   .text-h1 {
     font-size: var(--H1);
-    line-height: 66px;
-    font-family: var(--font-sans);
+    line-height: 125%;
+    font-family: 'Inter', var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    letter-spacing: -0.02em;
   }
   .text-h2 {
     font-size: var(--H2);
-    line-height: 36px;
+    line-height: 125%;
+    font-family: 'Inter', var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    letter-spacing: -0.02em;
   }
   .text-h3 {
     font-size: var(--H3);
-    line-height: 24px;
+    line-height: 125%;
+    font-family: 'Inter', var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    letter-spacing: -0.02em;
   }
   .text-b1 {
     font-size: var(--B1);
-    line-height: 20px;
+    line-height: 150%;
+    font-family: 'Inter', var(--font-sans);
+    font-weight: 400;
+    font-style: normal;
+    letter-spacing: 0;
   }
   .text-b2 {
     font-size: var(--B2);
@@ -93,8 +108,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -138,7 +153,7 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary: var(--blue-500);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -172,7 +187,7 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
+  --primary: var(--blue-500);
   --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
