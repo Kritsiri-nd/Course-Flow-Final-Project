@@ -54,7 +54,7 @@ export default function DeleteModalAlert({ delText, onDelete, isDeleting = false
               {isDeleting ? "Deleting..." : `Yes, I want to delete the ${delText}`}
             </button>
           </AlertDialogAction>
-          <AlertDialogCancel className="h-15 w-1/3 bg-blue-500 hover:bg-blue-600 !text-white px-4 py-2 rounded-lg text-b2 font-medium">
+          <AlertDialogCancel className="h-15 w-1/3 bg-primary hover:bg-primary/90 !text-primary-foreground px-4 py-2 rounded-lg text-b2 font-medium">
             No, keep it
           </AlertDialogCancel>
         </AlertDialogFooter>

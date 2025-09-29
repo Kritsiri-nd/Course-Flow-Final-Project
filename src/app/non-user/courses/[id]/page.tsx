@@ -320,7 +320,7 @@ export default function CourseDetailPage() {
                         // You can add API calls, navigation, etc. here
                       }}
                     >
-                      <Button className="w-full py-6 bg-blue-500 hover:bg-blue-600 text-b2 text-white">
+                      <Button className="w-full py-6 bg-primary hover:bg-primary/90 text-b2 text-primary-foreground">
                         Subscribe This Course
                       </Button>
                     </SubscribeModalAlert>
@@ -439,7 +439,7 @@ export default function CourseDetailPage() {
                       console.log(`Subscribing to course: ${course?.title}`);
                     }}
                   >
-                    <Button className="flex-1 bg-blue-500 hover:bg-blue-600 !text-white text-b4">
+                    <Button className="flex-1 bg-primary hover:bg-primary/90 !text-primary-foreground text-b4">
                       Subscribe This Course
                     </Button>
                   </SubscribeModalAlert>

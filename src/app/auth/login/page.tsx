@@ -11,8 +11,8 @@ export default async function LoginPage() {
 
   // ถ้ามี Session (ผู้ใช้ล็อกอินอยู่แล้ว)
   if (session) {
-    //สั่งให้ redirect ไปยังหน้า profile ทันที!
-    redirect('/user/profile');
+    //สั่งให้ redirect ไปยังหน้า landing page ทันที!
+    redirect('/');
   }
 
   // 6. ถ้าไม่มี Session, ก็แสดงฟอร์ม Login ตามปกติ

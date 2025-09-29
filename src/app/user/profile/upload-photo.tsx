@@ -42,8 +42,6 @@ export default function UploadPhoto({ profile }: { profile: any }) {
   };
 
   const handleRemove = async () => {
-    if (!confirm("Remove profile photo?")) return;
-
     setLoading(true);
     const res = await fetch("/api/profile/photo", { method: "DELETE" });
     setLoading(false);

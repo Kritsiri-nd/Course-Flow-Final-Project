@@ -71,18 +71,17 @@ export default function Instructure() {
           <div
             className="absolute opacity-100 cursor-pointer hover:scale-105 transition-transform z-20 sm:hidden"
             style={{
-              top: '270px',
-              left: '50px',
-              width: '317px',
-              height: '314px'
+              top: '300px',
+              left: '80px', 
+              width: '310px',
+              height: '307px'
             }}
             onClick={() => router.push("/non-user/courses")}
           >
             <img
               src="/images/vector.png"
               alt="Educational illustration"
-              width={310}
-              height={307}
+              width={260}
               className="opacity-100"
             />
           </div>
@@ -268,12 +267,12 @@ export default function Instructure() {
 
           {/* Mobile Text*/}
           <div className="relative z-10 px-10 pt-10 flex flex-col items-start text-left sm:hidden">
-            <h1 className="text-[32px] font-bold leading-[120%] text-[#1A1A1A] mb-4 max-w-[300px]">
-              Best Virtual Classroom Software
+            <h1 className="text-[32px] font-medium leading-[120%] text-[#1A1A1A] mb-4 max-w-[400px]">
+              Best Virtual <br />Classroom Software
             </h1>
             <p className="text-base font-normal leading-[150%] text-[#646D89] mb-6 max-w-[400px]">
-              Welcome to Schooler! <br />
-              The one-stop online class management system <br />
+              Welcome to Schooler! 
+              The one-stop online class management system
               that caters to all your educational needs!
             </p>
             <button
@@ -292,7 +291,7 @@ export default function Instructure() {
             width="1233"
             height="1111"
             viewBox="0 0 1233 1111"
-            className="absolute block"
+            className="absolute hidden sm:block"
             fill="none"
           >
             <circle
@@ -319,6 +318,58 @@ export default function Instructure() {
             <defs>
               <linearGradient
                 id="paint0_linear_15_1851"
+                x1="9.726"
+                y1="23.6459"
+                x2="77.4257"
+                y2="47.6752"
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop stopColor="#95BEFF" />
+                <stop offset="1" stopColor="#0040E6" />
+              </linearGradient>
+            </defs>
+          </svg>
+
+          {/* Background Elements - Mobile */}
+          <svg
+            width="1233"
+            height="1111"
+            viewBox="0 0 1233 1111"
+            className="absolute block sm:hidden"
+            fill="none"
+            style={{ 
+              width: '100%',
+              height: 'auto',
+              maxWidth: '400px',
+              top: '0px',
+              zIndex: -1 
+             
+            }}
+          >
+            <circle
+              cx="44.7032"
+              cy="13.7032"
+              r="36.5"
+              transform="rotate(-75 44.7032 13.7032)"
+              fill="url(#paint0_linear_15_1851_mobile)"
+            />
+          
+            <circle cx="1135.5" cy="105" r="42.5" fill="#C6DCFF" />
+            <path
+              d="M1223.84 399L1218.84 417.68"
+              stroke="#9B2FAC"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+            <path
+              d="M1212 405.837L1230.68 410.843"
+              stroke="#9B2FAC"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+            <defs>
+              <linearGradient
+                id="paint0_linear_15_1851_mobile"
                 x1="9.726"
                 y1="23.6459"
                 x2="77.4257"
@@ -499,7 +550,7 @@ export default function Instructure() {
             height="30"
             viewBox="0 0 51 51"
             fill="none"
-            className="absolute left-[20px] sm:left-[70px] bottom-[20px] sm:bottom-[76.22px]"
+            className="absolute left-[20px] sm:left-[70px] bottom-[50px] sm:bottom-[76.22px]"
           >
             <path
               d="M11.3581 19.9099L37.1499 15.9774L27.6597 40.28L11.3581 19.9099Z"
@@ -588,18 +639,7 @@ export default function Instructure() {
             fill="none"
           >
             <circle cx="1260.17" cy="96.1741" r="13.1741" fill="#C6DCFF" />
-            <path
-              d="M13.843 609L8.83754 627.68"
-              stroke="#2FAC61"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-            <path
-              d="M2.00035 615.837L20.6809 620.843"
-              stroke="#2FAC61"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
+          
             <circle
               cx="1345.7"
               cy="44.7033"
@@ -621,6 +661,19 @@ export default function Instructure() {
               </linearGradient>
             </defs>
           </svg>
+          
+          <path
+              d="M13.843 609L8.83754 627.68"
+              stroke="#2FAC61"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+            <path
+              d="M2.00035 615.837L20.6809 620.843"
+              stroke="#2FAC61"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
 
           <div className="h-auto lg:h-[742px] w-[100vw] flex flex-col gap-[20px] sm:gap-[30px] lg:gap-[25px] px-4 sm:px-6 lg:px-8 mt-[20px] sm:mt-20">
             <p className="text-[20px] sm:text-[24px] lg:text-3xl font-semibold text-center text-gray-900">
