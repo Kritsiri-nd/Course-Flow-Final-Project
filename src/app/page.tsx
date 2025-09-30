@@ -6,7 +6,7 @@ import Footer from "../components/ui/footer";
 export default function HomePage() {
   return (
     <>
-      
+      <h1 className="text-4xl font-bold">Home Page</h1>
       <Instructure />
       <SubFooter />
       <Footer />
