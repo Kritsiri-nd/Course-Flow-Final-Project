@@ -4,7 +4,8 @@ import "./globals.css";
 
 import { createSupabaseServerClient } from "@/lib/createSupabaseServerClient";
 import HeaderNav from "@/components/ui/navbar/HeaderNav";
-// import UserNav from "@/components/ui/navbar/UserNav";
+import UserNav from "@/components/ui/navbar/UserNav";
+import { headers } from "next/headers";
 
 
 export const metadata: Metadata = {
@@ -17,6 +18,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headersList = await headers();
+  const pathname = headersList.get('x-pathname') || '';
+  
+  // ตรวจสอบว่าเป็นหน้า admin หรือไม่
+  const isAdminPage = pathname.startsWith('/admin');
+  
   const supabase = await createSupabaseServerClient();
   const { data: { session } } = await supabase.auth.getSession();
 
@@ -35,7 +42,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body>
-        <HeaderNav />
+        {!isAdminPage && <HeaderNav />}
         {children}
       </body>
     </html>
