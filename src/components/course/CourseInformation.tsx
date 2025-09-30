@@ -108,7 +108,7 @@ export function CourseInformation({ formData, errors, onInputChange }: CourseInf
             </label>
             <div className="relative">
               <select 
-                className={`w-full h-12 rounded-lg border bg-white pt-3 pr-10 pb-3 pl-3 font-inter font-normal text-base leading-[150%] tracking-[0%] text-[#9AA1B9] focus:text-black focus-visible:outline-none focus-visible:border-[#F47E20] disabled:cursor-not-allowed disabled:opacity-50 appearance-none bg-no-repeat bg-right bg-[length:16px] ${
+                className={`w-full h-12 rounded-lg border bg-white pt-3 pr-10 pb-3 pl-3 font-inter font-normal text-base leading-[150%] tracking-[0%] ${formData.category ? 'text-black' : 'text-[#9AA1B9]'} focus-visible:outline-none focus-visible:border-[#F47E20] disabled:cursor-not-allowed disabled:opacity-50 appearance-none bg-no-repeat bg-right bg-[length:16px] ${
                   errors.category ? 'border-[#9B2FAC] focus:border-[#9B2FAC]' : 'border-[#D6D9E4]'
                 }`}
                 style={{
