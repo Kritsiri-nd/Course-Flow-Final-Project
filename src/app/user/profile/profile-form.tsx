@@ -5,17 +5,24 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabaseClient"; // 👈 client-side supabase
 import { validateFirstName, validateLastName, validateDateOfBirth, validateEmail, validateEducationalBackground } from "@/lib/validators";
 
-export default function ProfileForm({ profile, email }: { profile: any; email: string }) {
+export default function ProfileForm({ profile, email }: { profile: unknown; email: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>('');
   const [message, setMessage] = useState<string>('');
   
   // Form state for controlled inputs
+  interface ProfileData {
+    first_name?: string;
+    last_name?: string;
+    date_of_birth?: string;
+    education?: string;
+  }
+  
   const [formData, setFormData] = useState({
-    first_name: profile?.first_name || '',
-    last_name: profile?.last_name || '',
-    date_of_birth: profile?.date_of_birth || '',
-    education: profile?.education || '',
+    first_name: (profile as ProfileData)?.first_name || '',
+    last_name: (profile as ProfileData)?.last_name || '',
+    date_of_birth: (profile as ProfileData)?.date_of_birth || '',
+    education: (profile as ProfileData)?.education || '',
     email: email || '',
   });
   
@@ -155,7 +162,7 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
           // ✅ refresh session เพื่อให้ session.user.email อัปเดตทันที
           await supabase.auth.refreshSession();
         }
-      } catch (error) {
+      } catch {
         // ไม่แสดง error สำหรับ email update
         console.log('Email update failed, continuing...');
       }

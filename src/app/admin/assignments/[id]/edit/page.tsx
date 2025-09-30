@@ -279,8 +279,8 @@ export default function EditAssignmentPage() {
   // Get selected module
   const selectedModule = selectedCourse?.modules.find(m => m.id.toString() === selectedModuleId);
   
-  // Get selected lesson
-  const selectedLesson = selectedModule?.lessons.find(l => l.id.toString() === selectedLessonId);
+  // Get selected lesson (for future use)
+  // const selectedLesson = selectedModule?.lessons.find(l => l.id.toString() === selectedLessonId);
 
   if (isLoading) {
     return (

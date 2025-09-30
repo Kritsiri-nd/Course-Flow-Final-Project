@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import { PiBookOpenLight } from "react-icons/pi";
 import { LuClock3 } from "react-icons/lu";
 import Link from "next/link";
-import Navbar from "@/components/ui/navbar";
+// import Navbar from "@/components/ui/navbar";
 import SubFooter from "@/components/ui/subFooter";
 import Footer from "@/components/ui/footer";
 
 export default function CourseList() {
-  const [courses, setCourses] = useState<any[]>([]);
+  const [courses, setCourses] = useState<unknown[]>([]);
   const [query, setQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12; // ✅ กำหนดจำนวนคอร์สต่อหน้า
@@ -26,11 +26,23 @@ export default function CourseList() {
 
   if (!courses.length) return <p>Loading...</p>;
 
+  interface Course {
+    id: string;
+    title: string;
+    description: string;
+    category: string;
+    thumbnail: string;
+    summary: string;
+    duration_hours: number;
+  }
+  
   const filteredCourses = courses.filter(
-    (course) =>
-      course.title.toLowerCase().includes(query.toLowerCase()) ||
-      course.description.toLowerCase().includes(query.toLowerCase()) ||
-      course.category.toLowerCase().includes(query.toLowerCase())
+    (course: unknown) => {
+      const c = course as Course;
+      return c.title.toLowerCase().includes(query.toLowerCase()) ||
+        c.description.toLowerCase().includes(query.toLowerCase()) ||
+        c.category.toLowerCase().includes(query.toLowerCase());
+    }
   );
 
   // ✅ Pagination logic
@@ -85,32 +97,39 @@ export default function CourseList() {
         {/* Course Grid */}
         <div className="mt-10 px-2 sm:px-4 md:px-6 lg:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {paginatedCourses.length > 0 ? (
-            paginatedCourses.map((course) => {
-              const firstSentence = course.description.split(".")[0] + ".";
+            paginatedCourses.map((course: unknown) => {
+              // const firstSentence = course.description.split(".")[0] + ".";
               
               // คำนวณจำนวนบทเรียน
-              const totalLessons = course.modules?.reduce((acc: number, module: any) => {
+              interface Module {
+                lessons?: unknown[];
+              }
+              
+              const c = course as Course & { modules?: Module[] };
+              const totalLessons = c.modules?.reduce((acc: number, module: Module) => {
                 return acc + (module?.lessons?.length || 0);
               }, 0) || 0;
               
               return (
-                <Link key={course.id} href={`/non-user/courses/${course.id}`}>
+                <Link key={c.id} href={`/non-user/courses/${c.id}`}>
                   <div className="bg-white rounded-lg shadow hover:shadow-lg transition 
                   overflow-hidden cursor-pointer h-full flex flex-col">
                     {/* Thumbnail */}
-                    <img
-                      src={course.thumbnail}
-                      alt={course.title}
+                    <Image
+                      src={c.thumbnail}
+                      alt={c.title}
+                      width={400}
+                      height={240}
                       className="w-full h-60 object-cover"
                     />
 
                     {/* Content */}
                     <div className="p-4 flex flex-col flex-grow">
-                      <p className="text-orange-500 text-b3 pb-4">{course.category}</p>
-                      <h2 className="text-h3 text-black pb-4">{course.title}</h2>
+                      <p className="text-orange-500 text-b3 pb-4">{c.category}</p>
+                      <h2 className="text-h3 text-black pb-4">{c.title}</h2>
 
                       {/* Description */}
-                      <p className="text-b2 text-gray-700 flex-grow leading-relaxed">{course.summary}</p>
+                      <p className="text-b2 text-gray-700 flex-grow leading-relaxed">{c.summary}</p>
 
                       <div className="border-t border-gray-200 my-4 w-full"></div>
 
@@ -125,7 +144,7 @@ export default function CourseList() {
                         <div className="flex items-center gap-1">
                           <LuClock3 className="size-5 text-blue-600" />
                           <span className="text-b2 text-gray-700">
-                            {course.duration_hours} Hours
+                            {c.duration_hours} Hours
                           </span>
                         </div>
                       </div>

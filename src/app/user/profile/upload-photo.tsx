@@ -4,11 +4,15 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 
-export default function UploadPhoto({ profile }: { profile: any }) {
+export default function UploadPhoto({ profile }: { profile: unknown }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  interface ProfileData {
+    photo_url?: string;
+  }
+  
   const [photoUrl, setPhotoUrl] = useState<string>(
-    profile?.photo_url || "/assets/defaultUser.png"
+    (profile as ProfileData)?.photo_url || "/assets/defaultUser.png"
   );
 
   const handleUpload = () => {

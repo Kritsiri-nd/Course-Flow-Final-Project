@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 interface TestimonialCardProps {
     name: string;
     text: string;
@@ -45,9 +47,11 @@ interface TestimonialCardProps {
   
         {/* Profile Image */}
         <div className='flex justify-center items-center w-[200px] h-[240px] overflow-hidden'>
-          <img
+          <Image
             src={imageSrc}
             alt={name}
+            width={200}
+            height={240}
             className='min-w-full min-h-full object-cover'
           />
         </div>

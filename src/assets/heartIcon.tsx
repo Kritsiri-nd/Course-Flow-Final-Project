@@ -1,6 +1,6 @@
 import React from "react";
 
-function HeartIcon(props: { width?: string, height?: string, stroke?: string }) {
+function HeartIcon() {
   return (
     <svg
       width='36'

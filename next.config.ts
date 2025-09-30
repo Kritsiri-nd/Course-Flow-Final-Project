@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "**.supabase.co", // ✅ อนุญาตโหลดรูปจากทุก subdomain ของ supabase
       },
+      {
+        protocol: "https",
+        hostname: "picsum.photos", // ✅ อนุญาตโหลดรูปจาก picsum.photos (placeholder images)
+      },
     ],
   },
 };

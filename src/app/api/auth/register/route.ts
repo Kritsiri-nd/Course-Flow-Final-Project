@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabaseClient';
+import { createSupabaseServerClient } from '@/lib/createSupabaseServerClient';
 import { validateFirstName, validateLastName, validateDateOfBirth, validateEmail, validatePassword, validateEducationalBackground } from '@/lib/validators';
 import dayjs from 'dayjs';
 import bcrypt from 'bcryptjs';
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createSupabaseServerClient();
     const body = await request.json();
     const { firstName, lastName, dateOfBirth, educationalBackground, email, password } = body;
 

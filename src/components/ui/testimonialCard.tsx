@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 interface TestimonialCardProps {
     name: string;
     text: string;
@@ -45,9 +47,11 @@ interface TestimonialCardProps {
   
         {/* Profile Image */}
         <div className='flex justify-center items-center sm:w-[200px] h-[400px] w-[350px] sm:h-[240px] overflow-hidden mb-4 sm:mb-0'>
-          <img
+          <Image
             src={imageSrc}
             alt={name}
+            width={350}
+            height={400}
             className='min-w-full min-h-full object-cover rounded-lg'
           />
         </div>
@@ -58,7 +62,7 @@ interface TestimonialCardProps {
           <div className='text-[14px] sm:text-[16px] font-normal leading-[150%] text-[#646D89] w-full sm:w-[481px]'>
             {text}
           </div>
-        </div>
+        </div>  
       </div>
     );
   }
@@ -70,9 +74,11 @@ export function TestimonialCardMobile({ name, text, imageSrc, className = '' }: 
 
         {/* Profile Image (Mobile) - มาทับด้านบน */}
         <div className='absolute top-0 left-1/2 -translate-x-1/2 flex justify-center items-center w-[248px] h-[297px] overflow-hidden z-10'>
-        <img
+        <Image
           src={imageSrc}
           alt={name}
+          width={248}
+          height={297}
           className='min-w-full min-h-full object-cover rounded-lg'
         />
       </div>

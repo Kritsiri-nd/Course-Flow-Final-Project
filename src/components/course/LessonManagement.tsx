@@ -241,12 +241,14 @@ export function LessonManagement({ lessons, errors, onLessonsChange, courseId, m
     onLessonsChange(lessons.filter(lesson => lesson.id !== lessonId));
   };
 
+  /*
   const cancelEdit = () => {
     setEditingLesson(null);
     setNewLessonName('');
     setNewLessonSubLessons('1');
     setShowAddLessonForm(false);
   };
+  */
 
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-lg p-6 shadow-sm mt-12 border border-gray-200">

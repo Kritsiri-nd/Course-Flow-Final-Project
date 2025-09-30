@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { SubLessonForm } from "@/components/course/SubLessonForm";
 import { ArrowLeft, Loader2 } from "lucide-react";
 
-interface Lesson {}
+// Removed empty interface - using existing types instead
 
 type SubLessonState = { id: number; name: string; file: File | null; previewUrl?: string | null; existingUrl?: string | null };
 
@@ -41,7 +41,7 @@ export default function EditLessonPage() {
         if (!moduleRes.ok) throw new Error("Failed to load lesson");
         const m = await moduleRes.json();
         setLessonName(m?.title || "");
-        const mapped: SubLessonState[] = (m?.lessons || []).map((l: any, idx: number) => ({
+        const mapped: SubLessonState[] = (m?.lessons || []).map((l: { id?: number; title?: string; video_url?: string }, idx: number) => ({
           id: typeof l?.id === "number" ? l.id : idx + 1,
           name: l?.title || "",
           file: null,
@@ -138,8 +138,8 @@ export default function EditLessonPage() {
       }
 
       router.push(`/admin/courses/${courseId}/edit`);
-    } catch (e: any) {
-      alert(e?.message || "Failed to update lessons");
+    } catch (e: unknown) {
+      alert((e as Error)?.message || "Failed to update lessons");
     } finally {
       setIsSubmitting(false);
     }

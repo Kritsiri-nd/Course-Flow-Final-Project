@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from "next/navigation"
-import CourseFlowIcon from "../../assets/courseFlowIcon"
+// import CourseFlowIcon from "../../assets/courseFlowIcon"
 
 import { Session } from  '@supabase/supabase-js'
 import { createClient } from "@/lib/supabaseClient"

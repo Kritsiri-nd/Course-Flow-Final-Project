@@ -3,10 +3,11 @@ import { createClient } from "@supabase/supabase-js";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    console.log("GET /api/assignments/[id] - ID:", params.id);
+    const { id } = await params;
+    console.log("GET /api/assignments/[id] - ID:", id);
     
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL as string,
@@ -38,7 +39,7 @@ export async function GET(
           )
         )
       `)
-      .eq("id", params.id)
+      .eq("id", id)
       .single();
 
     if (error) {
@@ -63,8 +64,8 @@ export async function GET(
 
     // Normalize the data structure
     const lesson = Array.isArray(data.lessons) ? data.lessons[0] : data.lessons;
-    const module = lesson?.modules ? (Array.isArray(lesson.modules) ? lesson.modules[0] : lesson.modules) : null;
-    const course = module?.courses ? (Array.isArray(module.courses) ? module.courses[0] : module.courses) : null;
+    const lessonModule = lesson?.modules ? (Array.isArray(lesson.modules) ? lesson.modules[0] : lesson.modules) : null;
+    const course = lessonModule?.courses ? (Array.isArray(lessonModule.courses) ? lessonModule.courses[0] : lessonModule.courses) : null;
 
     const normalized = {
       id: data.id,
@@ -76,9 +77,9 @@ export async function GET(
       lesson: lesson ? {
         id: lesson.id,
         title: lesson.title,
-        module: module ? {
-          id: module.id,
-          title: module.title,
+        module: lessonModule ? {
+          id: lessonModule.id,
+          title: lessonModule.title,
           course: course ? {
             id: course.id,
             title: course.title,
@@ -104,7 +105,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = createClient(
@@ -112,6 +113,7 @@ export async function PUT(
       (process.env.SUPABASE_SERVICE_ROLE_KEY as string) || (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string)
     );
 
+    const { id } = await params;
     const body = await request.json();
     const { question, answer, lesson_id } = body;
 
@@ -130,7 +132,7 @@ export async function PUT(
         lesson_id: parseInt(lesson_id),
         updated_at: new Date().toISOString(),
       })
-      .eq("id", params.id)
+      .eq("id", id)
       .select()
       .single();
 
@@ -156,7 +158,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = createClient(
@@ -164,10 +166,11 @@ export async function DELETE(
       (process.env.SUPABASE_SERVICE_ROLE_KEY as string) || (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string)
     );
 
+    const { id } = await params;
     const { error } = await supabase
       .from("assignments")
       .delete()
-      .eq("id", params.id);
+      .eq("id", id);
 
     if (error) {
       return NextResponse.json({ 

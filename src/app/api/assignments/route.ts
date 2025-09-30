@@ -44,8 +44,8 @@ export async function GET() {
     // Normalize the data structure - handle both array and object responses
     const normalized = (data ?? []).map((assignment) => {
         const lesson = Array.isArray(assignment.lessons) ? assignment.lessons[0] : assignment.lessons;
-        const module = lesson?.modules ? (Array.isArray(lesson.modules) ? lesson.modules[0] : lesson.modules) : null;
-        const course = module?.courses ? (Array.isArray(module.courses) ? module.courses[0] : module.courses) : null;
+        const lessonModule = lesson?.modules ? (Array.isArray(lesson.modules) ? lesson.modules[0] : lesson.modules) : null;
+        const course = lessonModule?.courses ? (Array.isArray(lessonModule.courses) ? lessonModule.courses[0] : lessonModule.courses) : null;
 
         return {
             id: assignment.id,
@@ -56,9 +56,9 @@ export async function GET() {
             lesson: lesson ? {
                 id: lesson.id,
                 title: lesson.title,
-                module: module ? {
-                    id: module.id,
-                    title: module.title,
+                module: lessonModule ? {
+                    id: lessonModule.id,
+                    title: lessonModule.title,
                     course: course ? {
                         id: course.id,
                         title: course.title,
