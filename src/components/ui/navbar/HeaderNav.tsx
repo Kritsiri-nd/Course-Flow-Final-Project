@@ -47,8 +47,11 @@ export default async function HeaderNav() {
   if (userProfile.role === 'user') {
     // ถ้า role เป็น 'user'
     return <UserNav session={session} userProfile={userProfile} />;
+  } else if (userProfile.role === 'admin') {
+    // สำหรับ admin ไม่แสดง navbar
+    return null;
   } else {
-    // สำหรับ role อื่นๆ ทั้งหมด (เช่น 'admin')
+    // สำหรับ role อื่นๆ ที่ไม่ใช่ user หรือ admin
     return <UserNav session={session} userProfile={userProfile} />;
   }
 }
