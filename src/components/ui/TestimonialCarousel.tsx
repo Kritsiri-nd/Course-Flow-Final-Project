@@ -2,7 +2,7 @@
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
-import TestimonialCard from './testimonialCard';
+import TestimonialCard, { TestimonialCardMobile } from './testimonialCard';
 
 // Import Swiper styles
 import 'swiper/css';
@@ -137,11 +137,23 @@ export default function TestimonialCarousel() {
         >
           {testimonials.map((testimonial) => (
             <SwiperSlide key={testimonial.id} className="flex justify-center">
-              <TestimonialCard
-                name={testimonial.name}
-                text={testimonial.text}
-                imageSrc={testimonial.imageSrc}
-              />
+              {/* Desktop version */}
+              <div className="hidden sm:block">
+                <TestimonialCard
+                  name={testimonial.name}
+                  text={testimonial.text}
+                  imageSrc={testimonial.imageSrc}
+                />
+              </div>
+              
+              {/* Mobile version */}
+              <div className="block sm:hidden">
+                <TestimonialCardMobile
+                  name={testimonial.name}
+                  text={testimonial.text}
+                  imageSrc={testimonial.imageSrc}
+                />
+              </div>
             </SwiperSlide>
           ))}
         </Swiper>

@@ -1,12 +1,25 @@
 "use client";
 
+import { useEffect, useState } from 'react';
 import { useRouter } from "next/navigation";
 import ProtectIcon from "../../assets/protectIcon";
 import HeartIcon from "../../assets/heartIcon";
 import TestimonialCarousel from "./TestimonialCarousel";
+import dynamic from 'next/dynamic';
+
+const DynamicImage = dynamic(() => import('next/image'), { ssr: false });
 
 export default function Instructure() {
   const router = useRouter();
+  const [isClient, setIsClient] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   return (
     <>
@@ -303,18 +316,7 @@ export default function Instructure() {
             />
             <circle cx="384" cy="110" r="16" fill="#E5ECF8" />
             <circle cx="1135.5" cy="1106.5" r="42.5" fill="#C6DCFF" />
-            <path
-              d="M1223.84 399L1218.84 417.68"
-              stroke="#9B2FAC"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-            <path
-              d="M1212 405.837L1230.68 410.843"
-              stroke="#9B2FAC"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
+                   
             <defs>
               <linearGradient
                 id="paint0_linear_15_1851"
@@ -329,6 +331,38 @@ export default function Instructure() {
               </linearGradient>
             </defs>
           </svg>
+
+          <DynamicImage
+                src="/assets/purpleX.png"
+                alt="purpleX decoration"
+                width={23}
+                height={23}
+                className="w-[23px] h-[23px] absolute top-[400px] left-[1600px] hidden sm:block"
+              />
+
+          <DynamicImage
+                src="/assets/purpleX.png"
+                alt="purpleX decoration"
+                width={23}
+                height={23}
+                className="w-[23px] h-[23px] absolute top-[630px] left-[300px] sm:hidden"
+              />
+
+          <DynamicImage
+                src="/assets/blueCircle.png"
+                alt="purpleX decoration"
+                width={48}
+                height={48}
+                className="w-[48px] h-[48px] absolute top-[1220px] left-[290px] sm:hidden"
+              />
+
+          <DynamicImage
+                src="/assets/greenX.png"
+                alt="purpleX decoration"
+                width={20}
+                height={20}
+                className="w-[20px] h-[20px] absolute top-[3660px] left-[0px] sm:hidden z-10"
+              />
 
           {/* Background Elements - Mobile */}
           <svg
@@ -347,26 +381,17 @@ export default function Instructure() {
             }}
           >
             <circle
-              cx="44.7032"
-              cy="13.7032"
-              r="36.5"
+              cx="70"
+              cy="65"
+              r="80"
               transform="rotate(-75 44.7032 13.7032)"
               fill="url(#paint0_linear_15_1851_mobile)"
             />
           
-            <circle cx="1135.5" cy="105" r="42.5" fill="#C6DCFF" />
-            <path
-              d="M1223.84 399L1218.84 417.68"
-              stroke="#9B2FAC"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-            <path
-              d="M1212 405.837L1230.68 410.843"
-              stroke="#9B2FAC"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
+            <circle cx="1135.5" cy="125" r="50" fill="#C6DCFF" />
+
+          
+
             <defs>
               <linearGradient
                 id="paint0_linear_15_1851_mobile"
@@ -382,6 +407,7 @@ export default function Instructure() {
             </defs>
           </svg>
 
+          
           {/* Content - Responsive */}
           <div className="flex flex-col gap-[40px] sm:gap-[120px] w-full">
             {/* First Feature Row - Responsive */}
@@ -544,29 +570,23 @@ export default function Instructure() {
         </div>
 
         {/* Instructors Section - Responsive */}
-        <div className="h-auto sm:h-[823px] w-[90vw] sm:w-[80vw] relative flex justify-center items-center py-[40px] sm:py-0">
-          <svg
-            width="30"
-            height="30"
-            viewBox="0 0 51 51"
-            fill="none"
-            className="absolute left-[20px] sm:left-[70px] bottom-[50px] sm:bottom-[76.22px]"
-          >
-            <path
-              d="M11.3581 19.9099L37.1499 15.9774L27.6597 40.28L11.3581 19.9099Z"
-              stroke="#FBAA1C"
-              strokeWidth="2"
-            />
-          </svg>
-          
+        <div className="h-auto sm:h-[823px] w-[90vw] sm:w-[80vw] relative flex justify-center items-center py-[80px] sm:py-0">
+          <img
+            src="/assets/Polygon 3.png"
+            alt="polygon decoration"
+            className="absolute left-[40px] sm:left-[70px] bottom-[1620px] sm:bottom-[50px] w-[30px] h-[30px]"
+          />
+
+        
+  
           <div className="flex flex-col gap-[30px] sm:gap-[60px] w-full">
-            <p className="text-[24px] sm:text-[36px] font-medium leading-[120%] sm:leading-[125%] tracking-[-2%] text-center text-[#000000]">
+            <p className="text-[24px] sm:text-[36px] font-medium leading-[120%] sm:leading-[125%] tracking-[-2%] text-center text-[#000000] mb-[20px]">
               Our Professional Instructors
             </p>
             
             <div className="flex flex-col sm:flex-row gap-[20px] sm:gap-[24px] justify-center items-center">
               <div className="flex flex-col gap-[16px] sm:gap-[24px] hover:scale-105 transition-transform w-full sm:w-[357px]">
-                <div className="w-full h-[300px] sm:h-[420px] rounded-lg overflow-hidden cursor-pointer">
+                <div className="w-full h-[400px] sm:h-[420px] rounded-lg overflow-hidden cursor-pointer">
                   <img
                     src="/images/Jane Cooper.png"
                     alt="Jane Cooper"
@@ -586,7 +606,7 @@ export default function Instructure() {
               </div>
               
               <div className="flex flex-col gap-[16px] sm:gap-[24px] hover:scale-105 transition-transform w-full sm:w-[357px]">
-                <div className="cursor-pointer w-full h-[300px] sm:h-[420px] rounded-lg overflow-hidden">
+                <div className="cursor-pointer w-full h-[400px] sm:h-[420px] rounded-lg overflow-hidden">
                   <img
                     src="/images/Esther Howard.png"
                     alt="Esther Howard"
@@ -606,7 +626,7 @@ export default function Instructure() {
               </div>
               
               <div className="flex flex-col gap-[16px] sm:gap-[24px] hover:scale-105 transition-transform w-full sm:w-[357px]">
-                <div className="cursor-pointer w-full h-[300px] sm:h-[420px] rounded-lg overflow-hidden">
+                <div className="cursor-pointer w-full h-[400px] sm:h-[420px] rounded-lg overflow-hidden">
                   <img
                     src="/images/Brooklyn Simmons.png"
                     alt="Brooklyn Simmons"
@@ -638,15 +658,9 @@ export default function Instructure() {
             className="absolute block right-[0px] "
             fill="none"
           >
-            <circle cx="1260.17" cy="96.1741" r="13.1741" fill="#C6DCFF" />
+            <circle cx="1180" cy="200" r="30" fill="#C6DCFF" />
           
-            <circle
-              cx="1345.7"
-              cy="44.7033"
-              r="36.5"
-              transform="rotate(-75 1345.7 44.7033)"
-              fill="url(#paint0_linear_36_4312)"
-            />
+          
             <defs>
               <linearGradient
                 id="paint0_linear_36_4312"
@@ -662,27 +676,47 @@ export default function Instructure() {
             </defs>
           </svg>
           
-          <path
-              d="M13.843 609L8.83754 627.68"
-              stroke="#2FAC61"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-            <path
-              d="M2.00035 615.837L20.6809 620.843"
-              stroke="#2FAC61"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
+          <DynamicImage
+                src="/assets/rightCircle.png"
+                alt="rightCircle decoration"
+                width={73}
+                height={73}
+                className="w-[63px] h-[73px] absolute  right-[0] hidden sm:block z-10"
+              />
 
+            <DynamicImage
+                src="/assets/rightCircle.png"
+                alt="rightCircle decoration"
+                width={33}
+                height={33}
+                className="w-[20px] h-[23px] absolute  right-[0]  sm:hidden z-10"
+              />
+
+                  <DynamicImage
+                src="/assets/ellipse 5.png"
+                alt="blueCircle decoration"
+                width={12}
+                height={13}
+                className="w-[12px] h-[13px] absolute  right-[25px] bottom-[710px]  sm:hidden z-10"
+              />
+      
           <div className="h-auto lg:h-[742px] w-[100vw] flex flex-col gap-[20px] sm:gap-[30px] lg:gap-[25px] px-4 sm:px-6 lg:px-8 mt-[20px] sm:mt-20">
-            <p className="text-[20px] sm:text-[24px] lg:text-3xl font-semibold text-center text-gray-900">
+            <p className="text-[24px] lg:text-4xl font-semibold text-center text-gray-900 justify-center items-center">
               Our Graduates
             </p>
             <TestimonialCarousel />
+            <DynamicImage
+              src="/assets/greenX.png"
+              alt="green X decoration"
+              width={23}
+              height={23}
+              className="w-[23px] h-[23px] absolute left-[300px] top-[600px] "
+            />
           </div>
+          
         </div>
       </div>
     </>
   );
 }
+
