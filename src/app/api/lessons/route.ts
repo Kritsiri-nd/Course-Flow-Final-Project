@@ -86,8 +86,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, moduleId }, { status: 201 });
-  } catch (e: any) {
-    console.error("Unexpected error creating lessons:", e?.message || e);
+    } catch (e: unknown) {
+    console.error("Unexpected error creating lessons:", (e as Error)?.message || e);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

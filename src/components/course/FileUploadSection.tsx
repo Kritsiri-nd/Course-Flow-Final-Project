@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Image from "next/image";
 import { Plus, Upload, AlertCircle } from "lucide-react";
 import { FILE_CONSTRAINTS } from "@/lib/constants";
 
@@ -67,9 +68,11 @@ export function FileUploadSection({
         >
           {previewThumbnailUrl || uploadedThumbnailUrl ? (
             <div className="w-full h-full flex items-center justify-center p-2">
-              <img
+              <Image
                 src={(uploadedThumbnailUrl || previewThumbnailUrl) as string}
                 alt="Thumbnail preview"
+                width={300}
+                height={200}
                 className="max-w-full max-h-full object-contain rounded"
               />
             </div>

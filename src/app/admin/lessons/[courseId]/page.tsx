@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { SubLessonForm } from "@/components/course/SubLessonForm";
 import { ArrowLeft, Loader2 } from "lucide-react";
 
-interface Lesson {}
+// Removed empty interface - using existing types instead
 
 export default function AddLessonPage() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function AddLessonPage() {
   const [subLessons, setSubLessons] = useState<{ id: number; name: string; file: File | null; previewUrl?: string | null; }[]>([
     { id: 1, name: "", file: null, previewUrl: null },
   ]);
-  const [lessonId, setLessonId] = useState<string | null>(null);
+  const [lessonId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -123,8 +123,8 @@ export default function AddLessonPage() {
       }
 
       router.push(`/admin/courses/${courseId}/edit`);
-    } catch (e: any) {
-      alert(e?.message || "Failed to create lessons");
+    } catch (e: unknown) {
+      alert((e as Error)?.message || "Failed to create lessons");
     } finally {
       setIsSubmitting(false);
     }

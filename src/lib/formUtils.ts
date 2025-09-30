@@ -61,7 +61,9 @@ export const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
 
 // Form validation functions
 export const validateCourseForm = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formData: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   lessons: any[],
   errors: ValidationErrors,
   options?: {

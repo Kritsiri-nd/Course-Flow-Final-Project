@@ -46,7 +46,7 @@ export async function GET() {
   // normalize: modules, lessons ต้องเป็น array เสมอ
   const normalized = (data ?? []).map((course) => ({
     ...course,
-    modules: (course.modules ?? []).map((m: any) => ({
+    modules: (course.modules ?? []).map((m: { lessons?: unknown[] }) => ({
       ...m,
       lessons: m.lessons ?? [],
     })),
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       // 23505 = unique_violation (e.g., duplicate primary key or unique index)
-      if ((error as any).code === "23505") {
+      if ((error as { code?: string }).code === "23505") {
         return NextResponse.json(
           { error: error.message, code: "unique_violation" },
           { status: 409 }
@@ -126,8 +126,8 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(data, { status: 201 });
-  } catch (err: any) {
-    console.error("Unexpected error creating course:", err?.message || err);
+  } catch (err: unknown) {
+    console.error("Unexpected error creating course:", (err as Error)?.message || err);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

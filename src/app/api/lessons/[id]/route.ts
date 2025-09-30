@@ -9,10 +9,10 @@ type SubLessonPayload = {
 // GET /api/lessons/[id] - fetch a module with its lessons
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const moduleId = parseInt(id, 10);
     if (Number.isNaN(moduleId)) {
       return NextResponse.json({ error: "Invalid module id" }, { status: 400 });
@@ -23,6 +23,7 @@ export async function GET(
       (process.env.SUPABASE_SERVICE_ROLE_KEY as string) || (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string)
     );
 
+    // eslint-disable-next-line prefer-const
     let { data: moduleRow, error } = await supabase
       .from("modules")
       .select(
@@ -32,7 +33,7 @@ export async function GET(
       .single();
 
     if (error) {
-      if ((error as any).code === "PGRST116") {
+      if ((error as { code?: string }).code === "PGRST116") {
         // Fallback: Treat provided id as a lesson id and resolve its module
         const { data: lessonRow, error: lessonErr } = await supabase
           .from("lessons")
@@ -61,7 +62,7 @@ export async function GET(
     }
 
     return NextResponse.json(moduleRow, { status: 200 });
-  } catch (err: any) {
+  } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -69,10 +70,10 @@ export async function GET(
 // PUT /api/lessons/[id] - update module title and replace lessons list
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const moduleId = parseInt(id, 10);
     if (Number.isNaN(moduleId)) {
       return NextResponse.json({ error: "Invalid module id" }, { status: 400 });
@@ -98,6 +99,7 @@ export async function PUT(
     );
 
     // Verify module exists. If not, allow treating id as lesson id (resolve module_id)
+    // eslint-disable-next-line prefer-const
     let { data: existingModule, error: findErr } = await admin
       .from("modules")
       .select("id, course_id")
@@ -159,7 +161,7 @@ export async function PUT(
     }
 
     return NextResponse.json({ success: true }, { status: 200 });
-  } catch (err: any) {
+  } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -168,10 +170,11 @@ export async function PUT(
 // DELETE /api/lessons/[id] - delete a module and its lessons
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const moduleId = parseInt(params.id, 10);
+    const { id } = await params;
+    const moduleId = parseInt(id, 10);
     if (Number.isNaN(moduleId)) {
       return NextResponse.json({ error: "Invalid module id" }, { status: 400 });
     }
@@ -182,6 +185,7 @@ export async function DELETE(
     );
 
     // Ensure module exists, or resolve from lesson id
+    // eslint-disable-next-line prefer-const
     let { data: moduleRow, error: modErr } = await admin
       .from("modules")
       .select("id")
@@ -198,10 +202,10 @@ export async function DELETE(
       if (lessonErr || !lessonRow) {
         return NextResponse.json({ error: "Module not found" }, { status: 404 });
       }
-      moduleRow = { id: lessonRow.module_id } as any;
+      moduleRow = { id: lessonRow.module_id } as { id: number };
     }
 
-    const idToDelete = (moduleRow as any).id as number;
+    const idToDelete = (moduleRow as { id: number }).id;
 
     // Delete child lessons first to satisfy FKs (in case cascade isn't configured)
     const { error: delLessonsErr } = await admin
@@ -221,7 +225,7 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true }, { status: 200 });
-  } catch (err: any) {
+  } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

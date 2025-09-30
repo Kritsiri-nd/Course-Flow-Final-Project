@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import NonuserNav from './NonuserNav';
+// import NonuserNav from './NonuserNav';
 import CourseFlowIcon from '@/assets/courseFlowIcon';
 
 // --- Icon Components ---
@@ -35,7 +35,7 @@ type Profile = {
 } | null;
 
 // --- Main Component ---
-export default function UserNav({ session, userProfile }: { session: Session | null, userProfile: Profile }) {
+export default function UserNav({ userProfile }: { session: Session | null, userProfile: Profile }) {
   
   const router = useRouter();
   const supabase = createClient();

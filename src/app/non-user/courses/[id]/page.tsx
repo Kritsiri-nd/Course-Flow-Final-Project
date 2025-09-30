@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { PiBookOpenLight, PiStarFill } from "react-icons/pi";
+import { PiBookOpenLight } from "react-icons/pi";
 import { LuClock3, LuPlay, LuArrowLeft } from "react-icons/lu";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -165,16 +166,16 @@ export default function CourseDetailPage() {
             Course not found
           </h2>
           <p className="text-b2 text-muted-foreground">
-            The course you're looking for doesn't exist.
+            The course you&apos;re looking for doesn&apos;t exist.
           </p>
         </div>
       </div>
     );
 
-  const totalLessons = course.modules.reduce(
-    (acc, module) => acc + module.lessons.length,
-    0
-  );
+  // const totalLessons = course.modules.reduce(
+  //   (acc, module) => acc + module.lessons.length,
+  //   0
+  // );
 
   return (
     <>
@@ -204,10 +205,11 @@ export default function CourseDetailPage() {
                       aspectRatio: "739/460",
                     }}
                   >
-                    <img
+                    <Image
                       src={course.thumbnail}
                       alt={course.title}
-                      className="absolute inset-0 w-full h-full object-cover !m-0 !p-0"
+                      fill
+                      className="object-cover !m-0 !p-0"
                     />
                     <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                       <Button
@@ -349,9 +351,11 @@ export default function CourseDetailPage() {
                 <Link key={c.id} href={`/non-user/courses/${c.id}`}>
                   <div className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden cursor-pointer h-full flex flex-col">
                     {/* Thumbnail */}
-                    <img
+                    <Image
                       src={c.thumbnail}
                       alt={c.title}
+                      width={400}
+                      height={240}
                       className="w-full h-60 object-cover"
                     />
 

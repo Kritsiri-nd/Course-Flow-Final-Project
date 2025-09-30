@@ -4,7 +4,7 @@ import "./globals.css";
 
 import { createSupabaseServerClient } from "@/lib/createSupabaseServerClient";
 import HeaderNav from "@/components/ui/navbar/HeaderNav";
-import UserNav from "@/components/ui/navbar/UserNav";
+// import UserNav from "@/components/ui/navbar/UserNav";
 
 
 export const metadata: Metadata = {
@@ -20,16 +20,16 @@ export default async function RootLayout({
   const supabase = await createSupabaseServerClient();
   const { data: { session } } = await supabase.auth.getSession();
 
-  let userProfile = null;
+  // let userProfile = null;
 
   if(session){
-    const { data: profiles } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', session.user.id)
-    .single();
+    // const { data: profiles } = await supabase
+    // .from('profiles')
+    // .select('*')
+    // .eq('id', session.user.id)
+    // .single();
 
-    userProfile = profiles;
+    // userProfile = profiles;
   }
 
   return (

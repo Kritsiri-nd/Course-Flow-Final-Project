@@ -64,8 +64,8 @@ export async function PUT(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true }, { status: 200 });
-  } catch (e: any) {
-    console.error("Unexpected error reordering lessons:", e?.message || e);
+  } catch (e: unknown) {
+    console.error("Unexpected error reordering lessons:", (e as Error)?.message || e);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

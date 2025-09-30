@@ -58,14 +58,14 @@ export async function GET(
 
         const normalized = {
             ...data,
-            modules: (data?.modules ?? []).map((m: any) => ({
+            modules: (data?.modules ?? []).map((m: { lessons?: unknown[] }) => ({
                 ...m,
                 lessons: m.lessons ?? [],
             })),
         };
 
         return NextResponse.json(normalized, { status: 200 });
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("Error fetching course:", err);
         return NextResponse.json(
             { error: "Internal server error" },
@@ -148,8 +148,8 @@ export async function PUT(
         }
 
         return NextResponse.json(data, { status: 200 });
-    } catch (err: any) {
-        console.error("Unexpected error updating course:", err?.message || err);
+    } catch (err: unknown) {
+        console.error("Unexpected error updating course:", (err as Error)?.message || err);
         return NextResponse.json(
             { error: "Internal server error" },
             { status: 500 }
@@ -186,8 +186,8 @@ export async function DELETE(
         }
 
         return NextResponse.json({ success: true }, { status: 200 });
-    } catch (err: any) {
-        console.error("Unexpected error deleting course:", err?.message || err);
+    } catch (err: unknown) {
+        console.error("Unexpected error deleting course:", (err as Error)?.message || err);
         return NextResponse.json(
             { error: "Internal server error" },
             { status: 500 }

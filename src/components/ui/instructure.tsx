@@ -11,11 +11,11 @@ const DynamicImage = dynamic(() => import('next/image'), { ssr: false });
 
 export default function Instructure() {
   const router = useRouter();
-  const [isClient, setIsClient] = useState(false);
+  // const [isClient, setIsClient] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
+    // setIsClient(true);
     setMounted(true);
   }, []);
 
@@ -54,7 +54,7 @@ export default function Instructure() {
           </svg>
 
           {/* Mobile Wave */}
-          <img
+            <img
             src="/images/wave.png"
             alt="Wave background"
             className="absolute opacity-100 sm:hidden"
@@ -210,7 +210,7 @@ export default function Instructure() {
           </svg>
             
           {/* blue circle */}
-          <img
+            <img
             src="/images/sm-blue circle.png"
             alt="Blue circle"
             className="absolute right-[350px] bottom-[145px] sm:hidden z-30"
@@ -413,7 +413,7 @@ export default function Instructure() {
             {/* First Feature Row - Responsive */}
             <div className="flex flex-col lg:flex-row gap-[30px] sm:gap-[119px]">
               <div className="w-full lg:w-[454px] h-[250px] sm:h-[330px] rounded-lg overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300 order-1 lg:order-1">
-                <img
+            <img
                   src="/images/learning.png"
                   alt="Learning experience"
                   width={454}
@@ -557,7 +557,7 @@ export default function Instructure() {
                 </div>
               </div>
               <div className="w-full lg:w-[454px] h-[250px] sm:h-[330px] rounded-lg overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300 order-1 lg:order-2">
-                <img
+            <img
                   src="/images/interaction.png"
                   alt="Learning experience"
                   width={454}
@@ -571,7 +571,7 @@ export default function Instructure() {
 
         {/* Instructors Section - Responsive */}
         <div className="h-auto sm:h-[823px] w-[90vw] sm:w-[80vw] relative flex justify-center items-center py-[80px] sm:py-0">
-          <img
+            <img
             src="/assets/Polygon 3.png"
             alt="polygon decoration"
             className="absolute left-[40px] sm:left-[70px] bottom-[1620px] sm:bottom-[50px] w-[30px] h-[30px]"
@@ -587,7 +587,7 @@ export default function Instructure() {
             <div className="flex flex-col sm:flex-row gap-[20px] sm:gap-[24px] justify-center items-center">
               <div className="flex flex-col gap-[16px] sm:gap-[24px] hover:scale-105 transition-transform w-full sm:w-[357px]">
                 <div className="w-full h-[400px] sm:h-[420px] rounded-lg overflow-hidden cursor-pointer">
-                  <img
+            <img
                     src="/images/Jane Cooper.png"
                     alt="Jane Cooper"
                     width={357}
@@ -607,7 +607,7 @@ export default function Instructure() {
               
               <div className="flex flex-col gap-[16px] sm:gap-[24px] hover:scale-105 transition-transform w-full sm:w-[357px]">
                 <div className="cursor-pointer w-full h-[400px] sm:h-[420px] rounded-lg overflow-hidden">
-                  <img
+            <img
                     src="/images/Esther Howard.png"
                     alt="Esther Howard"
                     width={357}
@@ -627,7 +627,7 @@ export default function Instructure() {
               
               <div className="flex flex-col gap-[16px] sm:gap-[24px] hover:scale-105 transition-transform w-full sm:w-[357px]">
                 <div className="cursor-pointer w-full h-[400px] sm:h-[420px] rounded-lg overflow-hidden">
-                  <img
+            <img
                     src="/images/Brooklyn Simmons.png"
                     alt="Brooklyn Simmons"
                     width={357}

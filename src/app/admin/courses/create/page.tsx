@@ -95,7 +95,6 @@ export default function AddCoursePage() {
   // File input refs
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Handle form input changes
   const handleInputChange = (field: keyof CourseFormData, value: string) => {
@@ -198,10 +197,10 @@ export default function AddCoursePage() {
         try {
           const errorData = await response.json();
           errorMessage = errorData.error || errorMessage;
-        } catch (parseError) {
+        } catch {
           // If response is not JSON, use status text
           errorMessage = response.statusText || errorMessage;
-        };
+        }
         throw new Error(errorMessage);
       }
 

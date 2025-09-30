@@ -3,10 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabaseClient";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 
 
 
+/*
 const CalendarIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -26,11 +27,12 @@ const CalendarIcon = () => (
     <line x1="3" x2="21" y1="10" y2="10" />
   </svg>
 );
+*/
 
 
 export default function RegisterPage() {
 
-  const router = useRouter();
+  // const router = useRouter();
 
   const [firstName, setFirstName] = useState<string>('');
   const [lastName, setLastName] = useState<string>('');

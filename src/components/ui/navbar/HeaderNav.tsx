@@ -10,13 +10,13 @@ import NonuserNav from '@/components/ui/navbar/NonuserNav';
 export const dynamic = 'force-dynamic';
 
 
-type Profile = {
-  id: string;
-  first_name: string | null;
-  last_name: string | null;
-  photo_url: string | null;
-  role: string | null;
-} | null;
+// type Profile = {
+//   id: string;
+//   first_name: string | null;
+//   last_name: string | null;
+//   photo_url: string | null;
+//   role: string | null;
+// } | null;
 
 export default async function HeaderNav() {
   const supabase = await createSupabaseServerClient();

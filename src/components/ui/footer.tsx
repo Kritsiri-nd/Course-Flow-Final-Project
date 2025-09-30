@@ -17,7 +17,7 @@ export default function Footer() {
               window.scrollTo({ top: 0, left: 0, behavior: "auto" })
             }}
           >
-            <img
+            <Image
               src="/images/courseflowicon.png"
               alt="CourseFlow Logo"
               width={140}

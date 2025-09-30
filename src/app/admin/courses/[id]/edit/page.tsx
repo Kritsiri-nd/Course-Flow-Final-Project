@@ -57,7 +57,7 @@ export default function EditCoursePage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
@@ -91,7 +91,7 @@ export default function EditCoursePage() {
 
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  // const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -135,7 +135,7 @@ export default function EditCoursePage() {
         // Map modules -> a single row per module (lesson), count its sub-lessons
         try {
           const apiLessons = (data?.modules ?? [])
-            .map((m: any, idx: number) => ({
+            .map((m: { id?: number; title?: string; lessons?: unknown[] }, idx: number) => ({
               id: typeof m?.id === "number" ? m.id : idx + 1,
               name: m?.title ?? `Lesson ${idx + 1}`,
               subLessons: Array.isArray(m?.lessons) ? m.lessons.length : 0,
@@ -367,7 +367,7 @@ export default function EditCoursePage() {
               onClick={() => router.push("/admin/courses")}
             />
             <span className="text-[#9AA1B9] font-inter font-medium text-2xl leading-[125%] tracking-[-0.02em] align-middle">Course</span>
-            <span className="text-black font-inter font-bold text-2xl leading-[125%] tracking-[-0.02em] align-middle">'{formData.title || `ID: ${courseId}`}'</span>
+            <span className="text-black font-inter font-bold text-2xl leading-[125%] tracking-[-0.02em] align-middle">&apos;{formData.title || `ID: ${courseId}`}&apos;</span>
           </div>
 
           <div className="ml-auto gap-4 flex items-center">

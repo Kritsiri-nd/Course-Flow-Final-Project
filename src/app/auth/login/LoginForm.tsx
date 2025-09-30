@@ -4,20 +4,20 @@ import { useState } from 'react';
 import { createClient } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { sign } from 'crypto';
+// import { sign } from 'crypto';
 
 export default function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const [message, setMessage] = useState<string>('');
+  // const [message, setMessage] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
-    setMessage('');
+    // setMessage('');
     setIsLoading(true);
 
     const supabase = createClient();
@@ -30,7 +30,7 @@ export default function LoginForm() {
     if (signInError) {
       setError(`Please check your email and password.`);
     } else {
-      setMessage('Login successful! Redirecting...');
+      // setMessage('Login successful! Redirecting...');
       router.refresh();
       // router.push('/');
     }

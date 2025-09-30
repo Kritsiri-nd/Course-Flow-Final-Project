@@ -8,7 +8,8 @@ import {
 import { AdminPanel } from "@/components/layouts/sidebar-admin-panel";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Edit, Plus, Trash } from "lucide-react";
+import Image from "next/image";
+import { Edit, Plus } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -179,8 +180,8 @@ export default function AdminCourses() {
                   const created = c.created_at
                     ? new Date(c.created_at).toLocaleString()
                     : "-";
-                  const updated = (c as any).updated_at
-                    ? new Date((c as any).updated_at).toLocaleString()
+                  const updated = (c as { updated_at?: string }).updated_at
+                    ? new Date((c as { updated_at?: string }).updated_at!).toLocaleString()
                     : created;
                   return (
                     <TableRow key={c.id}>
@@ -189,9 +190,11 @@ export default function AdminCourses() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <img
+                          <Image
                             src={c.thumbnail}
                             alt={c.title}
+                            width={80}
+                            height={56}
                             className="h-14 w-20 object-cover rounded"
                           />
                         </div>
