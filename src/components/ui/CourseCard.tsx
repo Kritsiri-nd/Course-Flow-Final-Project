@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { PiBookOpenLight } from 'react-icons/pi';
 import { LuClock3 } from 'react-icons/lu';
 
@@ -24,7 +25,8 @@ export default function CourseCard({
   category = 'Course',
 }: CourseCardProps) {
   return (
-    <div className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden cursor-pointer h-full flex flex-col">
+    <Link href={`/non-user/courses/${id}`} className="block">
+      <div className="w-[357px] h-[475px] bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden cursor-pointer flex flex-col">
       {/* Thumbnail */}
       <div className="relative w-full h-60">
         <Image
@@ -36,17 +38,19 @@ export default function CourseCard({
       </div>
 
       {/* Content */}
-      <div className="p-4 flex flex-col flex-grow">
-        <p className="text-orange-500 text-b3 pb-4">{category}</p>
-        <h3 className="text-h3 text-black pb-4">{title}</h3>
+      <div className="flex flex-col flex-grow p-6 gap-6">
+        <div className="flex flex-col gap-4">
+          <p className="text-orange-500 text-b3">{category}</p>
+          <h3 className="text-h3 text-black">{title}</h3>
+        </div>
 
         {/* Description */}
         <p className="text-b2 text-gray-700 flex-grow leading-relaxed">{description}</p>
 
-        <div className="border-t border-gray-200 my-4 w-full"></div>
+        <div className="border-t border-gray-200 w-full"></div>
 
         {/* Lesson + Hours */}
-        <div className="flex items-center gap-6 mt-auto">
+        <div className="flex items-center gap-6">
           <div className="flex items-center gap-1">
             <PiBookOpenLight className="size-5 text-blue-600" />
             <span className="text-b2 text-gray-700">{lessonsCount} Lessons</span>
@@ -58,5 +62,6 @@ export default function CourseCard({
         </div>
       </div>
     </div>
+    </Link>
   );
 }
