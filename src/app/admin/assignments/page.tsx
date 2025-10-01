@@ -30,7 +30,7 @@ export default function Assignments() {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const itemsPerPage = 3;
+  const itemsPerPage = 10;
 
   // Fetch assignments from API
   useEffect(() => {
@@ -176,15 +176,9 @@ export default function Assignments() {
                   </TableCell>
                 </TableRow>
               ) : (
-                currentAssignments.map((assignment, index) => {
-                  // Calculate the correct row number across pages
-                  const rowNumber = startIndex + index + 1;
-
+                currentAssignments.map((assignment) => {
                   return (
                     <TableRow key={assignment.id}>
-                      <TableCell className="text-center text-b3">
-                        {rowNumber}
-                      </TableCell>
                       <TableCell className="text-rigth text-b3">
                         {assignment.question.length > 50
                           ? assignment.question.substring(0, 50) + "..."
