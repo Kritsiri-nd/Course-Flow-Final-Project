@@ -1,11 +1,11 @@
 // src/app/user/profile/page.tsx
-import { createSupabaseServerClientReadOnly } from "@/lib/createSupabaseServerClient";
+import { createSupabaseServerClient } from "@/lib/createSupabaseServerClient";
 import Footer from "@/components/ui/footer";
 import ProfileForm from "./profile-form";
 import UploadPhoto from "./upload-photo";
 
 export default async function ProfilePage() {
-  const supabase = await createSupabaseServerClientReadOnly();
+  const supabase = await createSupabaseServerClient();
   
   // ใช้ getUser() แทน getSession() เพื่อให้ได้ข้อมูลล่าสุด
   const {
