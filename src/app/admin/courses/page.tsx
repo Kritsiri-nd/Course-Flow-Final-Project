@@ -6,7 +6,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { AdminPanel } from "@/components/layouts/sidebar-admin-panel";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Edit, Plus } from "lucide-react";
@@ -43,8 +43,9 @@ export default function AdminCourses() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [paginatedCourses, setPaginatedCourses] = useState<Course[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const itemsPerPage = 10;
 
   useEffect(() => {
     const load = async () => {
@@ -60,7 +61,8 @@ export default function AdminCourses() {
     load();
   }, []);
 
-  const filtered = useMemo(() => {
+  // Filter courses based on search query
+  const filteredCourses = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return courses;
     return courses.filter((c) =>
@@ -70,13 +72,20 @@ export default function AdminCourses() {
     );
   }, [courses, query]);
 
-  const handlePageChange = useCallback(
-    (paginatedData: Course[], page: number, totalPages: number) => {
-      setPaginatedCourses(paginatedData);
-      setCurrentPage(page);
-    },
-    []
-  );
+  // Calculate pagination
+  const totalItems = filteredCourses.length;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentCourses = filteredCourses.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const handleDelete = async (courseId: number) => {
     try {
@@ -170,7 +179,7 @@ export default function AdminCourses() {
                     Loading...
                   </TableCell>
                 </TableRow>
-              ) : filtered.length === 0 ? (
+              ) : filteredCourses.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={8}
@@ -180,7 +189,7 @@ export default function AdminCourses() {
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedCourses.map((c, index) => {
+                currentCourses.map((c, index) => {
                   const price = `${c.currency} ${Number(
                     c.price ?? 0
                   ).toLocaleString()}`;
@@ -198,7 +207,7 @@ export default function AdminCourses() {
                     : created;
 
                   // Calculate the correct row number across pages
-                  const rowNumber = (currentPage - 1) * 10 + index + 1;
+                  const rowNumber = startIndex + index + 1;
 
                   return (
                     <TableRow key={c.id}>
@@ -255,8 +264,9 @@ export default function AdminCourses() {
             </TableBody>
           </Table>
           <PaginationUI
-            data={filtered}
-            itemsPerPage={10}
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+            currentPage={currentPage}
             onPageChange={handlePageChange}
             className="my-4"
           />

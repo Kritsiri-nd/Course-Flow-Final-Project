@@ -1,54 +1,39 @@
 "use client";
 import { useState, useEffect } from "react";
 
-//type for pagination
-interface PaginationProps<T> {
-  data: T[];
+interface PaginationProps {
+  totalItems: number;
   itemsPerPage?: number;
-  onPageChange?: (
-    paginatedData: T[],
-    currentPage: number,
-    totalPages: number
-  ) => void;
+  currentPage: number;
+  onPageChange: (page: number) => void;
   className?: string;
 }
 
-//pagination component
-export default function PaginationUI<T>({
-  data,
+export default function PaginationUI({
+  totalItems,
   itemsPerPage = 10,
+  currentPage,
   onPageChange,
   className = "",
-}: PaginationProps<T>) {
-  const [currentPage, setCurrentPage] = useState(1);
-
-  // Calculate pagination values
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+}: PaginationProps) {
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
-
-  // Reset to page 1 when data changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [data.length]);
-
-  // Call onPageChange callback when pagination changes
-  useEffect(() => {
-    if (onPageChange) {
-      onPageChange(paginatedData, currentPage, totalPages);
-    }
-  }, [currentPage, data, itemsPerPage, onPageChange]);
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
 
   const handlePrevPage = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 1));
+    if (currentPage > 1) {
+      onPageChange(currentPage - 1);
+    }
   };
 
   const handleNextPage = () => {
-    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    if (currentPage < totalPages) {
+      onPageChange(currentPage + 1);
+    }
   };
 
   const handlePageClick = (page: number) => {
-    setCurrentPage(page);
+    onPageChange(page);
   };
 
   // Don't render pagination if there's only one page or no data
@@ -146,9 +131,7 @@ export default function PaginationUI<T>({
 
       {/* Page Info */}
       <div className="ml-4 text-sm text-gray-700">
-        Showing {startIndex + 1} to{" "}
-        {Math.min(startIndex + itemsPerPage, data.length)} of {data.length}{" "}
-        results
+        Showing {startIndex + 1} to {endIndex} of {totalItems} results
       </div>
     </div>
   );
