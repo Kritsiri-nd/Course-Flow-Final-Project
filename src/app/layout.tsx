@@ -24,25 +24,29 @@ export default async function RootLayout({
   // ตรวจสอบว่าเป็นหน้า admin หรือไม่
   const isAdminPage = pathname.startsWith('/admin');
   
+  // ตรวจสอบว่าเป็นหน้า user หรือไม่
+  const isUserPage = pathname.startsWith('/user');
+  
   const supabase = await createSupabaseServerClient();
   const { data: { session } } = await supabase.auth.getSession();
 
-  // let userProfile = null;
+  let userProfile = null;
 
   if(session){
-    // const { data: profiles } = await supabase
-    // .from('profiles')
-    // .select('*')
-    // .eq('id', session.user.id)
-    // .single();
+    const { data: profiles } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', session.user.id)
+    .single();
 
-    // userProfile = profiles;
+    userProfile = profiles;
   }
 
   return (
     <html lang="en">
       <body>
-        {!isAdminPage && <HeaderNav />}
+        {!isAdminPage && !isUserPage && <HeaderNav />}
+        {!isAdminPage && isUserPage && <UserNav session={session} userProfile={userProfile} />}
         {children}
       </body>
     </html>
