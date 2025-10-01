@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import DeleteModalAlert from "@/components/ui/delete-modal-alert";
+import PaginationUI from "@/components/layouts/pagination-ui";
 
 type Course = {
   id: number;
@@ -42,6 +43,8 @@ export default function AdminCourses() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [paginatedCourses, setPaginatedCourses] = useState<Course[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const load = async () => {
@@ -66,6 +69,11 @@ export default function AdminCourses() {
       )
     );
   }, [courses, query]);
+
+  const handlePageChange = (paginatedData: Course[], page: number) => {
+    setPaginatedCourses(paginatedData);
+    setCurrentPage(page);
+  };
 
   const handleDelete = async (courseId: number) => {
     try {
@@ -169,7 +177,7 @@ export default function AdminCourses() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filtered.map((c, index) => {
+                paginatedCourses.map((c, index) => {
                   const price = `${c.currency} ${Number(
                     c.price ?? 0
                   ).toLocaleString()}`;
@@ -181,12 +189,18 @@ export default function AdminCourses() {
                     ? new Date(c.created_at).toLocaleString()
                     : "-";
                   const updated = (c as { updated_at?: string }).updated_at
-                    ? new Date((c as { updated_at?: string }).updated_at!).toLocaleString()
+                    ? new Date(
+                        (c as { updated_at?: string }).updated_at!
+                      ).toLocaleString()
                     : created;
+
+                  // Calculate the correct row number across pages
+                  const rowNumber = (currentPage - 1) * 10 + index + 1;
+
                   return (
                     <TableRow key={c.id}>
                       <TableCell className="text-center text-b3">
-                        {index + 1}
+                        {rowNumber}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">
@@ -237,6 +251,12 @@ export default function AdminCourses() {
               )}
             </TableBody>
           </Table>
+          <PaginationUI
+            data={filtered}
+            itemsPerPage={10}
+            onPageChange={handlePageChange}
+            className="my-4"
+          />
         </div>
       </SidebarInset>
     </SidebarProvider>
