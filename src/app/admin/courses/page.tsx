@@ -6,7 +6,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { AdminPanel } from "@/components/layouts/sidebar-admin-panel";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Edit, Plus } from "lucide-react";
@@ -70,10 +70,13 @@ export default function AdminCourses() {
     );
   }, [courses, query]);
 
-  const handlePageChange = (paginatedData: Course[], page: number) => {
-    setPaginatedCourses(paginatedData);
-    setCurrentPage(page);
-  };
+  const handlePageChange = useCallback(
+    (paginatedData: Course[], page: number, totalPages: number) => {
+      setPaginatedCourses(paginatedData);
+      setCurrentPage(page);
+    },
+    []
+  );
 
   const handleDelete = async (courseId: number) => {
     try {
