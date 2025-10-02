@@ -29,15 +29,26 @@ export default function MyAssignmentsClient({ userData, assignments }: MyAssignm
 
   // Filter assignments based on active tab
   const filteredAssignments = assignmentsState.filter(assignment => {
+    console.log(`🔍 Filtering assignment ${assignment.id}: status=${assignment.status}, activeTab=${activeTab}`);
     switch (activeTab) {
       case 'in-progress':
         return assignment.status === 'in-progress';
       case 'submitted':
         return assignment.status === 'submitted';
       default:
+        // แสดงทั้งหมด (pending, in-progress, submitted, overdue)
         return true;
     }
   });
+
+  // Count assignments by status
+  const statusCounts = {
+    all: assignmentsState.length,
+    'in-progress': assignmentsState.filter(a => a.status === 'in-progress').length,
+    submitted: assignmentsState.filter(a => a.status === 'submitted').length
+  };
+  
+  console.log('🔍 Filtered assignments:', filteredAssignments);
 
   const handleSubmitAssignment = (assignmentId: string, answer: string) => {
     setAssignmentsState(prev => 
@@ -90,7 +101,7 @@ export default function MyAssignmentsClient({ userData, assignments }: MyAssignm
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              {tab.label}
+              {tab.label} ({statusCounts[tab.key as keyof typeof statusCounts]})
               {activeTab === tab.key && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900"></div>
               )}
@@ -112,7 +123,14 @@ export default function MyAssignmentsClient({ userData, assignments }: MyAssignm
               ))
             ) : (
               <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">No assignments found for this filter.</p>
+                <p className="text-gray-500 text-lg">
+                  {activeTab === 'in-progress' 
+                    ? 'No assignments in progress.' 
+                    : activeTab === 'submitted'
+                    ? 'No submitted assignments.'
+                    : 'No assignments found for this filter.'
+                  }
+                </p>
               </div>
             )}
           </div>

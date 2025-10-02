@@ -47,15 +47,50 @@ export default function AssignmentCard({ assignment, onSubmit, onAnswerChange }:
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (answer.trim()) {
-      onSubmit(assignment.id, answer);
+      try {
+        const response = await fetch('/api/assignments/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            assignmentId: assignment.id,
+            answer: answer
+          }),
+        });
+
+        if (response.ok) {
+          onSubmit(assignment.id, answer);
+        } else {
+          console.error('Failed to submit assignment');
+        }
+      } catch (error) {
+        console.error('Error submitting assignment:', error);
+      }
     }
   };
 
-  const handleAnswerChange = (newAnswer: string) => {
+  const handleAnswerChange = async (newAnswer: string) => {
     setAnswer(newAnswer);
     onAnswerChange(assignment.id, newAnswer);
+    
+    // Auto-save answer as user types (debounced)
+    try {
+      await fetch('/api/assignments/submit', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          assignmentId: assignment.id,
+          answer: newAnswer
+        }),
+      });
+    } catch (error) {
+      console.error('Error auto-saving answer:', error);
+    }
   };
 
   const handleOpenCourse = () => {
