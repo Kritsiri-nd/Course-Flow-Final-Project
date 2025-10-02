@@ -218,7 +218,6 @@ export default function CourseDetailPage() {
   //   (acc, module) => acc + module.lessons.length,
   //   0
   // );
-  const router = useRouter();
   return (
     <>
       <div className="bg-white pt-2 pb-8 sm:pb-16 sm:pt-16 px-2 sm:px-6 md:px-8">
@@ -393,6 +392,7 @@ export default function CourseDetailPage() {
                       width={400}
                       height={240}
                       className="w-full h-60 object-cover"
+                      style={{ width: 'auto', height: 'auto' }}
                     />
 
                     {/* Content */}
@@ -478,7 +478,7 @@ export default function CourseDetailPage() {
                   <SubscribeModalAlert
                     courseTitle={course?.title || "Service Design Essentials"}
                     onConfirm={() => {
-                      console.log(`Subscribing to course: ${course?.title}`);
+                      router.push(`/payment/${course?.id}`);
                     }}
                   >
                     <Button className="flex-1 bg-primary hover:bg-primary/90 !text-primary-foreground text-b4">
