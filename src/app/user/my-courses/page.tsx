@@ -54,10 +54,12 @@ export default async function MyCoursesPage() {
   const coursesCompleted = enrollments?.filter(e => e.status === 'completed').length || 0;
 
   // แปลง enrollments data เป็น courses data
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const coursesData = enrollments?.map((enrollment: any) => {
     const course = enrollment.courses;
     if (!course) return null;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const lessonsCount = course.modules?.reduce((total: number, module: any) => {
       return total + (module.lessons?.length || 0);
     }, 0) || 0;
