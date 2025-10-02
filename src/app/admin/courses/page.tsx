@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import DeleteModalAlert from "@/components/ui/delete-modal-alert";
+import PaginationUI from "@/components/layouts/pagination-ui";
 
 type Course = {
   id: number;
@@ -42,6 +43,9 @@ export default function AdminCourses() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const itemsPerPage = 10;
 
   useEffect(() => {
     const load = async () => {
@@ -57,7 +61,8 @@ export default function AdminCourses() {
     load();
   }, []);
 
-  const filtered = useMemo(() => {
+  // Filter courses based on search query
+  const filteredCourses = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return courses;
     return courses.filter((c) =>
@@ -66,6 +71,21 @@ export default function AdminCourses() {
       )
     );
   }, [courses, query]);
+
+  // Calculate pagination
+  const totalItems = filteredCourses.length;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentCourses = filteredCourses.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const handleDelete = async (courseId: number) => {
     try {
@@ -159,7 +179,7 @@ export default function AdminCourses() {
                     Loading...
                   </TableCell>
                 </TableRow>
-              ) : filtered.length === 0 ? (
+              ) : filteredCourses.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={8}
@@ -169,7 +189,7 @@ export default function AdminCourses() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filtered.map((c, index) => {
+                currentCourses.map((c, index) => {
                   const price = `${c.currency} ${Number(
                     c.price ?? 0
                   ).toLocaleString()}`;
@@ -181,12 +201,18 @@ export default function AdminCourses() {
                     ? new Date(c.created_at).toLocaleString()
                     : "-";
                   const updated = (c as { updated_at?: string }).updated_at
-                    ? new Date((c as { updated_at?: string }).updated_at!).toLocaleString()
+                    ? new Date(
+                        (c as { updated_at?: string }).updated_at!
+                      ).toLocaleString()
                     : created;
+
+                  // Calculate the correct row number across pages
+                  const rowNumber = startIndex + index + 1;
+
                   return (
                     <TableRow key={c.id}>
                       <TableCell className="text-center text-b3">
-                        {index + 1}
+                        {rowNumber}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">
@@ -237,6 +263,13 @@ export default function AdminCourses() {
               )}
             </TableBody>
           </Table>
+          <PaginationUI
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+            className="my-4"
+          />
         </div>
       </SidebarInset>
     </SidebarProvider>

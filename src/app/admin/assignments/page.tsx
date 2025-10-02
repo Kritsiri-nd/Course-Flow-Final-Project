@@ -21,12 +21,16 @@ import Link from "next/link";
 import { Assignment } from "@/types";
 import { assignmentService } from "@/services/assignmentService";
 import DeleteModalAlert from "@/components/ui/delete-modal-alert";
+import PaginationUI from "@/components/layouts/pagination-ui";
 
 export default function Assignments() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const itemsPerPage = 10;
 
   // Fetch assignments from API
   useEffect(() => {
@@ -62,6 +66,21 @@ export default function Assignments() {
     );
   }, [assignments, query]);
 
+  // Calculate pagination
+  const totalItems = filteredAssignments.length;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentAssignments = filteredAssignments.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   const handleDelete = async (assignmentId: number) => {
     try {
       setDeletingId(assignmentId);
@@ -75,10 +94,14 @@ export default function Assignments() {
       }
 
       // Remove from local state
-      setAssignments(prev => prev.filter(a => a.id !== assignmentId));
+      setAssignments((prev) => prev.filter((a) => a.id !== assignmentId));
     } catch (error) {
       console.error("Error deleting assignment:", error);
-      alert(`Failed to delete assignment: ${error instanceof Error ? error.message : "Unknown error"}`);
+      alert(
+        `Failed to delete assignment: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     } finally {
       setDeletingId(null);
     }
@@ -153,46 +176,55 @@ export default function Assignments() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredAssignments.map((assignment) => (
-                  <TableRow key={assignment.id}>
-                    <TableCell className="text-rigth text-b3">
-                      {assignment.question.length > 50
-                        ? assignment.question.substring(0, 50) + "..."
-                        : assignment.question}
-                    </TableCell>
-                    <TableCell className="text-rigth text-b3">
-                      {assignment.lesson?.module?.course?.title || "N/A"}
-                    </TableCell>
-                    <TableCell className="text-rigth text-b3">
-                      {assignment.lesson?.module?.title || "N/A"}
-                    </TableCell>
-                    <TableCell className="text-rigth text-b3">
-                      {assignment.lesson?.title || "N/A"}
-                    </TableCell>
-                    <TableCell className="text-rigth text-b3">
-                      {new Date(assignment.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-rigth">
-                      <div className="flex gap-2">
-                        <DeleteModalAlert 
-                          delText="assignment" 
-                          onDelete={() => handleDelete(assignment.id)}
-                          isDeleting={deletingId === assignment.id}
-                        />
-                        <Link
-                          href={`/admin/assignments/${assignment.id}/edit`}
-                          className="p-2 hover:bg-gray-200 rounded transition-colors"
-                          title="Edit"
-                        >
-                          <Edit className="h-4 w-4 text-blue-300" />
-                        </Link>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
+                currentAssignments.map((assignment) => {
+                  return (
+                    <TableRow key={assignment.id}>
+                      <TableCell className="text-rigth text-b3">
+                        {assignment.question.length > 50
+                          ? assignment.question.substring(0, 50) + "..."
+                          : assignment.question}
+                      </TableCell>
+                      <TableCell className="text-rigth text-b3">
+                        {assignment.lesson?.module?.course?.title || "N/A"}
+                      </TableCell>
+                      <TableCell className="text-rigth text-b3">
+                        {assignment.lesson?.module?.title || "N/A"}
+                      </TableCell>
+                      <TableCell className="text-rigth text-b3">
+                        {assignment.lesson?.title || "N/A"}
+                      </TableCell>
+                      <TableCell className="text-rigth text-b3">
+                        {new Date(assignment.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-rigth">
+                        <div className="flex gap-2">
+                          <DeleteModalAlert
+                            delText="assignment"
+                            onDelete={() => handleDelete(assignment.id)}
+                            isDeleting={deletingId === assignment.id}
+                          />
+                          <Link
+                            href={`/admin/assignments/${assignment.id}/edit`}
+                            className="p-2 hover:bg-gray-200 rounded transition-colors"
+                            title="Edit"
+                          >
+                            <Edit className="h-4 w-4 text-blue-300" />
+                          </Link>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>
+          <PaginationUI
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+            className="my-4"
+          />
         </div>
       </SidebarInset>
     </SidebarProvider>
