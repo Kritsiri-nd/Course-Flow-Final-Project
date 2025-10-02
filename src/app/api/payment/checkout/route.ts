@@ -37,7 +37,12 @@ export async function POST(req: Request) {
       charge = await omise.charges.create({
         amount: Math.round(course.price * 100),
         currency: course.currency,
-        source: { type: 'promptpay', phone_number: phone_number! },
+        source: { 
+          type: 'promptpay', 
+          phone_number: phone_number!,
+          amount: Math.round(course.price * 100),
+          currency: course.currency
+        } as any,
         return_uri: 'http://localhost:3000/payment/success',
       })
     } else if (method === 'card') {
@@ -68,7 +73,12 @@ export async function POST(req: Request) {
     })
 
     return NextResponse.json(charge)
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    let message = 'Unknown error'
+    if (err instanceof Error) {
+      message = err.message
+    }
+    return NextResponse.json({ error: message }, { status: 500 })
   }
+  
 }

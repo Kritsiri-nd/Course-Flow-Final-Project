@@ -3,6 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { createClient } from '@/lib/supabaseClient';
+import Link from "next/link";
 
 declare global {
     interface Window {
@@ -167,10 +168,10 @@ export default function QRDisplayPage() {
 
         try {
             console.log('Checking payment status for charge:', chargeId);
-            
+
             const response = await fetch(`/api/payment/check-status?chargeId=${chargeId}`);
             const data = await response.json();
-            
+
             console.log('Payment status response:', data);
 
             if (response.ok && data.paid) {
@@ -220,7 +221,7 @@ export default function QRDisplayPage() {
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <a href={`/payment/${courseId}`} className="text-blue-600 hover:text-blue-800 mb-6 inline-block">← Back</a>
-                
+
                 <div className="flex justify-center">
                     <div className="bg-white border-2 border-dashed border-blue-300 rounded-lg p-8 max-w-md w-full">
                         {loading ? (
@@ -258,15 +259,15 @@ export default function QRDisplayPage() {
                         ) : qrData && qrData.scannable_code && qrData.scannable_code.image ? (
                             <div className="text-center space-y-6">
                                 <h2 className="text-2xl font-bold text-gray-900">Scan QR code</h2>
-                                
+
                                 <div className="space-y-2">
                                     <p className="text-sm text-gray-600">Reference no. {referenceNo}</p>
                                     <p className="text-2xl font-bold text-orange-600">THB {course.price.toLocaleString()}.00</p>
                                 </div>
 
                                 <div className="flex justify-center">
-                                    <img 
-                                        src={qrData.scannable_code.image.download_uri} 
+                                    <img
+                                        src={qrData.scannable_code.image.download_uri}
                                         alt="QR Code for payment"
                                         className="w-64 h-64 border border-gray-300 rounded-lg"
                                     />
@@ -307,8 +308,12 @@ export default function QRDisplayPage() {
                     <div className="flex justify-between items-center">
                         <div className="text-xl font-bold">CourseFlow</div>
                         <div className="flex space-x-6">
-                            <a href="/non-user/courses" className="hover:text-blue-200">All Courses</a>
-                            <a href="#" className="hover:text-blue-200">Bundle Package</a>
+                            <Link href="/non-user/courses" className="hover:text-blue-200">
+                                All Courses
+                            </Link>
+                            <Link href="/bundle" className="hover:text-blue-200">
+                                Bundle Package
+                            </Link>
                         </div>
                         <div className="flex space-x-4">
                             <div className="w-8 h-8 bg-blue-700 rounded-full flex items-center justify-center">

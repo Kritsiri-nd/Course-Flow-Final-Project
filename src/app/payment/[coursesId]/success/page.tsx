@@ -57,8 +57,12 @@ export default function PaymentSuccessPage() {
                     <div className="flex justify-between items-center">
                         <div className="text-xl font-bold">CourseFlow</div>
                         <div className="flex space-x-6">
-                            <a href="/non-user/courses" className="hover:text-blue-200">All Courses</a>
-                            <a href="#" className="hover:text-blue-200">Bundle Package</a>
+                            <Link href="/non-user/courses" className="hover:text-blue-200">
+                                All Courses
+                            </Link>
+                            <Link href="/bundle" className="hover:text-blue-200">
+                                Bundle Package
+                            </Link>
                         </div>
                         <div className="flex space-x-4">
                             <div className="w-8 h-8 bg-blue-700 rounded-full flex items-center justify-center">
