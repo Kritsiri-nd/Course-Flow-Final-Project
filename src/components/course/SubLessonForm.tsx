@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { GripVertical, Plus, X, AlertCircle } from "lucide-react";
+import { GripVertical, Plus, X, AlertCircle, Loader2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,23 +23,23 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import {
-  useSortable,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+} from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type SubLesson = {
   id: number;
   name: string;
   file: File | null;
   previewUrl?: string | null;
+  existingUrl?: string | null;
+  databaseId?: number; // Add this to track the actual database ID
 };
 
 interface SubLessonFormProps {
@@ -59,16 +59,20 @@ interface SortableSubLessonProps {
   onChangeName: (id: number, value: string) => void;
   onFilePick: (id: number, file: File | null) => void;
   onClearVideo: (id: number) => void;
-  fileInputsRef: React.MutableRefObject<Record<number, HTMLInputElement | null>>;
+  fileInputsRef: React.MutableRefObject<
+    Record<number, HTMLInputElement | null>
+  >;
+  isDeletingVideo?: boolean;
 }
 
-function SortableSubLesson({ 
-  subLesson, 
-  onRemove, 
-  onChangeName, 
-  onFilePick, 
-  onClearVideo, 
-  fileInputsRef 
+function SortableSubLesson({
+  subLesson,
+  onRemove,
+  onChangeName,
+  onFilePick,
+  onClearVideo,
+  fileInputsRef,
+  isDeletingVideo = false,
 }: SortableSubLessonProps) {
   const {
     attributes,
@@ -86,10 +90,12 @@ function SortableSubLesson({
   };
 
   return (
-    <div 
-      ref={setNodeRef} 
+    <div
+      ref={setNodeRef}
       style={style}
-      className={`mb-6 relative rounded-[12px] border border-[#E7E9F1] bg-[#F6F8FE] p-6 ${isDragging ? 'z-50' : ''}`}
+      className={`mb-6 relative rounded-[12px] border border-[#E7E9F1] bg-[#F6F8FE] p-6 ${
+        isDragging ? "z-50" : ""
+      }`}
     >
       <button
         type="button"
@@ -107,7 +113,9 @@ function SortableSubLesson({
           <GripVertical className="h-4 w-4 text-gray-400" />
         </button>
         <div className="flex-1">
-          <label className="block font-inter font-normal text-[16px] leading-[150%] tracking-[0%] text-black mb-2">Sub-lesson name <span className="text-red-500">*</span></label>
+          <label className="block font-inter font-normal text-[16px] leading-[150%] tracking-[0%] text-black mb-2">
+            Sub-lesson name <span className="text-red-500">*</span>
+          </label>
           <Input
             placeholder="Enter sub-lesson name"
             value={subLesson.name}
@@ -118,18 +126,29 @@ function SortableSubLesson({
       </div>
 
       <div className="pl-7">
-        <label className="block font-inter font-normal text-[16px] leading-[150%] tracking-[0%] text-black mb-2">Video <span className="text-red-500">*</span></label>
+        <label className="block font-inter font-normal text-[16px] leading-[150%] tracking-[0%] text-black mb-2">
+          Video <span className="text-red-500">*</span>
+        </label>
         <div className="flex items-center gap-6">
           {subLesson.previewUrl ? (
             <div className="relative w-[160px] h-[160px]">
-              <video src={subLesson.previewUrl} className="w-[160px] h-[160px] rounded-[12px] object-cover" controls />
+              <video
+                src={subLesson.previewUrl}
+                className="w-[160px] h-[160px] rounded-[12px] object-cover"
+                controls
+              />
               <button
                 type="button"
                 onClick={() => onClearVideo(subLesson.id)}
-                className="absolute top-2 right-2 h-7 w-7 rounded-full bg-[#6B3FEA] text-white flex items-center justify-center shadow-md hover:bg-[#5a2fe4] focus:outline-none focus:ring-2 focus:ring-[#6B3FEA]/40"
+                disabled={isDeletingVideo}
+                className="absolute top-2 right-2 h-7 w-7 rounded-full bg-[#6B3FEA] text-white flex items-center justify-center shadow-md hover:bg-[#5a2fe4] focus:outline-none focus:ring-2 focus:ring-[#6B3FEA]/40 disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Clear video"
               >
-                <X className="h-4 w-4" />
+                {isDeletingVideo ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <X className="h-4 w-4" />
+                )}
               </button>
             </div>
           ) : (
@@ -143,7 +162,9 @@ function SortableSubLesson({
                 type="file"
                 accept="video/*"
                 className="hidden"
-                onChange={(e) => onFilePick(subLesson.id, e.target.files?.[0] || null)}
+                onChange={(e) =>
+                  onFilePick(subLesson.id, e.target.files?.[0] || null)
+                }
               />
             </label>
           )}
@@ -164,6 +185,9 @@ export function SubLessonForm({
   isDeleting = false,
 }: SubLessonFormProps) {
   const fileInputsRef = useRef<Record<number, HTMLInputElement | null>>({});
+  const [deletingVideoIds, setDeletingVideoIds] = useState<Set<number>>(
+    new Set()
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -176,8 +200,12 @@ export function SubLessonForm({
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      const oldIndex = subLessons.findIndex((subLesson) => subLesson.id === active.id);
-      const newIndex = subLessons.findIndex((subLesson) => subLesson.id === over.id);
+      const oldIndex = subLessons.findIndex(
+        (subLesson) => subLesson.id === active.id
+      );
+      const newIndex = subLessons.findIndex(
+        (subLesson) => subLesson.id === over.id
+      );
 
       const newSubLessons = arrayMove(subLessons, oldIndex, newIndex);
       onSubLessonsChange(newSubLessons);
@@ -186,34 +214,34 @@ export function SubLessonForm({
       if (moduleId) {
         try {
           const subLessonOrders = newSubLessons.map((subLesson, index) => ({
-            id: subLesson.id,
-            order_index: index + 1
+            id: subLesson.databaseId || subLesson.id, // Use database ID if available
+            order_index: index + 1,
           }));
 
-          const response = await fetch('/api/lessons/sublessons/reorder', {
-            method: 'PUT',
+          const response = await fetch("/api/lessons/sublessons/reorder", {
+            method: "PUT",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({
               moduleId: moduleId,
-              subLessonOrders: subLessonOrders
+              subLessonOrders: subLessonOrders,
             }),
           });
 
           if (!response.ok) {
-            console.error('Failed to update sub-lesson order');
+            console.error("Failed to update sub-lesson order");
             // Optionally show a toast notification or error message
           }
         } catch (error) {
-          console.error('Error updating sub-lesson order:', error);
+          console.error("Error updating sub-lesson order:", error);
         }
       }
     }
   };
 
   const addSubLesson = () => {
-    const nextId = Math.max(0, ...subLessons.map(s => s.id)) + 1;
+    const nextId = Math.max(0, ...subLessons.map((s) => s.id)) + 1;
     onSubLessonsChange([
       ...subLessons,
       { id: nextId, name: "", file: null, previewUrl: null },
@@ -221,18 +249,18 @@ export function SubLessonForm({
   };
 
   const removeSubLesson = (id: number) => {
-    onSubLessonsChange(subLessons.filter(s => s.id !== id));
+    onSubLessonsChange(subLessons.filter((s) => s.id !== id));
   };
 
   const changeSubLessonName = (id: number, value: string) => {
     onSubLessonsChange(
-      subLessons.map(s => (s.id === id ? { ...s, name: value } : s))
+      subLessons.map((s) => (s.id === id ? { ...s, name: value } : s))
     );
   };
 
   const onFilePick = (id: number, file: File | null) => {
     onSubLessonsChange(
-      subLessons.map(s =>
+      subLessons.map((s) =>
         s.id === id
           ? {
               ...s,
@@ -244,10 +272,110 @@ export function SubLessonForm({
     );
   };
 
-  const clearVideo = (id: number) => {
+  const clearVideo = async (id: number) => {
+    const subLesson = subLessons.find((s) => s.id === id);
+    if (!subLesson) return;
+
+    // If there's an existing video URL (from Mux), delete it from Mux only
+    // We don't need to update the database here since we're in edit mode
+    if (
+      subLesson.existingUrl &&
+      subLesson.existingUrl.includes("stream.mux.com")
+    ) {
+      setDeletingVideoIds((prev) => new Set(prev).add(id));
+
+      try {
+        console.log(`Deleting video for sub-lesson ID: ${id}`);
+        console.log(`Video URL: ${subLesson.existingUrl}`);
+
+        // Extract asset ID from URL
+        const extractAssetId = (url: string): string | null => {
+          const patterns = [
+            /https:\/\/stream\.mux\.com\/([a-zA-Z0-9]+)\.m3u8/,
+            /https:\/\/stream\.mux\.com\/([a-zA-Z0-9]+)/,
+          ];
+
+          for (const pattern of patterns) {
+            const match = url.match(pattern);
+            if (match && match[1]) {
+              return match[1];
+            }
+          }
+          return null;
+        };
+
+        const assetId = extractAssetId(subLesson.existingUrl);
+
+        if (assetId) {
+          console.log(`Extracted asset ID: ${assetId}`);
+
+          // Delete directly from Mux using the asset ID
+          const response = await fetch("/api/upload/mux", {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              videoUrl: subLesson.existingUrl,
+              recordType: "lesson",
+              recordId: subLesson.databaseId || subLesson.id, // Use database ID if available
+              forceDelete: true, // Allow partial success
+            }),
+          });
+
+          const result = await response.json();
+
+          if (response.ok || response.status === 207) {
+            // 200 or 207 (partial success)
+            console.log("Video deletion result:", result);
+
+            // Show success message even for partial success
+            if (
+              result.success ||
+              result.details?.muxSuccess ||
+              result.details?.supabaseSuccess
+            ) {
+              console.log("Video deleted successfully (full or partial)");
+            }
+          } else {
+            console.error("Failed to delete video:", result);
+            // Don't throw error - still allow UI clearing for better UX
+          }
+        } else {
+          console.error(
+            "Could not extract asset ID from URL:",
+            subLesson.existingUrl
+          );
+        }
+      } catch (error) {
+        console.error("Error deleting video:", error);
+        // Don't throw error - still allow UI clearing for better UX
+      } finally {
+        setDeletingVideoIds((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(id);
+          return newSet;
+        });
+      }
+    }
+
+    // Clear the file input and update the UI state
     const input = fileInputsRef.current[id];
     if (input) input.value = "";
-    onFilePick(id, null);
+
+    // Update the sub-lesson state to remove video
+    onSubLessonsChange(
+      subLessons.map((s) =>
+        s.id === id
+          ? {
+              ...s,
+              file: null,
+              previewUrl: null,
+              existingUrl: null, // Clear existing URL as well
+            }
+          : s
+      )
+    );
   };
 
   return (
@@ -261,7 +389,11 @@ export function SubLessonForm({
             placeholder="Enter lesson name"
             value={lessonName}
             onChange={(e) => onLessonNameChange(e.target.value)}
-            className={`w-full pr-10 ${errors.lessonName ? 'border-[#9B2FAC] focus:border-[#9B2FAC] focus:ring-[#9B2FAC]' : ''}`}
+            className={`w-full pr-10 ${
+              errors.lessonName
+                ? "border-[#9B2FAC] focus:border-[#9B2FAC] focus:ring-[#9B2FAC]"
+                : ""
+            }`}
           />
           {errors.lessonName && (
             <AlertCircle className="absolute right-3 top-3 h-4 w-4 text-[#9B2FAC]" />
@@ -275,14 +407,19 @@ export function SubLessonForm({
       <hr className="border-t border-[#E7E9F1]" />
 
       <div>
-        <h3 className="font-inter font-semibold text-[20px] leading-[150%] tracking-[0%] text-[#646D89] mb-3">Sub-Lesson</h3>
+        <h3 className="font-inter font-semibold text-[20px] leading-[150%] tracking-[0%] text-[#646D89] mb-3">
+          Sub-Lesson
+        </h3>
 
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
-          <SortableContext items={subLessons.map(subLesson => subLesson.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext
+            items={subLessons.map((subLesson) => subLesson.id)}
+            strategy={verticalListSortingStrategy}
+          >
             {subLessons.map((s) => (
               <SortableSubLesson
                 key={s.id}
@@ -292,6 +429,7 @@ export function SubLessonForm({
                 onFilePick={onFilePick}
                 onClearVideo={clearVideo}
                 fileInputsRef={fileInputsRef}
+                isDeletingVideo={deletingVideoIds.has(s.id)}
               />
             ))}
           </SortableContext>
@@ -340,7 +478,9 @@ export function SubLessonForm({
                   className="h-15 w-2/3 border border-orange-500 !text-orange-500 bg-transparent hover:bg-orange-100 px-4 py-2 rounded-lg text-b2 font-medium"
                 >
                   <button onClick={onDeleteLesson} disabled={isDeleting}>
-                    {isDeleting ? "Deleting..." : "Yes, I want to delete this lesson"}
+                    {isDeleting
+                      ? "Deleting..."
+                      : "Yes, I want to delete this lesson"}
                   </button>
                 </AlertDialogAction>
                 <AlertDialogCancel className="h-15 w-1/3 bg-[#2F5FAC] hover:bg-[#2F5FAC] !text-white px-4 py-2 rounded-lg text-b2 font-medium">
@@ -354,5 +494,3 @@ export function SubLessonForm({
     </div>
   );
 }
-
-

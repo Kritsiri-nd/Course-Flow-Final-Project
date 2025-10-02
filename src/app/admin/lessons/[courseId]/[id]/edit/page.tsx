@@ -3,14 +3,23 @@
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdminPanel } from "@/components/layouts/sidebar-admin-panel";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { SubLessonForm } from "@/components/course/SubLessonForm";
 import { ArrowLeft, Loader2 } from "lucide-react";
 
-// Removed empty interface - using existing types instead
-
-type SubLessonState = { id: number; name: string; file: File | null; previewUrl?: string | null; existingUrl?: string | null };
+type SubLessonState = {
+  id: number;
+  name: string;
+  file: File | null;
+  previewUrl?: string | null;
+  existingUrl?: string | null;
+  databaseId?: number; // Add this field
+};
 
 export default function EditLessonPage() {
   const router = useRouter();
@@ -41,14 +50,33 @@ export default function EditLessonPage() {
         if (!moduleRes.ok) throw new Error("Failed to load lesson");
         const m = await moduleRes.json();
         setLessonName(m?.title || "");
-        const mapped: SubLessonState[] = (m?.lessons || []).map((l: { id?: number; title?: string; video_url?: string }, idx: number) => ({
-          id: typeof l?.id === "number" ? l.id : idx + 1,
-          name: l?.title || "",
-          file: null,
-          previewUrl: l?.video_url || null,
-          existingUrl: l?.video_url || null,
-        }));
-        setSubLessons(mapped.length ? mapped : [{ id: 1, name: "", file: null, previewUrl: null }]);
+        const mapped: SubLessonState[] = (m?.lessons || []).map(
+          (
+            l: { id?: number; title?: string; video_url?: string },
+            idx: number
+          ) => ({
+            id: typeof l?.id === "number" ? l.id : idx + 1,
+            name: l?.title || "",
+            file: null,
+            previewUrl: l?.video_url || null,
+            existingUrl: l?.video_url || null,
+            databaseId: l?.id, // Store the actual database ID
+          })
+        );
+        setSubLessons(
+          mapped.length
+            ? mapped
+            : [
+                {
+                  id: 1,
+                  name: "",
+                  file: null,
+                  previewUrl: null,
+                  existingUrl: null,
+                  databaseId: undefined,
+                },
+              ]
+        );
       } catch (e) {
         console.error(e);
         alert("Failed to load lesson data");
@@ -66,12 +94,50 @@ export default function EditLessonPage() {
   const handleDeleteLesson = async () => {
     setIsSubmitting(true);
     try {
+      // First, delete all videos associated with this lesson's sub-lessons
+      const videoDeletionPromises = subLessons
+        .filter(
+          (s) => s.existingUrl && s.existingUrl.includes("stream.mux.com")
+        )
+        .map(async (s) => {
+          try {
+            console.log(`Deleting video for sub-lesson: ${s.name}`);
+            const response = await fetch("/api/upload/mux", {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                videoUrl: s.existingUrl,
+                recordType: "lesson",
+                recordId: s.databaseId || s.id, // Use database ID if available
+                forceDelete: true,
+              }),
+            });
+
+            if (response.ok || response.status === 207) {
+              console.log(
+                `Successfully deleted video for sub-lesson: ${s.name}`
+              );
+            } else {
+              console.warn(`Failed to delete video for sub-lesson: ${s.name}`);
+            }
+          } catch (error) {
+            console.error(
+              `Error deleting video for sub-lesson ${s.name}:`,
+              error
+            );
+          }
+        });
+
+      // Wait for all video deletions to complete (but don't fail if some fail)
+      await Promise.allSettled(videoDeletionPromises);
+
+      // Then delete the lesson itself
       const response = await fetch(`/api/lessons/${moduleId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (!response.ok) {
-        let message = 'Failed to delete lesson';
+        let message = "Failed to delete lesson";
         try {
           const errorData = await response.json();
           message = errorData?.error || message;
@@ -82,8 +148,8 @@ export default function EditLessonPage() {
       // Redirect back to course edit page
       router.push(`/admin/courses/${courseId}/edit`);
     } catch (error) {
-      console.error('Error deleting lesson:', error);
-      const msg = error instanceof Error ? error.message : 'Unknown error';
+      console.error("Error deleting lesson:", error);
+      const msg = error instanceof Error ? error.message : "Unknown error";
       alert(`Failed to delete lesson: ${msg}`);
     } finally {
       setIsSubmitting(false);
@@ -92,7 +158,10 @@ export default function EditLessonPage() {
 
   const handleSave = async () => {
     if (!lessonName.trim()) {
-      setErrors(prev => ({ ...prev, lessonName: "Please enter lesson name" }));
+      setErrors((prev) => ({
+        ...prev,
+        lessonName: "Please enter lesson name",
+      }));
       return;
     }
 
@@ -103,20 +172,29 @@ export default function EditLessonPage() {
         subLessons.map(async (s) => {
           // If a new file picked, upload; else keep existingUrl if present
           if (s.file) {
-          const formData = new FormData();
-          formData.append("file", s.file);
+            const formData = new FormData();
+            formData.append("file", s.file);
 
-          const res = await fetch("/api/upload/mux", { method: "POST", body: formData });
-          if (!res.ok) {
-            let msg = "MUX upload failed";
-            try { const b = await res.json(); msg = b?.error || msg; } catch {}
-            throw new Error(msg);
+            const res = await fetch("/api/upload/mux", {
+              method: "POST",
+              body: formData,
+            });
+            if (!res.ok) {
+              let msg = "MUX upload failed";
+              try {
+                const b = await res.json();
+                msg = b?.error || msg;
+              } catch {}
+              throw new Error(msg);
+            }
+            const { url } = await res.json();
+            return { title: s.name || "Untitled", video_url: url };
           }
-          const { url } = await res.json();
-          return { title: s.name || "Untitled", video_url: url };
-        }
-        return { title: s.name || "Untitled", video_url: s.existingUrl ?? null };
-      })
+          return {
+            title: s.name || "Untitled",
+            video_url: s.existingUrl ?? null,
+          };
+        })
       );
 
       const updateRes = await fetch(`/api/lessons/${moduleId}`, {
@@ -131,7 +209,10 @@ export default function EditLessonPage() {
 
       if (!updateRes.ok) {
         let msg = "Failed to update lessons";
-        try { const b = await updateRes.json(); msg = b?.error || msg; } catch {}
+        try {
+          const b = await updateRes.json();
+          msg = b?.error || msg;
+        } catch {}
         throw new Error(msg);
       }
 
@@ -168,12 +249,18 @@ export default function EditLessonPage() {
                 className="h-[24px] w-[24px] text-[#9AA1B9] cursor-pointer hover:text-gray-600 transition-colors"
                 onClick={() => router.push(`/admin/courses/${courseId}/edit`)}
               />
-              <span className="text-[#9AA1B9] font-inter font-normal text-sm leading-[150%] tracking-normal align-middle">Course</span>
+              <span className="text-[#9AA1B9] font-inter font-normal text-sm leading-[150%] tracking-normal align-middle">
+                Course
+              </span>
               {courseTitle && (
-                <span className="text-[#2A2E3F] font-inter font-normal text-sm leading-[150%] tracking-normal align-middle">{courseTitle}</span>
+                <span className="text-[#2A2E3F] font-inter font-normal text-sm leading-[150%] tracking-normal align-middle">
+                  {courseTitle}
+                </span>
               )}
             </div>
-            <span className="text-black font-inter font-bold text-2xl leading-[125%] tracking-[-0.02em] align-middle">Edit Lesson</span>
+            <span className="text-black font-inter font-bold text-2xl leading-[125%] tracking-[-0.02em] align-middle">
+              Edit Lesson
+            </span>
           </div>
           <div className="ml-auto gap-4 flex items-center">
             <Button
@@ -208,11 +295,13 @@ export default function EditLessonPage() {
             onLessonNameChange={(v) => {
               setLessonName(v);
               if (errors.lessonName) {
-                setErrors(prev => ({ ...prev, lessonName: "" }));
+                setErrors((prev) => ({ ...prev, lessonName: "" }));
               }
             }}
             subLessons={subLessons}
-            onSubLessonsChange={(items) => setSubLessons(items as SubLessonState[])}
+            onSubLessonsChange={(items) =>
+              setSubLessons(items as SubLessonState[])
+            }
             errors={errors}
             moduleId={moduleId}
             onDeleteLesson={handleDeleteLesson}
@@ -223,5 +312,3 @@ export default function EditLessonPage() {
     </SidebarProvider>
   );
 }
-
-

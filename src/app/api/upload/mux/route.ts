@@ -15,6 +15,46 @@ const supabase = createClient(
     (process.env.SUPABASE_SERVICE_ROLE_KEY as string) || (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string)
 );
 
+/**
+ * Helper function to extract Mux asset ID from various URL formats
+ */
+function extractMuxAssetId(url: string): string | null {
+    if (!url || typeof url !== 'string') {
+        console.error('❌ Invalid URL provided:', url);
+        return null;
+    }
+
+    console.log('🔍 Attempting to extract asset ID from URL:', url);
+
+    // Try multiple patterns to handle different URL formats
+    const patterns = [
+        // Standard m3u8 format: https://stream.mux.com/{asset_id}.m3u8
+        /https:\/\/stream\.mux\.com\/([a-zA-Z0-9]+)\.m3u8/,
+        // Without .m3u8 extension: https://stream.mux.com/{asset_id}
+        /https:\/\/stream\.mux\.com\/([a-zA-Z0-9]+)$/,
+        // With additional path: https://stream.mux.com/{asset_id}/something
+        /https:\/\/stream\.mux\.com\/([a-zA-Z0-9]+)\//,
+        // Just the asset ID if it's passed directly
+        /^([a-zA-Z0-9]{20,})$/
+    ];
+
+    for (let i = 0; i < patterns.length; i++) {
+        const pattern = patterns[i];
+        const match = url.match(pattern);
+
+        console.log(`- Pattern ${i + 1} (${pattern}):`, match ? `✅ Match found: ${match[1]}` : '❌ No match');
+
+        if (match && match[1] && match[1] !== 'undefined') {
+            const assetId = match[1];
+            console.log(`✅ Successfully extracted asset ID: ${assetId}`);
+            return assetId;
+        }
+    }
+
+    console.error('❌ Could not extract asset ID from any pattern');
+    return null;
+}
+
 export async function POST(req: Request) {
     try {
         const form = await req.formData();
@@ -23,6 +63,11 @@ export async function POST(req: Request) {
         if (!(file instanceof File)) {
             return NextResponse.json({ error: "Missing file" }, { status: 400 });
         }
+
+        console.log('🎬 Starting Mux upload process...');
+        console.log('- File name:', file.name);
+        console.log('- File size:', file.size);
+        console.log('- File type:', file.type);
 
         // Create a direct upload for the video file
         const upload = await mux.video.uploads.create({
@@ -33,11 +78,18 @@ export async function POST(req: Request) {
             cors_origin: "*", // Configure this based on your domain in production
         });
 
+        console.log('- Upload created:', {
+            id: upload.id,
+            url: upload.url,
+            asset_id: upload.asset_id
+        });
+
         // Convert file to buffer for upload
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
         // Upload the file to MUX using the upload URL
+        console.log('- Uploading file to Mux...');
         const uploadResponse = await fetch(upload.url, {
             method: "PUT",
             body: buffer,
@@ -50,13 +102,51 @@ export async function POST(req: Request) {
             throw new Error("Failed to upload to MUX");
         }
 
+        console.log('- File uploaded successfully');
+
+        // The asset_id might not be available immediately, so we need to wait or poll
+        let assetId = upload.asset_id;
+
+        // If asset_id is not available, we need to get it from the upload
+        if (!assetId) {
+            console.log('- Asset ID not immediately available, retrieving upload info...');
+            try {
+                // Wait a moment for Mux to process
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                const uploadInfo = await mux.video.uploads.retrieve(upload.id);
+                assetId = uploadInfo.asset_id;
+                console.log('- Retrieved asset ID from upload:', assetId);
+            } catch (error) {
+                console.error('- Failed to retrieve asset ID:', error);
+            }
+        }
+
+        // If we still don't have an asset ID, we'll use the upload ID as a fallback
+        if (!assetId) {
+            console.warn('- Asset ID still not available, using upload ID as reference');
+            // We'll return a temporary URL and handle this case
+            return NextResponse.json({
+                assetId: null,
+                uploadId: upload.id,
+                url: null,
+                status: "processing",
+                message: "Upload successful, asset ID will be available shortly"
+            }, { status: 202 }); // 202 Accepted
+        }
+
         // Return the asset ID and playback URL
-        // Note: The playback URL will be available once MUX processes the video
-        const playbackUrl = `https://stream.mux.com/${upload.asset_id}.m3u8`;
+        const playbackUrl = `https://stream.mux.com/${assetId}.m3u8`;
+
+        console.log('✅ Upload completed successfully:', {
+            assetId,
+            uploadId: upload.id,
+            playbackUrl
+        });
 
         return NextResponse.json(
             {
-                assetId: upload.asset_id,
+                assetId: assetId,
                 uploadId: upload.id,
                 url: playbackUrl,
                 status: "processing", // MUX will process the video
@@ -66,20 +156,14 @@ export async function POST(req: Request) {
     } catch (error: unknown) {
         const message =
             error instanceof Error ? error.message : "Unexpected server error";
+        console.error('❌ Upload failed:', message);
         return NextResponse.json({ error: message }, { status: 500 });
     }
 }
 
 /**
- * DELETE method to remove video from both Supabase database and Mux service
- * 
- * Request body:
- * {
- *   "videoUrl": "https://stream.mux.com/asset_id.m3u8",
- *   "recordType": "course" | "lesson",
- *   "recordId": number,
- *   "forceDelete": boolean (optional, default: false)
- * }
+ * DELETE method to remove video from both Mux and Supabase
+ * Order: Mux first, then Supabase (safer approach)
  */
 export async function DELETE(req: Request) {
     try {
@@ -96,16 +180,69 @@ export async function DELETE(req: Request) {
             forceDelete?: boolean;
         } = body;
 
+        console.log('🗑️ DELETE REQUEST RECEIVED:');
+        console.log('- Video URL:', JSON.stringify(videoUrl));
+        console.log('- Video URL type:', typeof videoUrl);
+        console.log('- Video URL length:', videoUrl?.length);
+        console.log('- Record Type:', recordType);
+        console.log('- Record ID:', recordId);
+        console.log('- Force Delete:', forceDelete);
+
         // Validate required fields
         if (!videoUrl || !recordType || !recordId) {
+            console.error('❌ Missing required fields');
             return NextResponse.json(
                 { error: "Missing required fields: videoUrl, recordType, recordId" },
                 { status: 400 }
             );
         }
 
+        // Check if URL contains 'undefined' - if so, skip Mux deletion
+        if (videoUrl.includes('undefined')) {
+            console.log('⚠️ URL contains "undefined", skipping Mux deletion and only updating database');
+
+            try {
+                const tableName = recordType === 'course' ? 'courses' : 'lessons';
+                console.log(`- Updating table: ${tableName}, ID: ${recordId}`);
+
+                const { error: supabaseError } = await supabase
+                    .from(tableName)
+                    .update({ video_url: null })
+                    .eq('id', recordId);
+
+                if (supabaseError) {
+                    console.error('❌ Supabase error:', supabaseError.message);
+                    return NextResponse.json({
+                        success: false,
+                        message: "Failed to update database",
+                        error: supabaseError.message
+                    }, { status: 500 });
+                } else {
+                    console.log('✅ Database updated successfully');
+                    return NextResponse.json({
+                        success: true,
+                        message: "Invalid video URL removed from database",
+                        details: {
+                            muxSuccess: false,
+                            supabaseSuccess: true,
+                            assetId: null,
+                            note: "Skipped Mux deletion due to invalid URL"
+                        }
+                    }, { status: 200 });
+                }
+            } catch (error) {
+                console.error('❌ Database update failed:', error);
+                return NextResponse.json({
+                    success: false,
+                    message: "Failed to update database",
+                    error: error instanceof Error ? error.message : "Unknown error"
+                }, { status: 500 });
+            }
+        }
+
         // Validate recordType
         if (!['course', 'lesson'].includes(recordType)) {
+            console.error('❌ Invalid record type:', recordType);
             return NextResponse.json(
                 { error: "recordType must be either 'course' or 'lesson'" },
                 { status: 400 }
@@ -113,88 +250,139 @@ export async function DELETE(req: Request) {
         }
 
         const results = {
-            supabaseSuccess: false,
             muxSuccess: false,
+            supabaseSuccess: false,
             assetId: null as string | null,
             errors: [] as string[]
         };
 
-        // Step 1: Remove video URL from Supabase database
+        // Step 1: Extract asset ID and delete from Mux FIRST
+        console.log('🎬 Step 1: Deleting from Mux first...');
         try {
-            const tableName = recordType === 'course' ? 'courses' : 'lessons';
-            const { error: supabaseError } = await supabase
-                .from(tableName)
-                .update({ video_url: null })
-                .eq('id', recordId);
+            const assetId = extractMuxAssetId(videoUrl);
 
-            if (supabaseError) {
-                results.errors.push(`Supabase error: ${supabaseError.message}`);
-            } else {
-                results.supabaseSuccess = true;
-            }
-        } catch (error) {
-            const message = error instanceof Error ? error.message : "Unknown Supabase error";
-            results.errors.push(`Supabase error: ${message}`);
-        }
-
-        // Step 2: Extract asset ID from Mux URL and delete from Mux
-        try {
-            // Extract asset ID from Mux URL pattern: https://stream.mux.com/{asset_id}.m3u8
-            const muxUrlPattern = /https:\/\/stream\.mux\.com\/([^.]+)\.m3u8/;
-            const match = videoUrl.match(muxUrlPattern);
-
-            if (match && match[1]) {
-                const assetId = match[1];
+            if (assetId) {
                 results.assetId = assetId;
+                console.log(`- Final Asset ID to delete: ${assetId}`);
+                console.log('- Attempting to delete from Mux...');
+
+                // Verify asset exists before trying to delete
+                try {
+                    const asset = await mux.video.assets.retrieve(assetId);
+                    console.log(`- Asset found in Mux: ${asset.id} (status: ${asset.status})`);
+                } catch (retrieveError) {
+                    console.warn('⚠️ Asset not found in Mux (might already be deleted):', retrieveError);
+                    // Continue with deletion attempt anyway
+                }
 
                 // Delete asset from Mux
                 await mux.video.assets.delete(assetId);
+                console.log('✅ Mux deletion successful');
                 results.muxSuccess = true;
             } else {
+                console.error('❌ Could not extract asset ID from URL:', videoUrl);
                 results.errors.push("Invalid Mux URL format - could not extract asset ID");
             }
         } catch (error) {
             const message = error instanceof Error ? error.message : "Unknown Mux error";
-            results.errors.push(`Mux error: ${message}`);
+            console.error('❌ Mux deletion failed:', message);
+
+            // Check if it's a "not found" error (asset already deleted)
+            if (message.includes('not found') || message.includes('404')) {
+                console.log('ℹ️ Asset already deleted from Mux, treating as success');
+                results.muxSuccess = true;
+            } else {
+                results.errors.push(`Mux error: ${message}`);
+            }
         }
+
+        // Step 2: Only proceed with Supabase if Mux deletion succeeded OR forceDelete is true
+        if (results.muxSuccess || forceDelete) {
+            console.log('📊 Step 2: Updating Supabase database...');
+            try {
+                const tableName = recordType === 'course' ? 'courses' : 'lessons';
+                console.log(`- Updating table: ${tableName}, ID: ${recordId}`);
+
+                const { error: supabaseError } = await supabase
+                    .from(tableName)
+                    .update({ video_url: null })
+                    .eq('id', recordId);
+
+                if (supabaseError) {
+                    console.error('❌ Supabase error:', supabaseError.message);
+                    results.errors.push(`Supabase error: ${supabaseError.message}`);
+                } else {
+                    console.log('✅ Supabase update successful');
+                    results.supabaseSuccess = true;
+                }
+            } catch (error) {
+                const message = error instanceof Error ? error.message : "Unknown Supabase error";
+                console.error('❌ Supabase exception:', message);
+                results.errors.push(`Supabase error: ${message}`);
+            }
+        } else {
+            console.log('⏭️ Skipping Supabase update because Mux deletion failed and forceDelete is false');
+            results.errors.push("Skipped Supabase update because Mux deletion failed");
+        }
+
+        // Log final results
+        console.log('📋 DELETION RESULTS:');
+        console.log('- Mux Success:', results.muxSuccess);
+        console.log('- Supabase Success:', results.supabaseSuccess);
+        console.log('- Asset ID:', results.assetId);
+        console.log('- Errors:', results.errors);
 
         // Determine response based on results
         const hasErrors = results.errors.length > 0;
-        const partialSuccess = results.supabaseSuccess || results.muxSuccess;
+        const partialSuccess = results.muxSuccess || results.supabaseSuccess;
 
-        if (!hasErrors && results.supabaseSuccess && results.muxSuccess) {
+        if (!hasErrors && results.muxSuccess && results.supabaseSuccess) {
             // Complete success
+            console.log('🎉 Complete success!');
             return NextResponse.json({
                 success: true,
-                message: "Video successfully removed from both Supabase and Mux",
+                message: "Video successfully removed from both Mux and Supabase",
                 details: results
             }, { status: 200 });
-        } else if (partialSuccess && !forceDelete) {
-            // Partial success - return warning
+        } else if (results.muxSuccess && !results.supabaseSuccess && !forceDelete) {
+            // Mux succeeded but Supabase failed - this is problematic
+            console.log('⚠️ Mux deleted but Supabase failed - data inconsistency!');
             return NextResponse.json({
                 success: false,
-                message: "Partial deletion completed with errors",
+                message: "Video deleted from Mux but failed to update database - data inconsistency detected",
                 details: results,
-                suggestion: "Use forceDelete: true to ignore errors and return success for partial completion"
+                suggestion: "Manual database cleanup may be required"
             }, { status: 207 }); // 207 Multi-Status
         } else if (partialSuccess && forceDelete) {
             // Partial success but force delete enabled
+            console.log('🎉 Partial success (with force delete enabled)');
             return NextResponse.json({
                 success: true,
                 message: "Video deletion completed (some operations failed but forceDelete enabled)",
                 details: results
             }, { status: 200 });
-        } else {
-            // Complete failure
+        } else if (!results.muxSuccess) {
+            // Mux deletion failed - this is the primary failure
+            console.log('💥 Mux deletion failed - primary operation failed');
             return NextResponse.json({
                 success: false,
-                message: "Failed to delete video from both services",
+                message: "Failed to delete video from Mux - operation aborted",
+                details: results,
+                suggestion: "Check Mux credentials and asset ID extraction"
+            }, { status: 500 });
+        } else {
+            // Other failure cases
+            console.log('💥 Other failure');
+            return NextResponse.json({
+                success: false,
+                message: "Failed to delete video",
                 details: results
             }, { status: 500 });
         }
 
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : "Unexpected server error";
+        console.error('💥 Unexpected error in DELETE:', message);
         return NextResponse.json({
             success: false,
             error: message,
