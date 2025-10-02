@@ -121,6 +121,7 @@ export default function CourseList() {
                       width={400}
                       height={240}
                       className="w-full h-60 object-cover"
+                      style={{ width: 'auto', height: 'auto' }}
                     />
 
                     {/* Content */}
