@@ -103,22 +103,20 @@ export default function EditLessonPage() {
         subLessons.map(async (s) => {
           // If a new file picked, upload; else keep existingUrl if present
           if (s.file) {
-            const formData = new FormData();
-            formData.append("file", s.file);
-            formData.append("bucket", "attachments");
-            formData.append("folder", "videos");
+          const formData = new FormData();
+          formData.append("file", s.file);
 
-            const res = await fetch("/api/upload", { method: "POST", body: formData });
-            if (!res.ok) {
-              let msg = "Upload failed";
-              try { const b = await res.json(); msg = b?.error || msg; } catch {}
-              throw new Error(msg);
-            }
-            const { url } = await res.json();
-            return { title: s.name || "Untitled", video_url: url };
+          const res = await fetch("/api/upload/mux", { method: "POST", body: formData });
+          if (!res.ok) {
+            let msg = "MUX upload failed";
+            try { const b = await res.json(); msg = b?.error || msg; } catch {}
+            throw new Error(msg);
           }
-          return { title: s.name || "Untitled", video_url: s.existingUrl ?? null };
-        })
+          const { url } = await res.json();
+          return { title: s.name || "Untitled", video_url: url };
+        }
+        return { title: s.name || "Untitled", video_url: s.existingUrl ?? null };
+      })
       );
 
       const updateRes = await fetch(`/api/lessons/${moduleId}`, {

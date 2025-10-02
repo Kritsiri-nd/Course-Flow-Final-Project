@@ -92,10 +92,17 @@ export default function AddLessonPage() {
             formData.append("bucket", "attachments");
             formData.append("folder", "videos");
 
-            const res = await fetch("/api/upload", { method: "POST", body: formData });
+            // In the handleCreate function, change the upload URL:
+            const res = await fetch("/api/upload/mux", {
+              method: "POST",
+              body: formData,
+            });
             if (!res.ok) {
               let msg = "Upload failed";
-              try { const b = await res.json(); msg = b?.error || msg; } catch {}
+              try {
+                const b = await res.json();
+                msg = b?.error || msg;
+              } catch {}
               throw new Error(msg);
             }
             const { url } = await res.json();
