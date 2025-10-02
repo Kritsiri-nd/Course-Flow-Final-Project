@@ -13,17 +13,12 @@ interface Assignment {
   courseId: string;
 }
 
-interface UserData {
-  name: string;
-  photo: string;
-}
 
 interface MyAssignmentsClientProps {
-  userData: UserData;
   assignments: Assignment[];
 }
 
-export default function MyAssignmentsClient({ userData, assignments }: MyAssignmentsClientProps) {
+export default function MyAssignmentsClient({ assignments }: MyAssignmentsClientProps) {
   const [activeTab, setActiveTab] = useState<'all' | 'in-progress' | 'submitted'>('all');
   const [assignmentsState, setAssignmentsState] = useState<Assignment[]>(assignments);
 
@@ -94,7 +89,7 @@ export default function MyAssignmentsClient({ userData, assignments }: MyAssignm
           ].map((tab) => (
             <button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key as any)}
+              onClick={() => setActiveTab(tab.key as 'all' | 'in-progress' | 'submitted')}
               className={`text-b2 transition-colors pb-2 relative whitespace-nowrap ${
                 activeTab === tab.key
                   ? 'text-gray-900'

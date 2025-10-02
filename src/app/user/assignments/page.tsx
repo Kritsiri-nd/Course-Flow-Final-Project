@@ -13,12 +13,6 @@ export default async function UserAssignmentsPage() {
     redirect('/auth/login');
   }
 
-  // ดึงข้อมูล profile ของ user
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('first_name, last_name, photo_url')
-    .eq('id', session.user.id)
-    .single();
 
   // ดึงข้อมูล assignments เฉพาะของ user ที่ login เข้ามา
   // วิธีที่ 1: ดึง enrollments ก่อน แล้วดึง assignments ตาม course_ids
@@ -65,6 +59,7 @@ export default async function UserAssignmentsPage() {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let assignmentsData: any[] = [];
   let assignmentsError = null;
 
@@ -181,7 +176,7 @@ export default async function UserAssignmentsPage() {
           status = 'pending';
         }
       } else {
-        status = userSubmission.status as any;
+        status = userSubmission.status as 'pending' | 'in-progress' | 'submitted' | 'overdue';
       }
     }
 
@@ -196,11 +191,6 @@ export default async function UserAssignmentsPage() {
     };
   });
 
-  // สร้าง user data สำหรับแสดงผล
-  const userData = {
-    name: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'User',
-    photo: profile?.photo_url || '/assets/defaultUser.png',
-  };
 
   console.log('🔍 Debug - Transformed assignments:', transformedAssignments);
   console.log('🔍 Debug - Assignments with status:', transformedAssignments.map(a => ({ id: a.id, status: a.status, courseTitle: a.courseTitle })));
@@ -208,7 +198,6 @@ export default async function UserAssignmentsPage() {
   return (
     <>
       <MyAssignmentsClient 
-        userData={userData}
         assignments={transformedAssignments}
       />
       <Footer />
