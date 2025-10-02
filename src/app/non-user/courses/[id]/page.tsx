@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/accordion";
 import Footer from "@/components/ui/footer";
 import SubscribeModalAlert from "@/components/ui/subscribe-modal-alert";
+import { useRouter } from "next/navigation";
 
 // Shape used in the UI
 interface Course {
@@ -185,7 +186,7 @@ export default function CourseDetailPage() {
   //   (acc, module) => acc + module.lessons.length,
   //   0
   // );
-
+  const router = useRouter();
   return (
     <>
       <div className="bg-white pt-2 pb-8 sm:pb-16 sm:pt-16 px-2 sm:px-6 md:px-8">
@@ -319,15 +320,14 @@ export default function CourseDetailPage() {
                     <SubscribeModalAlert
                       courseTitle={course.title}
                       onConfirm={() => {
-                        // Add your subscription logic here
-                        console.log(`Subscribing to course: ${course.title}`);
-                        // You can add API calls, navigation, etc. here
+                        router.push(`/payment/${course.id}`);
                       }}
                     >
                       <Button className="w-full py-6 bg-primary hover:bg-primary/90 text-b2 text-primary-foreground">
                         Subscribe This Course
                       </Button>
                     </SubscribeModalAlert>
+
                   </div>
                 </div>
               </Card>
