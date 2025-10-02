@@ -70,6 +70,15 @@ type ApiCourse = {
   modules?: ApiModule[] | null;
 };
 
+// Function to extract YouTube video ID from URL
+function extractYouTubeId(url: string): string {
+  if (!url) return '';
+  
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : '';
+}
+
 function mapApiCourseToUiCourse(api: ApiCourse): Course {
   const safeNumber = (value: unknown, fallback = 0): number => {
     if (typeof value === "number") return value;
@@ -205,20 +214,13 @@ export default function CourseDetailPage() {
                       aspectRatio: "739/460",
                     }}
                   >
-                    <Image
-                      src={course.thumbnail}
-                      alt={course.title}
-                      fill
-                      className="object-cover !m-0 !p-0"
+                    <iframe
+                      src={`https://www.youtube.com/embed/${extractYouTubeId(course.videoUrl)}`}
+                      className="w-full h-full !m-0 !p-0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      title={course.title}
                     />
-                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                      <Button
-                        size="lg"
-                        className="w-16 h-16 rounded-full bg-white/90 hover:bg-white text-blue-600 shadow-lg"
-                      >
-                        <LuPlay className="w-6 h-6 ml-1" />
-                      </Button>
-                    </div>
                   </div>
                 </Card>
               </div>
