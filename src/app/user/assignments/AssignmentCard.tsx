@@ -94,7 +94,7 @@ export default function AssignmentCard({ assignment, onSubmit, onAnswerChange }:
   };
 
   const handleOpenCourse = () => {
-    router.push(`/user/my-courses`);
+    router.push(`/non-user/courses/${assignment.courseId}`);
   };
 
   const canEdit = assignment.status === 'pending' || assignment.status === 'in-progress' || assignment.status === 'overdue';
