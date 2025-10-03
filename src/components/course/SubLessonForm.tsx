@@ -350,6 +350,7 @@ export function SubLessonForm({
               file: null,
               previewUrl: null,
               existingUrl: null, // Clear existing URL as well
+              videoAssetId: null, // Also clear stored asset id so DB gets null
             }
           : s
       )
