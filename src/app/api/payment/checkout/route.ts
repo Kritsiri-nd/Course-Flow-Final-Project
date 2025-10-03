@@ -42,7 +42,7 @@ export async function POST(req: Request) {
           phone_number: phone_number!,
           amount: Math.round(course.price * 100),
           currency: course.currency
-        } as any,
+        },
         return_uri: 'http://localhost:3000/payment/success',
       })
     } else if (method === 'card') {

@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/accordion";
 import Footer from "@/components/ui/footer";
 import SubscribeModalAlert from "@/components/ui/subscribe-modal-alert";
-import { useRouter } from "next/navigation";
 
 // Shape used in the UI
 interface Course {

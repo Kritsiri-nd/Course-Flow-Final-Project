@@ -9,7 +9,7 @@ export async function GET() {
     }
 
     return NextResponse.json({ publicKey });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to get Omise key' }, { status: 500 });
   }
 }

@@ -5,9 +5,15 @@ import { useState, useEffect } from "react";
 import { createClient } from '@/lib/supabaseClient';
 import Image from "next/image";
 
+type PaymentMethod = 'card' | 'qr';
+
 declare global {
     interface Window {
-        Omise: any;
+        Omise: {
+            setPublicKey: (key: string) => void;
+            createSource: (type: string, params: Record<string, unknown>, callback: (status: number, response: unknown) => void) => void;
+            createToken: (type: string, params: Record<string, unknown>, callback: (status: number, response: unknown) => void) => void;
+        };
     }
 }
 
@@ -17,11 +23,11 @@ export default function PaymentPage() {
     const [userId, setUserId] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [omiseKey, setOmiseKey] = useState<string | null>(null);
-    const [course, setCourse] = useState<any>(null);
+    const [course, setCourse] = useState<{ id: number; title: string; price: number; currency: string } | null>(null);
     const supabase = createClient();
 
     // Form states
-    const [paymentMethod, setPaymentMethod] = useState<'card' | 'qr'>('card');
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
     const [cardData, setCardData] = useState({
         number: '',
         name: '',
@@ -29,7 +35,7 @@ export default function PaymentPage() {
         cvv: ''
     });
     const [promoCode, setPromoCode] = useState('');
-    const [qrData, setQrData] = useState<any>(null);
+    // const [qrData, setQrData] = useState<{ scannable_code?: { image?: string } } | null>(null);
 
     // Get user from Supabase
     useEffect(() => {
@@ -127,19 +133,22 @@ export default function PaymentPage() {
             Omise.createSource(
                 "promptpay",
                 {
-                    amount: course.price * 100, // Convert to satang
+                    amount: course!.price * 100, // Convert to satang
                     currency: "thb",
                 },
-                async (status: number, response: any) => {
+                async (status: number, response: unknown) => {
                     console.log('QR Response:', response); // Debug log
                     if (status !== 200) {
-                        alert("สร้าง QR Code ไม่สำเร็จ: " + (response.message || "Unknown error"));
+                        const errorMessage = (response as { message?: string })?.message || "Unknown error";
+                        alert("สร้าง QR Code ไม่สำเร็จ: " + errorMessage);
                         setLoading(false);
                         return;
                     }
 
-                    if (response && response.scannable_code && response.scannable_code.image) {
-                        setQrData(response);
+                    const qrResponse = response as { scannable_code?: { image?: string } };
+                    if (qrResponse && qrResponse.scannable_code && qrResponse.scannable_code.image) {
+                        // QR Code created successfully, redirect to QR display page
+                        window.location.href = `/payment/${courseId}/qr-display`;
                     } else {
                         alert("QR Code response ไม่ถูกต้อง");
                         console.error('Invalid QR response:', response);
@@ -183,14 +192,15 @@ export default function PaymentPage() {
                     expiration_year: '20' + cardData.expiry.split('/')[1],
                     security_code: cardData.cvv,
                 },
-                async (status: number, response: any) => {
+                async (status: number, response: unknown) => {
                     if (status !== 200) {
-                        alert("ข้อมูลบัตรเครดิตไม่ถูกต้อง: " + (response.message || "Unknown error"));
+                        const errorMessage = (response as { message?: string })?.message || "Unknown error";
+                        alert("ข้อมูลบัตรเครดิตไม่ถูกต้อง: " + errorMessage);
                         setLoading(false);
                         return;
                     }
 
-                    const token = response.id;
+                    const token = (response as { id: string }).id;
                     const res = await fetch("/api/payment/checkout", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -255,8 +265,8 @@ export default function PaymentPage() {
                                             type="radio"
                                             name="paymentMethod"
                                             value="card"
-                                            checked={paymentMethod === 'card'}
-                                            onChange={(e) => setPaymentMethod(e.target.value as 'card' | 'qr')}
+                                            checked={(paymentMethod as PaymentMethod) === 'card'}
+                                            onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
                                             className="w-4 h-4 text-blue-500"
                                         />
                                         <span className="text-gray-800 text-[16px] font-medium">Credit card / Debit card</span>
@@ -338,8 +348,8 @@ export default function PaymentPage() {
                                             type="radio"
                                             name="paymentMethod"
                                             value="qr"
-                                            checked={paymentMethod === 'qr'}
-                                            onChange={(e) => setPaymentMethod(e.target.value)}
+                                            checked={(paymentMethod as PaymentMethod) === 'qr'}
+                                            onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
                                             className="w-4 h-4 text-blue-500"
                                         />
                                         <span className="text-gray-800 text-[16px] font-medium">QR Payment</span>

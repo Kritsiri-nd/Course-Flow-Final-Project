@@ -1,13 +1,17 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from '@/lib/supabaseClient';
 import Link from "next/link";
 
 declare global {
     interface Window {
-        Omise: any;
+        Omise: {
+            setPublicKey: (key: string) => void;
+            createSource: (type: string, params: Record<string, unknown>, callback: (status: number, response: unknown) => void) => void;
+            createToken: (type: string, params: Record<string, unknown>, callback: (status: number, response: unknown) => void) => void;
+        };
     }
 }
 
@@ -17,8 +21,8 @@ export default function QRDisplayPage() {
     const router = useRouter();
     const [userId, setUserId] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    const [course, setCourse] = useState<any>(null);
-    const [qrData, setQrData] = useState<any>(null);
+    const [course, setCourse] = useState<{ id: number; title: string; price: number; currency: string } | null>(null);
+    const [qrData, setQrData] = useState<{ scannable_code?: { image?: { download_uri: string } } } | null>(null);
     const [paymentStatus, setPaymentStatus] = useState<'pending' | 'success' | 'failed'>('pending');
     const [referenceNo, setReferenceNo] = useState<string>('');
     const [chargeId, setChargeId] = useState<string>('');
@@ -55,25 +59,7 @@ export default function QRDisplayPage() {
     }, [courseId]);
 
 
-    // Generate QR Code
-    useEffect(() => {
-        if (course && !qrData && !loading) {
-            generateQRCode();
-        }
-    }, [course]);
-
-    // Check payment status periodically
-    useEffect(() => {
-        if (chargeId && paymentStatus === 'pending') {
-            const interval = setInterval(() => {
-                checkPaymentStatus();
-            }, 3000); // Check every 3 seconds
-
-            return () => clearInterval(interval);
-        }
-    }, [chargeId, paymentStatus]);
-
-    const generateQRCode = async () => {
+    const generateQRCode = useCallback(async () => {
         console.log('generateQRCode called');
         console.log('userId:', userId);
         console.log('courseId:', courseId);
@@ -161,9 +147,9 @@ export default function QRDisplayPage() {
             setPaymentStatus('failed');
             setLoading(false);
         }
-    };
+    }, [userId, courseId, course]);
 
-    const checkPaymentStatus = async () => {
+    const checkPaymentStatus = useCallback(async () => {
         if (!chargeId) return;
 
         try {
@@ -189,7 +175,7 @@ export default function QRDisplayPage() {
         } catch (error) {
             console.error('Error checking payment status:', error);
         }
-    };
+    }, [chargeId, courseId, router]);
 
     const saveQRImage = () => {
         if (qrData && qrData.scannable_code && qrData.scannable_code.image) {
@@ -205,6 +191,24 @@ export default function QRDisplayPage() {
     const goBackToPayment = () => {
         router.push(`/payment/${courseId}`);
     };
+
+    // Generate QR Code
+    useEffect(() => {
+        if (course && !qrData && !loading) {
+            generateQRCode();
+        }
+    }, [course, qrData, loading, generateQRCode]);
+
+    // Check payment status periodically
+    useEffect(() => {
+        if (chargeId && paymentStatus === 'pending') {
+            const interval = setInterval(() => {
+                checkPaymentStatus();
+            }, 3000); // Check every 3 seconds
+
+            return () => clearInterval(interval);
+        }
+    }, [chargeId, paymentStatus, checkPaymentStatus]);
 
     if (!course) {
         return (
