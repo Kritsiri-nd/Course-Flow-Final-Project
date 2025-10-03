@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 type SubLessonPayload = {
   title: string;
   video_url?: string | null;
+  video_asset_id?: string | null;
 };
 
 // GET /api/lessons/[id] - fetch a module with its lessons
@@ -27,7 +28,7 @@ export async function GET(
     let { data: moduleRow, error } = await supabase
       .from("modules")
       .select(
-        `id, title, course_id, lessons ( id, title, video_url, order_index )`
+        `id, title, course_id, lessons ( id, title, video_url, video_asset_id, order_index )`
       )
       .eq("id", moduleId)
       .single();
@@ -47,7 +48,7 @@ export async function GET(
         const { data: moduleFromLesson, error: modFromLessonErr } = await supabase
           .from("modules")
           .select(
-            `id, title, course_id, lessons ( id, title, video_url, order_index )`
+            `id, title, course_id, lessons ( id, title, video_url, video_asset_id, order_index )`
           )
           .eq("id", lessonRow.module_id)
           .single();
@@ -150,6 +151,7 @@ export async function PUT(
       module_id: moduleId,
       title: s.title,
       video_url: s.video_url ?? null,
+      video_asset_id: s.video_asset_id ?? null,
       order_index: idx + 1,
     }));
 

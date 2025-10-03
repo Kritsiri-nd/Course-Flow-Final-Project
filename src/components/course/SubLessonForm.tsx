@@ -40,6 +40,7 @@ type SubLesson = {
   previewUrl?: string | null;
   existingUrl?: string | null;
   databaseId?: number; // Add this to track the actual database ID
+  videoAssetId?: string | null;
 };
 
 interface SubLessonFormProps {
@@ -278,38 +279,17 @@ export function SubLessonForm({
 
     // If there's an existing video URL (from Mux), delete it from Mux only
     // We don't need to update the database here since we're in edit mode
-    if (
-      subLesson.existingUrl &&
-      subLesson.existingUrl.includes("stream.mux.com")
-    ) {
+    if (subLesson.existingUrl && subLesson.existingUrl.includes("mux.com")) {
       setDeletingVideoIds((prev) => new Set(prev).add(id));
 
       try {
         console.log(`Deleting video for sub-lesson ID: ${id}`);
         console.log(`Video URL: ${subLesson.existingUrl}`);
 
-        // Extract asset ID from URL
-        const extractAssetId = (url: string): string | null => {
-          const patterns = [
-            /https:\/\/stream\.mux\.com\/([a-zA-Z0-9]+)\.m3u8/,
-            /https:\/\/stream\.mux\.com\/([a-zA-Z0-9]+)/,
-          ];
+        const videoAssetId = subLesson.videoAssetId ?? null;
 
-          for (const pattern of patterns) {
-            const match = url.match(pattern);
-            if (match && match[1]) {
-              return match[1];
-            }
-          }
-          return null;
-        };
-
-        const assetId = extractAssetId(subLesson.existingUrl);
-
-        if (assetId) {
-          console.log(`Extracted asset ID: ${assetId}`);
-
-          // Delete directly from Mux using the asset ID
+        if (videoAssetId || subLesson.existingUrl) {
+          // Delete from Mux using stored asset id if available, else fallback to URL
           const response = await fetch("/api/upload/mux", {
             method: "DELETE",
             headers: {
@@ -320,6 +300,7 @@ export function SubLessonForm({
               recordType: "lesson",
               recordId: subLesson.databaseId || subLesson.id, // Use database ID if available
               forceDelete: true, // Allow partial success
+              videoAssetId: videoAssetId,
             }),
           });
 
@@ -342,10 +323,7 @@ export function SubLessonForm({
             // Don't throw error - still allow UI clearing for better UX
           }
         } else {
-          console.error(
-            "Could not extract asset ID from URL:",
-            subLesson.existingUrl
-          );
+          console.error("No identifiers available for Mux deletion");
         }
       } catch (error) {
         console.error("Error deleting video:", error);

@@ -17,7 +17,7 @@ export async function GET(
         return NextResponse.json({
             status: asset.status,
             playbackUrl: asset.playback_ids?.[0]
-                ? `https://stream.mux.com/${asset.playback_ids[0].id}.m3u8`
+                ? `https://player.mux.com/${asset.playback_ids[0].id}`
                 : null,
         });
     } catch (error) {

@@ -19,6 +19,7 @@ type SubLessonState = {
   previewUrl?: string | null;
   existingUrl?: string | null;
   databaseId?: number; // Add this field
+  videoAssetId?: string | null;
 };
 
 export default function EditLessonPage() {
@@ -52,7 +53,12 @@ export default function EditLessonPage() {
         setLessonName(m?.title || "");
         const mapped: SubLessonState[] = (m?.lessons || []).map(
           (
-            l: { id?: number; title?: string; video_url?: string },
+            l: {
+              id?: number;
+              title?: string;
+              video_url?: string;
+              video_asset_id?: string | null;
+            },
             idx: number
           ) => ({
             id: typeof l?.id === "number" ? l.id : idx + 1,
@@ -61,6 +67,7 @@ export default function EditLessonPage() {
             previewUrl: l?.video_url || null,
             existingUrl: l?.video_url || null,
             databaseId: l?.id, // Store the actual database ID
+            videoAssetId: l?.video_asset_id ?? null,
           })
         );
         setSubLessons(
@@ -96,9 +103,7 @@ export default function EditLessonPage() {
     try {
       // First, delete all videos associated with this lesson's sub-lessons
       const videoDeletionPromises = subLessons
-        .filter(
-          (s) => s.existingUrl && s.existingUrl.includes("stream.mux.com")
-        )
+        .filter((s) => s.existingUrl && s.existingUrl.includes("mux.com"))
         .map(async (s) => {
           try {
             console.log(`Deleting video for sub-lesson: ${s.name}`);
@@ -108,8 +113,9 @@ export default function EditLessonPage() {
               body: JSON.stringify({
                 videoUrl: s.existingUrl,
                 recordType: "lesson",
-                recordId: s.databaseId || s.id, // Use database ID if available
+                recordId: s.databaseId || s.id,
                 forceDelete: true,
+                videoAssetId: s.videoAssetId ?? null,
               }),
             });
 
@@ -187,12 +193,17 @@ export default function EditLessonPage() {
               } catch {}
               throw new Error(msg);
             }
-            const { url } = await res.json();
-            return { title: s.name || "Untitled", video_url: url };
+            const { url, assetId } = await res.json();
+            return {
+              title: s.name || "Untitled",
+              video_url: url,
+              video_asset_id: assetId,
+            };
           }
           return {
             title: s.name || "Untitled",
             video_url: s.existingUrl ?? null,
+            video_asset_id: s.videoAssetId ?? null,
           };
         })
       );

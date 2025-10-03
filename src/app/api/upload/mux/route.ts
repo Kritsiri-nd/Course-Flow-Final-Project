@@ -16,25 +16,25 @@ const supabase = createClient(
 );
 
 /**
- * Helper function to extract Mux asset ID from various URL formats
+ * Helper function to extract a Mux playback ID from various URL formats
  */
-function extractMuxAssetId(url: string): string | null {
+function extractMuxPlaybackId(url: string): string | null {
     if (!url || typeof url !== 'string') {
         console.error('❌ Invalid URL provided:', url);
         return null;
     }
 
-    console.log('🔍 Attempting to extract asset ID from URL:', url);
+    console.log('🔍 Attempting to extract playback ID from URL:', url);
 
     // Try multiple patterns to handle different URL formats
     const patterns = [
-        // Standard m3u8 format: https://stream.mux.com/{asset_id}.m3u8
+        // Standard m3u8 format: https://stream.mux.com/{playback_id}.m3u8
         /https:\/\/stream\.mux\.com\/([a-zA-Z0-9]+)\.m3u8/,
-        // Without .m3u8 extension: https://stream.mux.com/{asset_id}
+        // Without .m3u8 extension: https://stream.mux.com/{playback_id}
         /https:\/\/stream\.mux\.com\/([a-zA-Z0-9]+)$/,
-        // With additional path: https://stream.mux.com/{asset_id}/something
-        /https:\/\/stream\.mux\.com\/([a-zA-Z0-9]+)\//,
-        // Just the asset ID if it's passed directly
+        // Player URL: https://player.mux.com/{playback_id}
+        /https:\/\/player\.mux\.com\/([a-zA-Z0-9]+)/,
+        // Just the playback ID if it's passed directly
         /^([a-zA-Z0-9]{20,})$/
     ];
 
@@ -45,13 +45,13 @@ function extractMuxAssetId(url: string): string | null {
         console.log(`- Pattern ${i + 1} (${pattern}):`, match ? `✅ Match found: ${match[1]}` : '❌ No match');
 
         if (match && match[1] && match[1] !== 'undefined') {
-            const assetId = match[1];
-            console.log(`✅ Successfully extracted asset ID: ${assetId}`);
-            return assetId;
+            const playbackId = match[1];
+            console.log(`✅ Successfully extracted playback ID: ${playbackId}`);
+            return playbackId;
         }
     }
 
-    console.error('❌ Could not extract asset ID from any pattern');
+    console.error('❌ Could not extract playback ID from any pattern');
     return null;
 }
 
@@ -135,12 +135,28 @@ export async function POST(req: Request) {
             }, { status: 202 }); // 202 Accepted
         }
 
-        // Return the asset ID and playback URL
-        const playbackUrl = `https://stream.mux.com/${assetId}.m3u8`;
+        // Ensure there is a public playback ID, then build player URL
+        let playbackId: string | null = null;
+        try {
+            const asset = await mux.video.assets.retrieve(assetId);
+            const existing = (asset as any)?.playback_ids?.find((p: any) => p?.policy === 'public')
+                || (asset as any)?.playback_ids?.[0];
+            if (existing?.id) {
+                playbackId = existing.id;
+            } else {
+                const created = await (mux.video.assets as any).playbackIds.create(assetId, { policy: 'public' });
+                playbackId = (created as any)?.id ?? null;
+            }
+        } catch (e) {
+            console.warn('⚠️ Could not obtain playback ID immediately:', e);
+        }
+
+        const playbackUrl = playbackId ? `https://player.mux.com/${playbackId}` : `https://stream.mux.com/${assetId}.m3u8`;
 
         console.log('✅ Upload completed successfully:', {
             assetId,
             uploadId: upload.id,
+            playbackId,
             playbackUrl
         });
 
@@ -148,6 +164,7 @@ export async function POST(req: Request) {
             {
                 assetId: assetId,
                 uploadId: upload.id,
+                playbackId: playbackId,
                 url: playbackUrl,
                 status: "processing", // MUX will process the video
             },
@@ -172,12 +189,14 @@ export async function DELETE(req: Request) {
             videoUrl,
             recordType,
             recordId,
-            forceDelete = false
+            forceDelete = false,
+            videoAssetId
         }: {
             videoUrl: string;
             recordType: 'course' | 'lesson';
             recordId: number;
             forceDelete?: boolean;
+            videoAssetId?: string | null;
         } = body;
 
         console.log('🗑️ DELETE REQUEST RECEIVED:');
@@ -205,9 +224,13 @@ export async function DELETE(req: Request) {
                 const tableName = recordType === 'course' ? 'courses' : 'lessons';
                 console.log(`- Updating table: ${tableName}, ID: ${recordId}`);
 
+                const updatePayload = tableName === 'courses'
+                    ? { video_url: null }
+                    : { video_url: null, video_asset_id: null } as Record<string, unknown>;
+
                 const { error: supabaseError } = await supabase
                     .from(tableName)
-                    .update({ video_url: null })
+                    .update(updatePayload)
                     .eq('id', recordId);
 
                 if (supabaseError) {
@@ -256,19 +279,36 @@ export async function DELETE(req: Request) {
             errors: [] as string[]
         };
 
-        // Step 1: Extract asset ID and delete from Mux FIRST
+        // Step 1: Resolve asset ID and delete from Mux FIRST
         console.log('🎬 Step 1: Deleting from Mux first...');
         try {
-            const assetId = extractMuxAssetId(videoUrl);
+            let resolvedAssetId: string | null = null;
 
-            if (assetId) {
-                results.assetId = assetId;
-                console.log(`- Final Asset ID to delete: ${assetId}`);
+            if (videoAssetId) {
+                resolvedAssetId = videoAssetId;
+                console.log(`- Using provided asset ID: ${resolvedAssetId}`);
+            } else {
+                const playbackId = extractMuxPlaybackId(videoUrl);
+                if (playbackId) {
+                    console.log(`- Extracted playback ID: ${playbackId}`);
+                    try {
+                        const playback = await mux.video.playbackIds.retrieve(playbackId);
+                        resolvedAssetId = (playback as any)?.asset_id ?? null;
+                        console.log(`- Resolved asset ID from playback ID: ${resolvedAssetId}`);
+                    } catch (resolveErr) {
+                        console.warn('⚠️ Failed to resolve asset from playback ID:', resolveErr);
+                    }
+                }
+            }
+
+            if (resolvedAssetId) {
+                results.assetId = resolvedAssetId;
+                console.log(`- Final Asset ID to delete: ${resolvedAssetId}`);
                 console.log('- Attempting to delete from Mux...');
 
                 // Verify asset exists before trying to delete
                 try {
-                    const asset = await mux.video.assets.retrieve(assetId);
+                    const asset = await mux.video.assets.retrieve(resolvedAssetId);
                     console.log(`- Asset found in Mux: ${asset.id} (status: ${asset.status})`);
                 } catch (retrieveError) {
                     console.warn('⚠️ Asset not found in Mux (might already be deleted):', retrieveError);
@@ -276,12 +316,12 @@ export async function DELETE(req: Request) {
                 }
 
                 // Delete asset from Mux
-                await mux.video.assets.delete(assetId);
+                await mux.video.assets.delete(resolvedAssetId);
                 console.log('✅ Mux deletion successful');
                 results.muxSuccess = true;
             } else {
-                console.error('❌ Could not extract asset ID from URL:', videoUrl);
-                results.errors.push("Invalid Mux URL format - could not extract asset ID");
+                console.error('❌ Could not resolve asset ID from provided data');
+                results.errors.push("Invalid Mux identifiers - could not resolve asset ID");
             }
         } catch (error) {
             const message = error instanceof Error ? error.message : "Unknown Mux error";
@@ -303,9 +343,13 @@ export async function DELETE(req: Request) {
                 const tableName = recordType === 'course' ? 'courses' : 'lessons';
                 console.log(`- Updating table: ${tableName}, ID: ${recordId}`);
 
+                const updatePayload = tableName === 'courses'
+                    ? { video_url: null }
+                    : { video_url: null, video_asset_id: null } as Record<string, unknown>;
+
                 const { error: supabaseError } = await supabase
                     .from(tableName)
-                    .update({ video_url: null })
+                    .update(updatePayload)
                     .eq('id', recordId);
 
                 if (supabaseError) {

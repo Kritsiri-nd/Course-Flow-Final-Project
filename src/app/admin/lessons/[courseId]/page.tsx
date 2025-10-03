@@ -3,7 +3,11 @@
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdminPanel } from "@/components/layouts/sidebar-admin-panel";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { SubLessonForm } from "@/components/course/SubLessonForm";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -19,9 +23,14 @@ export default function AddLessonPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lessonName, setLessonName] = useState("");
   const [courseTitle, setCourseTitle] = useState<string>("");
-  const [subLessons, setSubLessons] = useState<{ id: number; name: string; file: File | null; previewUrl?: string | null; }[]>([
-    { id: 1, name: "", file: null, previewUrl: null },
-  ]);
+  const [subLessons, setSubLessons] = useState<
+    {
+      id: number;
+      name: string;
+      file: File | null;
+      previewUrl?: string | null;
+    }[]
+  >([{ id: 1, name: "", file: null, previewUrl: null }]);
   const [lessonId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -45,18 +54,18 @@ export default function AddLessonPage() {
 
   const handleDeleteLesson = async () => {
     if (!lessonId) {
-      alert('No lesson to delete');
+      alert("No lesson to delete");
       return;
     }
 
     setIsSubmitting(true);
     try {
       const response = await fetch(`/api/lessons/${lessonId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (!response.ok) {
-        let message = 'Failed to delete lesson';
+        let message = "Failed to delete lesson";
         try {
           const errorData = await response.json();
           message = errorData?.error || message;
@@ -67,8 +76,8 @@ export default function AddLessonPage() {
       // Redirect back to course edit page
       router.push(`/admin/courses/${courseId}/edit`);
     } catch (error) {
-      console.error('Error deleting lesson:', error);
-      const msg = error instanceof Error ? error.message : 'Unknown error';
+      console.error("Error deleting lesson:", error);
+      const msg = error instanceof Error ? error.message : "Unknown error";
       alert(`Failed to delete lesson: ${msg}`);
     } finally {
       setIsSubmitting(false);
@@ -77,7 +86,10 @@ export default function AddLessonPage() {
 
   const handleCreate = async () => {
     if (!lessonName.trim()) {
-      setErrors(prev => ({ ...prev, lessonName: "Please enter lesson name" }));
+      setErrors((prev) => ({
+        ...prev,
+        lessonName: "Please enter lesson name",
+      }));
       return;
     }
 
@@ -105,10 +117,18 @@ export default function AddLessonPage() {
               } catch {}
               throw new Error(msg);
             }
-            const { url } = await res.json();
-            return { title: s.name || "Untitled", video_url: url };
+            const { url, assetId } = await res.json();
+            return {
+              title: s.name || "Untitled",
+              video_url: url,
+              video_asset_id: assetId,
+            };
           }
-          return { title: s.name || "Untitled", video_url: null };
+          return {
+            title: s.name || "Untitled",
+            video_url: null,
+            video_asset_id: null,
+          };
         })
       );
 
@@ -125,7 +145,10 @@ export default function AddLessonPage() {
 
       if (!createRes.ok) {
         let msg = "Failed to create lessons";
-        try { const b = await createRes.json(); msg = b?.error || msg; } catch {}
+        try {
+          const b = await createRes.json();
+          msg = b?.error || msg;
+        } catch {}
         throw new Error(msg);
       }
 
@@ -149,12 +172,18 @@ export default function AddLessonPage() {
                 className="h-[24px] w-[24px] text-[#9AA1B9] cursor-pointer hover:text-gray-600 transition-colors"
                 onClick={() => router.push(`/admin/courses/${courseId}/edit`)}
               />
-              <span className="text-[#9AA1B9] font-inter font-normal text-sm leading-[150%] tracking-normal align-middle">Course</span>
+              <span className="text-[#9AA1B9] font-inter font-normal text-sm leading-[150%] tracking-normal align-middle">
+                Course
+              </span>
               {courseTitle && (
-                <span className="text-[#2A2E3F] font-inter font-normal text-sm leading-[150%] tracking-normal align-middle">{courseTitle}</span>
+                <span className="text-[#2A2E3F] font-inter font-normal text-sm leading-[150%] tracking-normal align-middle">
+                  {courseTitle}
+                </span>
               )}
             </div>
-            <span className="text-black font-inter font-bold text-2xl leading-[125%] tracking-[-0.02em] align-middle">Add Lesson</span>
+            <span className="text-black font-inter font-bold text-2xl leading-[125%] tracking-[-0.02em] align-middle">
+              Add Lesson
+            </span>
           </div>
           <div className="ml-auto gap-4 flex items-center">
             <Button
@@ -189,7 +218,7 @@ export default function AddLessonPage() {
             onLessonNameChange={(v) => {
               setLessonName(v);
               if (errors.lessonName) {
-                setErrors(prev => ({ ...prev, lessonName: "" }));
+                setErrors((prev) => ({ ...prev, lessonName: "" }));
               }
             }}
             subLessons={subLessons}
@@ -203,5 +232,3 @@ export default function AddLessonPage() {
     </SidebarProvider>
   );
 }
-
-

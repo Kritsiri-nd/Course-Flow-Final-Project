@@ -53,6 +53,7 @@ export interface Lesson {
     created_at: string;
     content?: string;
     video_url?: string;
+    video_asset_id?: string | null;
     module_id: number;
 }
 
