@@ -214,7 +214,11 @@ export default function PaymentPage() {
 
                     const data = await res.json();
                     if (data.paid) {
-                        alert("ชำระเงินสำเร็จ!");
+                        if (data.enrollment_created) {
+                            alert("ชำระเงินสำเร็จ! คุณสามารถเข้าเรียนได้แล้ว");
+                        } else {
+                            alert("ชำระเงินสำเร็จ!");
+                        }
                         // Redirect to success page
                         window.location.href = `/payment/${courseId}/success`;
                     } else {

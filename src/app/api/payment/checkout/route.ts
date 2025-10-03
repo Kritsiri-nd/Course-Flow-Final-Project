@@ -4,11 +4,12 @@ import { createSupabaseServerClient } from '@/lib/createSupabaseServerClient'
 
 export async function POST(req: Request) {
   try {
-    const { course_id, user_id, method, token, phone_number } = await req.json()
-    console.log('Request data:', { course_id, user_id, method, token, phone_number });
+    const { course_id, user_id, method, token, phone_number, charge_id } = await req.json()
+    console.log('Request data:', { course_id, user_id, method, token, phone_number, charge_id });
     // method = "promptpay" | "card"
     // token = card token ที่สร้างจาก Omise.js (ใช้เฉพาะกับบัตร)
     // phone_number = หมายเลขโทรศัพท์สำหรับ PromptPay
+    // charge_id = charge ID ที่มีอยู่แล้ว (สำหรับ QR payment)
 
     const supabase = await createSupabaseServerClient()
     const { data: course, error } = await supabase
@@ -28,7 +29,11 @@ export async function POST(req: Request) {
 
     let charge
 
-    if (method === 'promptpay') {
+    // If charge_id is provided (for QR payment), use existing charge
+    if (charge_id) {
+      console.log('Using existing charge:', charge_id);
+      charge = { id: charge_id, paid: false, status: 'pending' };
+    } else if (method === 'promptpay') {
       if (!phone_number) {
         return NextResponse.json({ error: 'Missing phone number for PromptPay' }, { status: 400 })
       }
@@ -62,17 +67,54 @@ export async function POST(req: Request) {
     }
 
     // Save payment record
-    await supabase.from('payments').insert({
+    const { data: payment, error: paymentError } = await supabase.from('payments').insert({
       user_id,
       course_id,
       amount: course.price,
       currency: course.currency,
-      status: 'pending',
+      status: charge_id ? 'pending' : 'pending', // QR payment starts as pending
       provider: 'omise',
       provider_payment_id: charge.id,
-    })
+    }).select().single()
 
-    return NextResponse.json(charge)
+    if (paymentError) {
+      console.error('Error saving payment:', paymentError)
+      return NextResponse.json({ error: 'Failed to save payment record' }, { status: 500 })
+    }
+
+    console.log('✅ Payment record saved:', payment.id);
+
+    // Check if payment is successful immediately (for card payments)
+    if (charge.paid && charge.status === 'successful') {
+      // Update payment status to successful
+      await supabase.from('payments')
+        .update({ status: 'successful' })
+        .eq('id', payment.id)
+
+      // Create enrollment
+      const { data: enrollmentData, error: enrollmentError } = await supabase.from('enrollments').insert({
+        user_id,
+        course_id,
+        status: 'in-progress',
+        progress_percentage: 0,
+        enrolled_at: new Date().toISOString(),
+        last_accessed_at: new Date().toISOString()
+      }).select().single()
+
+      if (enrollmentError) {
+        console.error('❌ Error creating enrollment:', enrollmentError)
+        // Don't fail the payment, just log the error
+      } else {
+        console.log('✅ Enrollment created successfully:', enrollmentData)
+        console.log('✅ User ID:', user_id, 'Course ID:', course_id)
+      }
+    }
+
+    return NextResponse.json({
+      ...charge,
+      payment_id: payment.id,
+      enrollment_created: charge.paid && charge.status === 'successful'
+    })
   } catch (err: unknown) {
     let message = 'Unknown error'
     if (err instanceof Error) {

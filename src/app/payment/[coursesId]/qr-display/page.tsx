@@ -108,6 +108,30 @@ export default function QRDisplayPage() {
             if (data && data.id) {
                 setChargeId(data.id);
                 console.log('Charge ID:', data.id);
+                
+                // Save payment record to database
+                try {
+                    const paymentResponse = await fetch('/api/payment/checkout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            course_id: parseInt(courseId as string),
+                            user_id: userId,
+                            method: 'promptpay',
+                            charge_id: data.id
+                        })
+                    });
+                    
+                    if (paymentResponse.ok) {
+                        console.log('✅ Payment record saved successfully');
+                    } else {
+                        console.error('❌ Failed to save payment record');
+                    }
+                } catch (error) {
+                    console.error('❌ Error saving payment record:', error);
+                }
             }
 
             // Check different possible response structures
@@ -163,6 +187,52 @@ export default function QRDisplayPage() {
             if (response.ok && data.paid) {
                 console.log('Payment successful!');
                 setPaymentStatus('success');
+                
+                // Update payment status to successful first
+                try {
+                    console.log('🔄 Updating payment status to successful...');
+                    const updateResponse = await fetch('/api/payment/update-status', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            charge_id: chargeId,
+                            status: 'successful'
+                        })
+                    });
+
+                    if (updateResponse.ok) {
+                        console.log('✅ Payment status updated to successful');
+                        
+                        // Create enrollment when payment is successful
+                        console.log('🔄 Creating enrollment for user:', userId, 'course:', courseId);
+                        const enrollmentResponse = await fetch('/api/enrollments', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                course_id: parseInt(courseId as string),
+                                user_id: userId
+                            })
+                        });
+
+                        const enrollmentData = await enrollmentResponse.json();
+                        console.log('📝 Enrollment response:', enrollmentData);
+
+                        if (enrollmentResponse.ok) {
+                            console.log('✅ Enrollment created successfully');
+                        } else {
+                            console.error('❌ Failed to create enrollment:', enrollmentData);
+                        }
+                    } else {
+                        console.error('❌ Failed to update payment status');
+                    }
+                } catch (error) {
+                    console.error('❌ Error updating payment status:', error);
+                }
+                
                 // Auto redirect to success page after 2 seconds
                 setTimeout(() => {
                     router.push(`/payment/${courseId}/success`);
@@ -175,7 +245,7 @@ export default function QRDisplayPage() {
         } catch (error) {
             console.error('Error checking payment status:', error);
         }
-    }, [chargeId, courseId, router]);
+    }, [chargeId, courseId, router, userId]);
 
     const saveQRImage = () => {
         if (qrData && qrData.scannable_code && qrData.scannable_code.image) {
