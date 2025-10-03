@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { PiBookOpenLight } from "react-icons/pi";
-import { LuClock3, LuPlay, LuArrowLeft } from "react-icons/lu";
+import { LuClock3, LuArrowLeft } from "react-icons/lu";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -121,10 +121,12 @@ function mapApiCourseToUiCourse(api: ApiCourse): Course {
 
 export default function CourseDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params?.id as string;
   const [course, setCourse] = useState<Course | null>(null);
   const [otherCourses, setOtherCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -156,6 +158,36 @@ export default function CourseDetailPage() {
       fetchCourse();
     }
   }, [id]);
+
+  const handleAddToWishlist = async () => {
+    if (!course || isAddingToWishlist) return;
+    
+    setIsAddingToWishlist(true);
+    
+    try {
+      const response = await fetch('/api/wishlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ courseId: course.id.toString() }),
+      });
+      
+      if (response.ok) {
+        // Navigate to wishlist page
+        router.push('/user/wishlist');
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to add to wishlist:', errorData);
+        alert(`Failed to add to wishlist: ${errorData.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error adding to wishlist:', error);
+      alert('Network error. Please try again.');
+    } finally {
+      setIsAddingToWishlist(false);
+    }
+  };
 
   if (loading)
     return (
@@ -313,8 +345,10 @@ export default function CourseDetailPage() {
                     <Button
                       variant="outline"
                       className="w-full py-6 bg-white border-orange-500 text-b2 text-orange-500 hover:bg-blue-50"
+                      onClick={handleAddToWishlist}
+                      disabled={isAddingToWishlist}
                     >
-                      Add to Wishlist
+                      {isAddingToWishlist ? 'Adding...' : 'Add to Wishlist'}
                     </Button>
                     <SubscribeModalAlert
                       courseTitle={course.title}
@@ -436,8 +470,10 @@ export default function CourseDetailPage() {
                   <Button
                     variant="outline"
                     className="flex-1 border-orange-500 !text-orange-500 hover:bg-orange-50 text-b4"
+                    onClick={handleAddToWishlist}
+                    disabled={isAddingToWishlist}
                   >
-                    Add to Wishlist
+                    {isAddingToWishlist ? 'Adding...' : 'Add to Wishlist'}
                   </Button>
                   <SubscribeModalAlert
                     courseTitle={course?.title || "Service Design Essentials"}
