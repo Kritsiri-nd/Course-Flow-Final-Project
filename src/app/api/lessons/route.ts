@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 type SubLessonPayload = {
   title: string;
   video_url?: string | null;
+  video_asset_id?: string | null;
 };
 
 export async function POST(req: NextRequest) {
@@ -73,6 +74,7 @@ export async function POST(req: NextRequest) {
       title: s.title,
       order_index: idx + 1,
       video_url: s.video_url ?? null,
+      video_asset_id: s.video_asset_id ?? null,
     }));
 
     if (lessonsToInsert.length > 0) {
@@ -86,7 +88,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, moduleId }, { status: 201 });
-    } catch (e: unknown) {
+  } catch (e: unknown) {
     console.error("Unexpected error creating lessons:", (e as Error)?.message || e);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
