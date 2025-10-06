@@ -60,10 +60,6 @@ const config: Config = {
         '1': '2px 2px 12px 0 rgba(0, 0, 0, 0.08)',
         '2': '2px 2px 12px 0 rgba(64, 50, 133, 0.12)',
       }
-      backgroundImage: {
-        'linear1': 'var(--linear1)',
-        'linear2': 'var(--linear2)', 
-      },
     },
   },
   plugins: [],
