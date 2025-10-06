@@ -247,15 +247,16 @@ export default function PaymentPage() {
 
     return (
         <div className="min-h-screen bg-[#FFFFFF]">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 ">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-end">
+
                     {/* Main Content */}
-                    <div className="lg:col-span-2 max-w-[739px] ">
+                    <div className="w-full">
                         <Link href="/non-user/courses" className="text-blue-500 hover:text-blue-600 mb-6 inline-block text-[16px] font-bold">
                             ← Back
                         </Link>
 
-                        <h1 className="text-h2 text-black mb-8">
+                        <h1 className="text-h2 text-black mb-10">
                             Enter payment info to start<br></br>your subscription
                         </h1>
 
@@ -270,6 +271,7 @@ export default function PaymentPage() {
                     </div>
 
                     {/* Order Summary */}
+                    <div className="w-full">
                     <OrderSummary
                         course={course}
                         paymentMethod={paymentMethod}
@@ -277,6 +279,7 @@ export default function PaymentPage() {
                         omiseKey={omiseKey}
                         onSubmit={handleSubmit}
                     />
+                    </div>
                 </div>
             </div>
         </div>

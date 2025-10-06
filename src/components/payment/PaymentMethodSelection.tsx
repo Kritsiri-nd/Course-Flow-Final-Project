@@ -15,7 +15,7 @@ export default function PaymentMethodSelection({
         <div>
             <h2 className="text-b2 font-regular text-gray-700 mb-4">Select payment method</h2>
             <div className="space-y-3">
-                <label className="flex items-center space-x-3 cursor-pointer">
+                <label className="flex items-center space-x-3 cursor-pointer ">
                     <input
                         type="radio"
                         name="paymentMethod"

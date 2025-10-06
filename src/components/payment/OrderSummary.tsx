@@ -14,18 +14,19 @@ interface OrderSummaryProps {
     onSubmit: () => void;
 }
 
-export default function OrderSummary({ 
-    course, 
-    paymentMethod, 
-    loading, 
-    omiseKey, 
-    onSubmit 
+export default function OrderSummary({
+    course,
+    paymentMethod,
+    loading,
+    omiseKey,
+    onSubmit
 }: OrderSummaryProps) {
     const [promoCode, setPromoCode] = useState('');
 
     return (
         <div className="lg:col-span-1 max-w-[357px]">
-            <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-8">
+            <div className="bg-white border border-gray-100 shadow-sm rounded-lg p-6 sticky top-8">
+
                 <h2 className="text-[14px] font-regular text-orange-500 mb-6">Summary</h2>
 
                 <div className="space-y-4">
@@ -73,7 +74,7 @@ export default function OrderSummary({
                             type="button"
                             onClick={onSubmit}
                             disabled={loading || !omiseKey}
-                            className="w-full bg-blue-500 text-white py-4 px-4 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+                            className="w-full bg-blue-500 text-white py-4 px-4 rounded-lg hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed mt-6"
                         >
                             {loading ? "Processing..." : "Place order"}
                         </button>

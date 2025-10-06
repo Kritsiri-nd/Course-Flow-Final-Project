@@ -19,16 +19,17 @@ interface CreditCardFormProps {
     formatExpiry: (value: string) => string;
 }
 
-export default function CreditCardForm({ 
-    cardData, 
-    onCardDataChange, 
-    paymentMethod, 
+export default function CreditCardForm({
+    cardData,
+    onCardDataChange,
+    paymentMethod,
     onPaymentMethodChange,
     formatCardNumber,
     formatExpiry
 }: CreditCardFormProps) {
     return (
-        <div className="bg-gray-200 p-6 rounded-lg space-y-6">
+        <div className="bg-gray-200 border border-gray-200 shadow-sm rounded-lg p-6 space-y-6">
+
             {/* Card Number */}
             <div className="flex flex-row">
                 <div>
@@ -44,10 +45,11 @@ export default function CreditCardForm({
                         maxLength={19}
                     />
                 </div>
-                <div className="flex mt-2">
-                    <Image src="/assets/visa-logo.png" alt="VISA" width={50} height={20} />
-                    <Image src="/assets/mastercard-logo.png" alt="Mastercard" width={46} height={50} />
+                <div className="flex items-center gap-2 mt-8 px-3">
+                    <Image src="/assets/visa-logo.png" alt="VISA" width={44} height={14} />
+                    <Image src="/assets/mastercard-logo.png" alt="Mastercard" width={36} height={28} />
                 </div>
+
             </div>
 
             {/* Name on Card */}
@@ -93,8 +95,8 @@ export default function CreditCardForm({
                     />
                 </div>
             </div>
-            
-            
+
+
         </div>
     );
 }
