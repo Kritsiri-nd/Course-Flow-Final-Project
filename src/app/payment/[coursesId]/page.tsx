@@ -3,7 +3,8 @@ import Link from "next/link"
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { createClient } from '@/lib/supabaseClient';
-import Image from "next/image";
+import OrderSummary from "@/components/payment/OrderSummary";
+import PaymentForm from "@/components/payment/PaymentForm";
 
 type PaymentMethod = 'card' | 'qr';
 
@@ -34,7 +35,6 @@ export default function PaymentPage() {
         expiry: '',
         cvv: ''
     });
-    const [promoCode, setPromoCode] = useState('');
     // const [qrData, setQrData] = useState<{ scannable_code?: { image?: string } } | null>(null);
 
     // Get user from Supabase
@@ -163,8 +163,8 @@ export default function PaymentPage() {
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
 
         if (paymentMethod === 'qr') {
             await handlePromptPay();
@@ -248,7 +248,7 @@ export default function PaymentPage() {
     return (
         <div className="min-h-screen bg-[#FFFFFF]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 ">
                     {/* Main Content */}
                     <div className="lg:col-span-2 max-w-[739px] ">
                         <Link href="/non-user/courses" className="text-blue-500 hover:text-blue-600 mb-6 inline-block text-[16px] font-bold">
@@ -259,186 +259,24 @@ export default function PaymentPage() {
                             Enter payment info to start<br></br>your subscription
                         </h1>
 
-                        <form id="payment-form" onSubmit={handleSubmit} className="space-y-8 ">
-                            {/* Payment Method Selection */}
-                            <div>
-                                <h2 className="text-b2 font-regular text-gray-700 mb-4">Select payment method</h2>
-                                <div className="space-y-3">
-                                    <label className="flex items-center space-x-3 cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            name="paymentMethod"
-                                            value="card"
-                                            checked={(paymentMethod as PaymentMethod) === 'card'}
-                                            onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                                            className="w-4 h-4 text-blue-500"
-                                        />
-                                        <span className="text-gray-800 text-[16px] font-medium">Credit card / Debit card</span>
-                                    </label>
-
-                                </div>
-                            </div>
-
-                            {/* Credit Card Form */}
-                            {paymentMethod === 'card' && (
-                                <div className="bg-gray-200 p-6 rounded-lg space-y-6">
-                                    {/* Card Number */}
-                                    <div className="flex flex-row ">
-                                        <div>
-                                            <label className="block text-b2 font-regular text-black mb-2">
-                                                Card number
-                                            </label>
-                                            <input
-                                                type="text"
-                                                placeholder="Card number"
-                                                value={cardData.number}
-                                                onChange={(e) => handleCardInputChange('number', formatCardNumber(e.target.value))}
-                                                className="text-b2 font-regular text-gray-600 w-full max-w-[453px] px-3 py-2 border-1 border-gray-400 rounded-sm bg-white"
-                                                maxLength={19}
-                                            />
-                                        </div>
-                                        <div className="flex  mt-2">
-                                            <Image src="/assets/visa-logo.png" alt="VISA" width={50} height={20} />
-                                            <Image src="/assets/mastercard-logo.png" alt="Mastercard" width={46} height={50} />
-
-                                        </div>
-                                    </div>
-
-                                    {/* Name on Card */}
-                                    <div>
-                                        <label className="block text-b2 font-regular text-black mb-2">
-                                            Name on card
-                                        </label>
-                                        <input
-                                            type="text"
-                                            placeholder="Name on card"
-                                            value={cardData.name}
-                                            onChange={(e) => handleCardInputChange('name', e.target.value)}
-                                            className="text-b2 font-regular text-gray-600 w-full px-3 py-2 border-1 border-gray-400 rounded-sm bg-white"
-                                        />
-                                    </div>
-
-                                    {/* Expiry and CVV */}
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-b2 font-regular text-black mb-2">
-                                                Expiry date
-                                            </label>
-                                            <input
-                                                type="text"
-                                                placeholder="MM/YY"
-                                                value={cardData.expiry}
-                                                onChange={(e) => handleCardInputChange('expiry', formatExpiry(e.target.value))}
-                                                className="text-b2 font-regular text-gray-600 w-full px-3 py-2 border-1 border-gray-400 rounded-sm bg-white"
-                                                maxLength={5}
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-b2 font-regular text-black mb-2">
-                                                CVV
-                                            </label>
-                                            <input
-                                                type="text"
-                                                placeholder="CVV"
-                                                value={cardData.cvv}
-                                                onChange={(e) => handleCardInputChange('cvv', e.target.value.replace(/\D/g, ''))}
-                                                className="text-b2 font-regular text-gray-600 w-full px-3 py-2 border-1 border-gray-400 rounded-sm bg-white"
-                                                maxLength={4}
-                                            />
-                                        </div>
-                                    </div>
-                                    <label className="flex items-center space-x-3 cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            name="paymentMethod"
-                                            value="qr"
-                                            checked={(paymentMethod as PaymentMethod) === 'qr'}
-                                            onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                                            className="w-4 h-4 text-blue-500"
-                                        />
-                                        <span className="text-gray-800 text-[16px] font-medium">QR Payment</span>
-                                    </label>
-                                </div>
-                            )}
-
-                            {/* QR Payment Redirect Message */}
-                            {paymentMethod === 'qr' && (
-                                <div className="bg-gray-50 p-6 rounded-lg space-y-6">
-                                    <div className="text-center py-8">
-                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                                        <p className="text-gray-600">กำลังนำไปยังหน้า QR Code...</p>
-                                    </div>
-                                </div>
-                            )}
-
-                        </form>
+                        <PaymentForm
+                            paymentMethod={paymentMethod}
+                            onPaymentMethodChange={setPaymentMethod}
+                            cardData={cardData}
+                            onCardDataChange={handleCardInputChange}
+                            formatCardNumber={formatCardNumber}
+                            formatExpiry={formatExpiry}
+                        />
                     </div>
 
                     {/* Order Summary */}
-                    <div className="lg:col-span-1 max-w-[357px]">
-                        <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-8">
-                            <h2 className="text-[14px] font-regular text-orange-500 mb-6">Summary</h2>
-
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-b2 font-regular text-gray-700">Subscription</label>
-                                    <p className="text-black text-h3 font-medium">{course.title}</p>
-                                </div>
-
-                                <div className="flex items-center justify-between space-x-2">
-                                    <input
-                                        type="text"
-                                        placeholder="Promo code"
-                                        value={promoCode}
-                                        onChange={(e) => setPromoCode(e.target.value)}
-                                        className="w-full max-w-[205px] px-3 py-2 border-1 border-gray-400 rounded-md"
-                                    />
-                                    <button
-                                        type="button"
-                                        className="box-shadow1 mt-2 px-4 py-2 bg-gray-200 text-[16px] font-bold text-gray-600 rounded-md hover:blue-500 hover:text-white"
-                                    >
-                                        Apply
-                                    </button>
-                                </div>
-
-                                <div className="border-t pt-4 space-y-2">
-                                    <div className="flex justify-between">
-                                        <span className="text-black text-b2 font-regular">Subtotal</span>
-                                        <span className="text-gray-700 text-b2 font-regular">{course.price.toLocaleString()}.00</span>
-                                    </div>
-                                    <div className="flex flex-row  justify-between">
-                                        <span className="text-black text-b2 font-regular">Payment method</span>
-                                        <div className="text-right">
-                                            {paymentMethod === 'card' ? (
-                                                <>
-                                                    <div className="text-gray-700 text-b2 font-regular">Credit card / Debit </div>
-                                                    <div className="text-gray-700 text-b2 font-regular">card</div>
-                                                </>
-                                            ) : (
-                                                <span className="text-gray-700 text-b2 font-regular">QR Payment</span>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-black text-b2 font-regular">Total</span>
-                                        <span className="text-gray-700 text-h3 font-medium">THB {course.price.toLocaleString()}.00</span>
-                                    </div>
-                                </div>
-
-                                {/* Place Order Button */}
-                                {paymentMethod === 'card' && (
-                                    <button
-                                        type="submit"
-                                        form="payment-form"
-                                        disabled={loading || !omiseKey}
-                                        className="w-full bg-blue-500 text-white py-4 px-4 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed mt-6"
-                                    >
-                                        {loading ? "Processing..." : "Place order"}
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    </div>
+                    <OrderSummary
+                        course={course}
+                        paymentMethod={paymentMethod}
+                        loading={loading}
+                        omiseKey={omiseKey}
+                        onSubmit={handleSubmit}
+                    />
                 </div>
             </div>
         </div>
