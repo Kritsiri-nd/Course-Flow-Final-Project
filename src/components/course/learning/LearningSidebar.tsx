@@ -8,6 +8,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
+import { useEffect, useMemo, useState } from "react";
 
 type SidebarLesson = { id: number; title: string };
 type SidebarModule = { id: number; title: string; lessons: SidebarLesson[] };
@@ -18,11 +19,62 @@ type LearningSidebarProps = {
   modules: SidebarModule[];
   selectedLessonId?: number | null;
   onSelectLesson?: (lessonId: number) => void;
+  courseId?: number | null;
+  refreshTrigger?: number; // increment to refresh progress
 };
 
 export default function LearningSidebar(props: LearningSidebarProps) {
-  const { courseTitle, summary, modules, selectedLessonId, onSelectLesson } =
-    props;
+  const {
+    courseTitle,
+    summary,
+    modules,
+    selectedLessonId,
+    onSelectLesson,
+    courseId,
+    refreshTrigger,
+  } = props;
+
+  const [overallPercent, setOverallPercent] = useState<number>(0);
+  const [statusMap, setStatusMap] = useState<
+    Record<
+      number,
+      { status: "completed" | "in_progress" | "not_started"; percent: number }
+    >
+  >({});
+
+  useEffect(() => {
+    let ignore = false;
+    async function load() {
+      if (!courseId) return;
+      console.log(
+        "Loading progress for course:",
+        courseId,
+        "trigger:",
+        refreshTrigger
+      );
+      try {
+        const res = await fetch(
+          `/api/lesson-progress?course_id=${courseId}&bulk=true`
+        );
+        const data = await res.json();
+        console.log("Progress data received:", data);
+        if (!ignore && data && !data.error) {
+          setOverallPercent(Number(data.overallPercent || 0));
+          setStatusMap(data.lessonStatus || {});
+        }
+      } catch (error) {
+        console.error("Error loading progress:", error);
+        if (!ignore) {
+          setOverallPercent(0);
+          setStatusMap({});
+        }
+      }
+    }
+    load();
+    return () => {
+      ignore = true;
+    };
+  }, [courseId, refreshTrigger]);
 
   return (
     <Card className="p-4 md:p-6">
@@ -35,11 +87,15 @@ export default function LearningSidebar(props: LearningSidebarProps) {
           ) : null}
         </div>
 
-        {/* Progress placeholder - optional wiring later */}
         <div className="space-y-2">
-          <p className="text-b3 text-muted-foreground">Progress</p>
+          <p className="text-b3 text-muted-foreground">
+            {overallPercent}% Complete
+          </p>
           <div className="h-2 w-full rounded-full bg-gray-200 overflow-hidden">
-            <div className="h-full w-[0%] bg-blue-600" />
+            <div
+              className="h-full bg-gradient-to-r from-blue-400 to-blue-700 transition-[width] duration-500"
+              style={{ width: `${overallPercent}%` }}
+            />
           </div>
         </div>
 
@@ -57,6 +113,39 @@ export default function LearningSidebar(props: LearningSidebarProps) {
                 <ul className="space-y-3">
                   {m.lessons?.map((l) => {
                     const isActive = Number(selectedLessonId) === Number(l.id);
+                    const status = statusMap[l.id]?.status || "not_started";
+                    const statusStyle =
+                      status === "completed"
+                        ? "bg-emerald-500 text-white"
+                        : status === "in_progress"
+                        ? "border-2 border-emerald-500 text-emerald-500"
+                        : "border-2 border-gray-300 text-gray-300";
+                    const statusShape =
+                      status === "completed" ? (
+                        <span className="inline-flex items-center justify-center size-5 rounded-full bg-emerald-500">
+                          <svg
+                            viewBox="0 0 20 20"
+                            className="size-3 text-white"
+                            aria-hidden
+                          >
+                            <path
+                              fill="currentColor"
+                              d="M16.7 5.3a1 1 0 0 1 0 1.4l-7 7a1 1 0 0 1-1.4 0l-3-3A1 1 0 0 1 6.7 9.3l2.3 2.3l6.3-6.3a1 1 0 0 1 1.4 0"
+                            />
+                          </svg>
+                        </span>
+                      ) : status === "in_progress" ? (
+                        <span className="relative inline-flex items-center justify-center size-5">
+                          <span className="absolute inset-0 rounded-full border-2 border-emerald-500 opacity-30" />
+                          <span
+                            className="absolute left-0 top-0 bottom-0 rounded-l-full bg-emerald-500"
+                            style={{ width: "50%" }}
+                          />
+                          <span className="relative size-5 rounded-full border-2 border-emerald-500" />
+                        </span>
+                      ) : (
+                        <span className="inline-block size-5 rounded-full border-2 border-gray-300" />
+                      );
                     return (
                       <li key={l.id}>
                         <button
@@ -69,12 +158,7 @@ export default function LearningSidebar(props: LearningSidebarProps) {
                               : "hover:bg-gray-50"
                           )}
                         >
-                          <span
-                            className={cn(
-                              "size-2 rounded-full",
-                              isActive ? "bg-blue-500" : "bg-green-500"
-                            )}
-                          />
+                          {statusShape}
                           {l.title}
                         </button>
                       </li>

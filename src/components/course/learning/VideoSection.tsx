@@ -7,12 +7,14 @@ type VideoSectionProps = {
   title: string;
   videoUrl?: string | null;
   lessonId?: number | null; // used for progress tracking
+  onProgressChange?: () => void; // callback when progress updates
 };
 
 export default function VideoSection({
   title,
   videoUrl,
   lessonId,
+  onProgressChange,
 }: VideoSectionProps) {
   const muxPlayerRef = useRef<any>(null);
   const [playbackId, setPlaybackId] = useState<string | null>(null);
@@ -105,8 +107,54 @@ export default function VideoSection({
             seconds_watched: deltaWatch,
           }),
         });
+        // Notify parent that progress has changed
+        console.log("Progress reported:", {
+          lessonId,
+          nowSeconds,
+          durationSeconds,
+          deltaWatch,
+        });
+        onProgressChange?.();
       } catch {
         // ignore network errors for progress
+      }
+    }
+
+    async function reportFinal(nowSeconds: number, durationSeconds: number) {
+      // Force send final progress update without throttling
+      const deltaWatch = Math.max(
+        0,
+        Math.round(nowSeconds - (lastReportedTimeRef.current || 0))
+      );
+      lastTickRef.current = Date.now();
+      lastReportedTimeRef.current = nowSeconds;
+      try {
+        console.log("Sending FINAL progress update:", {
+          lessonId,
+          nowSeconds,
+          durationSeconds,
+          deltaWatch,
+        });
+        await fetch("/api/lesson-progress", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            lesson_id: lessonId,
+            duration_seconds: Math.round(durationSeconds || 0),
+            last_position_seconds: Math.round(nowSeconds || 0),
+            seconds_watched: deltaWatch,
+          }),
+        });
+        // Notify parent that progress has changed
+        console.log("FINAL progress reported:", {
+          lessonId,
+          nowSeconds,
+          durationSeconds,
+          deltaWatch,
+        });
+        onProgressChange?.();
+      } catch (error) {
+        console.error("Error sending final progress:", error);
       }
     }
 
@@ -120,7 +168,9 @@ export default function VideoSection({
 
     function handleEnded() {
       const duration = Number(el.duration || 0);
-      report(duration, duration);
+      console.log("Video ended, duration:", duration);
+      // Force send final progress update
+      reportFinal(duration, duration);
     }
 
     el.addEventListener("loadedmetadata", handleLoaded);

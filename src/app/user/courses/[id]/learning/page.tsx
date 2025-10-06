@@ -16,6 +16,7 @@ export default function UserCourseLearningPage() {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
+  const [progressRefreshTrigger, setProgressRefreshTrigger] = useState(0);
 
   useEffect(() => {
     let ignore = false;
@@ -54,6 +55,11 @@ export default function UserCourseLearningPage() {
     return null;
   }, [course, selectedLessonId]);
 
+  const handleProgressChange = () => {
+    console.log("Progress change triggered, incrementing refresh trigger");
+    setProgressRefreshTrigger((prev) => prev + 1);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-1 w-full max-w-[1240px] mx-auto px-2 sm:px-6 md:px-8 py-4 sm:py-8">
@@ -73,6 +79,8 @@ export default function UserCourseLearningPage() {
                 }))}
                 selectedLessonId={selectedLessonId}
                 onSelectLesson={(id) => setSelectedLessonId(id)}
+                courseId={courseId}
+                refreshTrigger={progressRefreshTrigger}
               />
             ) : (
               <div className="text-b2 text-muted-foreground">
@@ -85,6 +93,7 @@ export default function UserCourseLearningPage() {
               title={selectedLesson?.title || ""}
               videoUrl={selectedLesson?.video_url || undefined}
               lessonId={selectedLessonId || undefined}
+              onProgressChange={handleProgressChange}
             />
             <AssignmentCard lessonId={selectedLessonId} />
             <BottomNav />
