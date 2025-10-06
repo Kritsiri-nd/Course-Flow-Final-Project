@@ -16,6 +16,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 
+// 👇 1. แก้ไข import ให้เป็น Named Import
+import { signOut } from "@/app/auth/action"; 
+
 const navigationItems = [
   {
     title: "Course",
@@ -39,8 +42,8 @@ export function AdminPanel() {
 
   return (
     <Sidebar className="h-svh border-r border-gray-400 bg-white opacity-100">
-      <div className="h-[min(100svh,800px)] flex flex-col">
-        <SidebarHeader className="flex flex-col items-center justify-center h-[131px] px-6 pt-6">
+      <div className="flex h-[min(100svh,800px)] flex-col">
+        <SidebarHeader className="flex h-[131px] flex-col items-center justify-center px-6 pt-6">
           <div className="space-y-6">
             <Image
               src="/assets/CourseFlow.png"
@@ -53,15 +56,15 @@ export function AdminPanel() {
           </div>
         </SidebarHeader>
 
-        <SidebarContent className="px-0 flex-1 overflow-auto">
-          <SidebarGroup className="px-0 mt-10">
+        <SidebarContent className="flex-1 overflow-auto px-0">
+          <SidebarGroup className="mt-10 px-0">
             <SidebarGroupContent>
               <SidebarMenu className="gap-0">
                 {navigationItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       asChild
-                      className={`w-full justify-start px-6 py-6 rounded-none text-gray-600 hover:bg-gray-100 ${
+                      className={`w-full justify-start rounded-none px-6 py-6 text-gray-600 hover:bg-gray-100 ${
                         pathname?.startsWith(item.url) ? "bg-gray-200" : ""
                       }`}
                     >
@@ -77,23 +80,23 @@ export function AdminPanel() {
           </SidebarGroup>
         </SidebarContent>
 
-        <SidebarFooter className="px-0 pb-6 mt-auto">
+        <SidebarFooter className="mt-auto px-0 pb-6">
           <SidebarGroup className="p-0">
             <SidebarGroupContent>
               <SidebarMenu className="gap-10">
                 <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    className="w-full justify-start px-6 py-6 rounded-none text-gray-600 hover:bg-gray-100"
-                  >
-                    <Link
-                      href="/auth/login"
-                      className="flex items-center gap-3"
+                  {/* 👇 2. เปลี่ยนจาก Link เป็น Form */}
+                  <form action={signOut} className="w-full">
+                    <SidebarMenuButton
+                      type="submit" // 👈 3. กำหนด type="submit"
+                      className="w-full justify-start rounded-none px-6 py-6 text-gray-600 hover:bg-gray-100"
                     >
-                      <LogOut className="h-5 w-5" />
-                      <span className="text-base">Log out</span>
-                    </Link>
-                  </SidebarMenuButton>
+                      <div className="flex items-center gap-3">
+                        <LogOut className="h-5 w-5" />
+                        <span className="text-base">Log out</span>
+                      </div>
+                    </SidebarMenuButton>
+                  </form>
                 </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
