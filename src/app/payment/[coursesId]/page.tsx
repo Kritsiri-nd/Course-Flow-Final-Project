@@ -82,13 +82,6 @@ export default function PaymentPage() {
         getCourse();
     }, [courseId]);
 
-    // Redirect to QR display when QR payment is selected
-    useEffect(() => {
-        if (paymentMethod === 'qr' && course && omiseKey && window.Omise) {
-            // Redirect to QR display page
-            window.location.href = `/payment/${courseId}/qr-display`;
-        }
-    }, [paymentMethod, course, omiseKey, courseId]);
 
     // Load Omise script
     useEffect(() => {
@@ -145,10 +138,10 @@ export default function PaymentPage() {
                         return;
                     }
 
-                    const qrResponse = response as { scannable_code?: { image?: string } };
-                    if (qrResponse && qrResponse.scannable_code && qrResponse.scannable_code.image) {
-                        // QR Code created successfully, redirect to QR display page
-                        window.location.href = `/payment/${courseId}/qr-display`;
+                    const qrResponse = response as { id?: string; object?: string; type?: string };
+                    if (qrResponse && qrResponse.id && qrResponse.object === 'source' && qrResponse.type === 'promptpay') {
+                        // QR Source created successfully, redirect to QR display page with source ID
+                        window.location.href = `/payment/${courseId}/qr-display?sourceId=${qrResponse.id}`;
                     } else {
                         alert("QR Code response ไม่ถูกต้อง");
                         console.error('Invalid QR response:', response);
@@ -247,8 +240,8 @@ export default function PaymentPage() {
 
     return (
         <div className="min-h-screen bg-[#FFFFFF]">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-end">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-center">
 
                     {/* Main Content */}
                     <div className="w-full">
@@ -256,7 +249,7 @@ export default function PaymentPage() {
                             ← Back
                         </Link>
 
-                        <h1 className="text-h2 text-black mb-10">
+                        <h1 className="sm:text-h2 text-h3 text-black mb-10">
                             Enter payment info to start<br></br>your subscription
                         </h1>
 

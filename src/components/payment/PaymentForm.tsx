@@ -1,7 +1,5 @@
 "use client";
-import PaymentMethodSelection from "./PaymentMethodSelection";
 import CreditCardForm from "./CreditCardForm";
-import QRPaymentRedirect from "./QRPaymentRedirect";
 
 type PaymentMethod = 'card' | 'qr';
 
@@ -31,38 +29,49 @@ export default function PaymentForm({
 }: PaymentFormProps) {
     return (
         <form id="payment-form" className="space-y-8">
-            {/* Payment Method Selection */}
-            <PaymentMethodSelection
-                paymentMethod={paymentMethod}
-                onPaymentMethodChange={onPaymentMethodChange}
-            />
+            {/* Select payment method heading */}
+            <h2 className="text-b2 font-regular text-gray-700 mb-4">Select payment method</h2>
 
-            {/* Credit Card Form */}
-            {paymentMethod === 'card' && (
-                <CreditCardForm
-                    cardData={cardData}
-                    onCardDataChange={onCardDataChange}
-                    paymentMethod={paymentMethod}
-                    onPaymentMethodChange={onPaymentMethodChange}
-                    formatCardNumber={formatCardNumber}
-                    formatExpiry={formatExpiry}
-                />
-            )}
-            {/* QR Payment Option */}
-            <label className="flex items-center space-x-3 cursor-pointer">
-                <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="qr"
-                    checked={paymentMethod === 'qr'}
-                    onChange={(e) => onPaymentMethodChange(e.target.value as PaymentMethod)}
-                    className="w-4 h-4 text-blue-500"
-                />
-                <span className="text-gray-800 text-[16px] font-medium">QR Payment</span>
-            </label>
-            {/* QR Payment Redirect Message */}
-            {paymentMethod === 'qr' && <QRPaymentRedirect />}
+            {/* Credit Card / Debit Card Section */}
+            <div className={`rounded-lg p-6 ${paymentMethod === 'card' ? 'bg-gray-200' : ''}`}>
+                <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="card"
+                        checked={paymentMethod === 'card'}
+                        onChange={(e) => onPaymentMethodChange(e.target.value as PaymentMethod)}
+                        className="w-4 h-4 text-blue-500"
+                    />
+                    <span className="text-gray-800 text-[16px] font-medium">Credit card / Debit card</span>
+                </label>
+
+                {/* Credit Card Form (always rendered, but visually part of the card section) */}
+                <div className="mt-6">
+                    <CreditCardForm
+                        cardData={cardData}
+                        onCardDataChange={onCardDataChange}
+                        formatCardNumber={formatCardNumber}
+                        formatExpiry={formatExpiry}
+                    />
+                </div>
+            </div>
+
+            {/* QR Payment Section */}
+            <div className={`rounded-lg p-6 ${paymentMethod === 'qr' ? 'bg-gray-200' : ''}`}>
+                <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="qr"
+                        checked={paymentMethod === 'qr'}
+                        onChange={(e) => onPaymentMethodChange(e.target.value as PaymentMethod)}
+                        className="w-4 h-4 text-blue-500"
+                    />
+                    <span className="text-gray-800 text-[16px] font-medium">QR Payment</span>
+                </label>
+            </div>
+
         </form>
-        
     );
 }
