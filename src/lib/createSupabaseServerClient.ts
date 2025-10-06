@@ -1,31 +1,105 @@
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-export async function createSupabaseServerClient() {
+// Async version for server components
+export async function createSupabaseServerClient() { 
   const cookieStore = await cookies()
 
-  // ตรวจสอบ environment variables
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  // Session timeout: 30 นาที (1800 วินาที)
+  const SESSION_TIMEOUT = 30 * 60; // 30 minutes in seconds
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('Missing Supabase environment variables:')
-    console.error('NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? 'Found' : 'Missing')
-    console.error('NEXT_PUBLIC_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'Found' : 'Missing')
-    throw new Error('Your project\'s URL and Key are required to create a Supabase client!')
-  }
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+      },
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          try {
+            // ตั้งเวลาหมดอายุ cookie ให้เป็น 30 นาที สำหรับ session cookies
+            const sessionOptions = name.includes('supabase') ? {
+              ...options,
+              maxAge: SESSION_TIMEOUT, // 30 นาที
+              httpOnly: true,
+              secure: process.env.NODE_ENV === 'production',
+              sameSite: 'lax' as const
+            } : options;
+
+            cookieStore.set({ name, value, ...sessionOptions })
+          } catch {
+            // The `set` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+        remove(name: string, options: CookieOptions) {
+          try {
+            cookieStore.set({ name, value: '', ...options })
+          } catch {
+            // The `delete` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+      },
+    }
+  )
+}
+
+// Non-async version for server actions
+export async function createClient() { 
+  const cookieStore = await cookies()
+
+  // Session timeout: 30 นาที (1800 วินาที)
+  const SESSION_TIMEOUT = 30 * 60; // 30 minutes in seconds
 
   return createServerClient(
     supabaseUrl,
     supabaseAnonKey,
     {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+      },
       cookies: {
         get(name: string) {
           return cookieStore.get(name)?.value
         },
-        // ❌ ห้าม set/remove ที่นี่
-        set() {},
-        remove() {},
+        set(name: string, value: string, options: CookieOptions) {
+          try {
+            // ตั้งเวลาหมดอายุ cookie ให้เป็น 30 นาที สำหรับ session cookies
+            const sessionOptions = name.includes('supabase') ? {
+              ...options,
+              maxAge: SESSION_TIMEOUT, // 30 นาที
+              httpOnly: true,
+              secure: process.env.NODE_ENV === 'production',
+              sameSite: 'lax' as const
+            } : options;
+
+            cookieStore.set({ name, value, ...sessionOptions })
+          } catch {
+            // The `set` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+        remove(name: string, options: CookieOptions) {
+          try {
+            cookieStore.set({ name, value: '', ...options })
+          } catch {
+            // The `delete` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
       },
     }
   )

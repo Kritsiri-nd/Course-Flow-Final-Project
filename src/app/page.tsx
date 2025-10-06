@@ -6,7 +6,6 @@ import Footer from "../components/ui/footer";
 export default function HomePage() {
   return (
     <>
-      
       <Instructure />
       <SubFooter />
       <Footer />
