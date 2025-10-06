@@ -7,73 +7,83 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
 
-export default function LearningSidebar() {
+type SidebarLesson = { id: number; title: string };
+type SidebarModule = { id: number; title: string; lessons: SidebarLesson[] };
+
+type LearningSidebarProps = {
+  courseTitle: string;
+  summary?: string | null;
+  modules: SidebarModule[];
+  selectedLessonId?: number | null;
+  onSelectLesson?: (lessonId: number) => void;
+};
+
+export default function LearningSidebar(props: LearningSidebarProps) {
+  const { courseTitle, summary, modules, selectedLessonId, onSelectLesson } =
+    props;
+
   return (
     <Card className="p-4 md:p-6">
       <div className="space-y-4">
         <div className="space-y-1">
           <p className="text-orange-500 text-b3">Course</p>
-          <h2 className="text-h3 leading-tight">Service Design Essentials</h2>
-          <p className="text-b3 text-muted-foreground">
-            Lorem ipsum dolor sit amet, conse ctetur adipiscing elit.
-          </p>
+          <h2 className="text-h3 leading-tight">{courseTitle}</h2>
+          {summary ? (
+            <p className="text-b3 text-muted-foreground">{summary}</p>
+          ) : null}
         </div>
 
+        {/* Progress placeholder - optional wiring later */}
         <div className="space-y-2">
-          <p className="text-b3 text-muted-foreground">15% Complete</p>
+          <p className="text-b3 text-muted-foreground">Progress</p>
           <div className="h-2 w-full rounded-full bg-gray-200 overflow-hidden">
-            <div className="h-full w-[15%] bg-blue-600" />
+            <div className="h-full w-[0%] bg-blue-600" />
           </div>
         </div>
 
         <Accordion type="multiple" className="space-y-4">
-          <AccordionItem value="module-1" className="border rounded-md">
-            <AccordionTrigger className="px-4 py-3">
-              01 Introduction
-            </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4">
-              <ul className="space-y-3">
-                <li className="flex items-center gap-3 text-b2">
-                  <span className="size-2 rounded-full bg-green-500" />
-                  Welcome to the Course
-                </li>
-                <li className="flex items-center gap-3 text-b2">
-                  <span className="size-2 rounded-full bg-green-500" />
-                  Course Overview
-                </li>
-                <li className="flex items-center gap-3 text-b2">
-                  <span className="size-2 rounded-full bg-green-500" />
-                  Getting to Know You
-                </li>
-                <li className="flex items-center gap-3 text-b2">
-                  <span className="size-2 rounded-full bg-green-500" />
-                  What is Service Design ?
-                </li>
-                <li className="flex items-center gap-3 text-b2">
-                  <span className="size-2 rounded-full bg-green-500" />
-                  Service Design vs. UX vs. UI vs. Design Thinking
-                </li>
-                <li className="flex items-center gap-3 text-b2 bg-blue-50 rounded-md p-3">
-                  <span className="size-2 rounded-full bg-blue-500" />4 Levels
-                  of Service Design in an Organization
-                </li>
-                <li className="flex items-center gap-3 text-b2">
-                  <span className="size-2 rounded-full border border-gray-400" />
-                  Scope of Service Design
-                </li>
-              </ul>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="module-2" className="border rounded-md">
-            <AccordionTrigger className="px-4 py-3">
-              02 Service Design Theories and Principles
-            </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4 text-b2 text-muted-foreground">
-              Coming up next...
-            </AccordionContent>
-          </AccordionItem>
+          {modules.map((m) => (
+            <AccordionItem
+              key={m.id}
+              value={`module-${m.id}`}
+              className="border rounded-md"
+            >
+              <AccordionTrigger className="px-4 py-3">
+                {m.title}
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4">
+                <ul className="space-y-3">
+                  {m.lessons?.map((l) => {
+                    const isActive = Number(selectedLessonId) === Number(l.id);
+                    return (
+                      <li key={l.id}>
+                        <button
+                          type="button"
+                          onClick={() => onSelectLesson?.(l.id)}
+                          className={cn(
+                            "w-full text-left flex items-center gap-3 text-b2 rounded-md px-2 py-2",
+                            isActive
+                              ? "bg-blue-50 text-blue-700"
+                              : "hover:bg-gray-50"
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "size-2 rounded-full",
+                              isActive ? "bg-blue-500" : "bg-green-500"
+                            )}
+                          />
+                          {l.title}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+          ))}
         </Accordion>
       </div>
     </Card>
