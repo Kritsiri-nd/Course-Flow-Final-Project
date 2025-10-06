@@ -84,6 +84,7 @@ export default function UserCourseLearningPage() {
             <VideoSection
               title={selectedLesson?.title || ""}
               videoUrl={selectedLesson?.video_url || undefined}
+              lessonId={selectedLessonId || undefined}
             />
             <AssignmentCard lessonId={selectedLessonId} />
             <BottomNav />
