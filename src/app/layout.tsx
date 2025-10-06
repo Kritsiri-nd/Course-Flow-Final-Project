@@ -26,7 +26,7 @@ export default async function RootLayout({
 
   // ตรวจสอบว่าเป็นหน้า admin หรือไม่
   const isAdminPage = pathname.startsWith('/admin');
-
+  
   // ตรวจสอบว่าเป็นหน้า user หรือไม่
   const isUserPage = pathname.startsWith("/user");
 
