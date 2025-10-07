@@ -100,7 +100,7 @@ export default function AssignmentCard({ assignment, onSubmit, onAnswerChange }:
   const canEdit = assignment.status === 'pending' || assignment.status === 'in-progress' || assignment.status === 'overdue';
 
   return (
-    <div className="bg-blue-50 rounded-lg p-6 shadow-sm border border-blue-100">
+    <div className="bg-blue-50 rounded-lg p-4 sm:p-6 shadow-sm border border-blue-100">
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-black mb-1">
@@ -115,8 +115,8 @@ export default function AssignmentCard({ assignment, onSubmit, onAnswerChange }:
         </span>
       </div>
 
-      {/* Horizontal Layout for Question/Answer and Buttons */}
-      <div className="flex gap-4 justify-center bg-white rounded-lg p-4">
+      {/* Horizontal Layout for Question/Answer and Buttons - Responsive */}
+      <div className="flex flex-col lg:flex-row gap-4 justify-center bg-white rounded-lg p-4">
         {/* Question and Answer Box */}
         <div className="flex-1 bg-white rounded-lg p-4">
           <h4 className="text-gray-800 font-medium mb-3">{assignment.question}</h4>
@@ -136,9 +136,9 @@ export default function AssignmentCard({ assignment, onSubmit, onAnswerChange }:
           )}
         </div>
 
-        {/* Button Box */}
-        <div className="flex items-center justify-center rounded-lg p-4">
-          <div className="flex flex-col gap-3 items-center">
+        {/* Button Box - Responsive */}
+        <div className="flex lg:flex-col items-center justify-center rounded-lg p-4">
+          <div className="flex flex-row lg:flex-col gap-3 items-center">
              {assignment.status !== 'submitted' && (
                <button
                  onClick={handleSubmit}

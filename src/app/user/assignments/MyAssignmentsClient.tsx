@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AssignmentCard from './AssignmentCard';
 
 interface Assignment {
@@ -21,6 +21,16 @@ interface MyAssignmentsClientProps {
 export default function MyAssignmentsClient({ assignments }: MyAssignmentsClientProps) {
   const [activeTab, setActiveTab] = useState<'all' | 'in-progress' | 'submitted'>('all');
   const [assignmentsState, setAssignmentsState] = useState<Assignment[]>(assignments);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading time
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Filter assignments based on active tab
   const filteredAssignments = assignmentsState.filter(assignment => {
@@ -64,6 +74,18 @@ export default function MyAssignmentsClient({ assignments }: MyAssignmentsClient
       )
     );
   };
+
+  // Loading component
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 relative overflow-hidden flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading your assignments...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 relative overflow-hidden">
