@@ -112,7 +112,7 @@ export default function PaymentPage() {
     };
 
     const handlePromptPay = async () => {
-        if (!userId || !courseId || !omiseKey || !window.Omise) {
+        if (!userId || !courseId || !course) {
             alert("กรุณารอให้ระบบโหลดเสร็จ");
             return;
         }
@@ -120,36 +120,74 @@ export default function PaymentPage() {
         setLoading(true);
 
         try {
-            const Omise = window.Omise;
-            Omise.setPublicKey(omiseKey);
+            // Generate reference number and timestamp
+            const refNo = `CF${Date.now()}`;
+            const createdAt = Date.now();
 
-            // Create PromptPay source
-            Omise.createSource(
-                "promptpay",
-                {
-                    amount: course!.price * 100, // Convert to satang
-                    currency: "thb",
+            // Create PromptPay charge using our API (same as QR display page)
+            const response = await fetch('/api/payment/create-qr', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
                 },
-                async (status: number, response: unknown) => {
-                    console.log('QR Response:', response); // Debug log
-                    if (status !== 200) {
-                        const errorMessage = (response as { message?: string })?.message || "Unknown error";
-                        alert("สร้าง QR Code ไม่สำเร็จ: " + errorMessage);
-                        setLoading(false);
-                        return;
-                    }
+                body: JSON.stringify({
+                    amount: course.price * 100, // Convert to satang
+                    currency: 'thb',
+                }),
+            });
 
-                    const qrResponse = response as { id?: string; object?: string; type?: string };
-                    if (qrResponse && qrResponse.id && qrResponse.object === 'source' && qrResponse.type === 'promptpay') {
-                        // QR Source created successfully, redirect to QR display page with source ID
-                        window.location.href = `/payment/${courseId}/qr-display?sourceId=${qrResponse.id}`;
-                    } else {
-                        alert("QR Code response ไม่ถูกต้อง");
-                        console.error('Invalid QR response:', response);
-                    }
-                    setLoading(false);
+            const data = await response.json();
+
+            if (!response.ok) {
+                alert("สร้าง QR Code ไม่สำเร็จ: " + (data.error || "Unknown error"));
+                setLoading(false);
+                return;
+            }
+
+            // Extract QR image URL from different possible response structures
+            let qrImageUrl = '';
+            if (data && data.source && data.source.scannable_code && data.source.scannable_code.image) {
+                qrImageUrl = data.source.scannable_code.image.download_uri || data.source.scannable_code.image;
+            } else if (data && data.scannable_code && data.scannable_code.image) {
+                qrImageUrl = data.scannable_code.image.download_uri || data.scannable_code.image;
+            } else if (data && data.source && data.source.image) {
+                qrImageUrl = data.source.image.download_uri || data.source.image;
+            } else if (data && data.image) {
+                qrImageUrl = data.image.download_uri || data.image;
+            }
+
+            if (data && data.id && qrImageUrl) {
+                // Save payment record to database
+                try {
+                    const paymentResponse = await fetch('/api/payment/checkout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            course_id: parseInt(courseId as string),
+                            user_id: userId,
+                            method: 'promptpay',
+                            charge_id: data.id
+                        })
+                    });
+                } catch (error) {
+                    console.error('Error saving payment record:', error);
                 }
-            );
+
+                // Redirect to QR display page with all necessary parameters
+                const qrDisplayUrl = new URL(`/payment/${courseId}/qr-display`, window.location.origin);
+                qrDisplayUrl.searchParams.set('chargeId', data.id);
+                qrDisplayUrl.searchParams.set('referenceNo', refNo);
+                qrDisplayUrl.searchParams.set('qrUrl', qrImageUrl);
+                qrDisplayUrl.searchParams.set('createdAt', createdAt.toString());
+                
+                window.location.href = qrDisplayUrl.toString();
+            } else {
+                alert("QR Code response ไม่ถูกต้อง");
+                console.error('Invalid QR response:', data);
+                setLoading(false);
+            }
         } catch (error) {
             console.error('Error:', error);
             alert("เกิดข้อผิดพลาด: " + error);
@@ -240,8 +278,8 @@ export default function PaymentPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#FFFFFF] flex flex-col">
-            <div className="flex-1">
+        <div className="min-h-screen flex flex-col">
+            <div className="flex-1 ">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-center">
 

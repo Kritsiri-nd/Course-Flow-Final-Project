@@ -27,7 +27,46 @@ export default function QRDisplayPage() {
     const [paymentStatus, setPaymentStatus] = useState<'pending' | 'success' | 'failed'>('pending');
     const [referenceNo, setReferenceNo] = useState<string>('');
     const [chargeId, setChargeId] = useState<string>('');
+    const [qrCreatedAt, setQrCreatedAt] = useState<number | null>(null);
+    const [isQrExpired, setIsQrExpired] = useState(false);
     const supabase = createClient();
+
+    // Get URL search params for existing QR data
+    const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    const existingChargeId = searchParams?.get('chargeId');
+    const existingReferenceNo = searchParams?.get('referenceNo');
+    const existingQrUrl = searchParams?.get('qrUrl');
+    const existingCreatedAt = searchParams?.get('createdAt');
+
+    // Check if QR code is expired (Omise QR codes expire after 15 minutes)
+    const checkQrExpiration = useCallback((createdAt: number) => {
+        const now = Date.now();
+        const qrAge = now - createdAt;
+        const expirationTime = 15 * 60 * 1000; // 15 minutes in milliseconds
+        return qrAge > expirationTime;
+    }, []);
+
+    // Initialize existing QR data if available
+    useEffect(() => {
+        if (existingChargeId && existingReferenceNo && existingQrUrl && existingCreatedAt) {
+            const createdAt = parseInt(existingCreatedAt);
+            const isExpired = checkQrExpiration(createdAt);
+            
+            if (!isExpired) {
+                // Use existing QR data
+                setChargeId(existingChargeId);
+                setReferenceNo(existingReferenceNo);
+                setQrCreatedAt(createdAt);
+                setQrData({
+                    scannable_code: {
+                        image: { download_uri: existingQrUrl }
+                    }
+                });
+            } else {
+                setIsQrExpired(true);
+            }
+        }
+    }, [existingChargeId, existingReferenceNo, existingQrUrl, existingCreatedAt, checkQrExpiration]);
 
     // Get user from Supabase
     useEffect(() => {
@@ -61,13 +100,7 @@ export default function QRDisplayPage() {
 
 
     const generateQRCode = useCallback(async () => {
-        console.log('generateQRCode called');
-        console.log('userId:', userId);
-        console.log('courseId:', courseId);
-        console.log('course:', course);
-
         if (!userId || !courseId || !course) {
-            console.log('Missing required data for QR generation');
             return;
         }
 
@@ -77,8 +110,8 @@ export default function QRDisplayPage() {
             // Generate reference number
             const refNo = `CF${Date.now()}`;
             setReferenceNo(refNo);
-
-            console.log('Creating PromptPay source with amount:', course.price * 100);
+            const createdAt = Date.now();
+            setQrCreatedAt(createdAt);
 
             // Create PromptPay source using our API
             const response = await fetch('/api/payment/create-qr', {
@@ -93,13 +126,8 @@ export default function QRDisplayPage() {
             });
 
             const data = await response.json();
-            console.log('QR API Response:', data);
-            console.log('Response structure check:');
-            console.log('- data.scannable_code:', data.scannable_code);
-            console.log('- data.scannable_code?.image:', data.scannable_code?.image);
 
             if (!response.ok) {
-                console.log('QR creation failed:', data.error);
                 setPaymentStatus('failed');
                 setLoading(false);
                 return;
@@ -108,7 +136,6 @@ export default function QRDisplayPage() {
             // Store charge ID for status checking
             if (data && data.id) {
                 setChargeId(data.id);
-                console.log('Charge ID:', data.id);
                 
                 // Save payment record to database
                 try {
@@ -124,48 +151,52 @@ export default function QRDisplayPage() {
                             charge_id: data.id
                         })
                     });
-                    
-                    if (paymentResponse.ok) {
-                        console.log('✅ Payment record saved successfully');
-                    } else {
-                        console.error('❌ Failed to save payment record');
-                    }
                 } catch (error) {
-                    console.error('❌ Error saving payment record:', error);
+                    console.error('Error saving payment record:', error);
                 }
             }
 
+            let qrImageUrl = '';
+
             // Check different possible response structures
             if (data && data.source && data.source.scannable_code && data.source.scannable_code.image) {
-                console.log('QR created successfully (source.scannable_code.image)');
                 setQrData(data.source);
+                qrImageUrl = data.source.scannable_code.image.download_uri || data.source.scannable_code.image;
             } else if (data && data.scannable_code && data.scannable_code.image) {
-                console.log('QR created successfully (scannable_code.image)');
                 setQrData(data);
+                qrImageUrl = data.scannable_code.image.download_uri || data.scannable_code.image;
             } else if (data && data.source && data.source.image) {
-                console.log('QR created successfully (source.image)');
-                // Transform response to expected structure
+                qrImageUrl = data.source.image.download_uri || data.source.image;
                 setQrData({
                     scannable_code: {
                         image: data.source.image
                     }
                 });
             } else if (data && data.image) {
-                console.log('QR created successfully (direct image)');
-                // Transform response to expected structure
+                qrImageUrl = data.image.download_uri || data.image;
                 setQrData({
                     scannable_code: {
                         image: data.image
                     }
                 });
             } else {
-                console.log('Invalid QR response structure:', data);
-                console.log('Available keys:', Object.keys(data));
-                if (data && data.source) {
-                    console.log('Source keys:', Object.keys(data.source));
-                }
                 setPaymentStatus('failed');
+                setLoading(false);
+                return;
             }
+
+            // Update URL with QR parameters for persistence
+            if (qrImageUrl && data.id) {
+                const newUrl = new URL(window.location.href);
+                newUrl.searchParams.set('chargeId', data.id);
+                newUrl.searchParams.set('referenceNo', refNo);
+                newUrl.searchParams.set('qrUrl', qrImageUrl);
+                newUrl.searchParams.set('createdAt', createdAt.toString());
+                
+                // Update URL without causing a page reload
+                window.history.replaceState({}, '', newUrl.toString());
+            }
+
             setLoading(false);
         } catch (error) {
             console.error('Error in generateQRCode:', error);
@@ -263,12 +294,50 @@ export default function QRDisplayPage() {
         router.push(`/payment/${courseId}`);
     };
 
-    // Generate QR Code
+    const generateNewQRCode = () => {
+        // Clear existing data and generate new QR
+        setQrData(null);
+        setChargeId('');
+        setReferenceNo('');
+        setQrCreatedAt(null);
+        setIsQrExpired(false);
+        setPaymentStatus('pending');
+        
+        // Clear URL parameters
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete('chargeId');
+        newUrl.searchParams.delete('referenceNo');
+        newUrl.searchParams.delete('qrUrl');
+        newUrl.searchParams.delete('createdAt');
+        window.history.replaceState({}, '', newUrl.toString());
+        
+        generateQRCode();
+    };
+
+    // Check QR expiration periodically
+    useEffect(() => {
+        if (qrCreatedAt && !isQrExpired) {
+            const interval = setInterval(() => {
+                const isExpired = checkQrExpiration(qrCreatedAt);
+                if (isExpired) {
+                    setIsQrExpired(true);
+                }
+            }, 1000); // Check every second
+
+            return () => clearInterval(interval);
+        }
+    }, [qrCreatedAt, isQrExpired, checkQrExpiration]);
+
+    // Generate QR Code only if no existing QR or if expired
     useEffect(() => {
         if (course && !qrData && !loading) {
-            generateQRCode();
+            if (!existingChargeId) {
+                generateQRCode();
+            } else if (isQrExpired) {
+                generateQRCode();
+            }
         }
-    }, [course, qrData, loading, generateQRCode]);
+    }, [course, qrData, loading, generateQRCode, existingChargeId, isQrExpired]);
 
     // Check payment status periodically
     useEffect(() => {
@@ -293,15 +362,19 @@ export default function QRDisplayPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#FFFFFF] flex flex-col">
+        <div className="min-h-screen  flex flex-col">
           <div className="flex-1">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-              <Link
-                href={`/payment/${courseId}`}
-                className="text-blue-500 hover:text-blue-600 mb-6 inline-block text-[16px] font-bold"
-              >
-                ← Back
-              </Link>
+              {paymentStatus !== "failed" ? (
+                <Link
+                  href={`/payment/${courseId}`}
+                  className="text-blue-500 hover:text-blue-600 mb-6 inline-block text-[16px] font-bold"
+                >
+                  ← Back
+                </Link>
+              ) : (
+                <div className="mb-15"></div>
+              )}
         
               {/* ✅ กล่อง QR Code อยู่กลางแนวนอน */}
               <div className="flex justify-center">
@@ -313,9 +386,9 @@ export default function QRDisplayPage() {
                     </div>
                   ) : paymentStatus === "failed" ? (
                     <div className="text-center py-8">
-                      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <div className="w-16 h-16 bg-[#9B2FAC] rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg
-                          className="w-8 h-8 text-red-500"
+                          className="w-8 h-8 text-white"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -328,15 +401,15 @@ export default function QRDisplayPage() {
                           />
                         </svg>
                       </div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      <h3 className="text-h3 font-medium text-black mb-2">
                         Payment failed
                       </h3>
-                      <p className="text-gray-600 mb-6">
+                      <p className="text-b2 font-regular text-gray-700 mb-10">
                         Please check your payment details and try again
                       </p>
                       <button
                         onClick={goBackToPayment}
-                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700"
+                        className="w-full max-w-[321px] bg-blue-500 text-white py-3 px-4 rounded-md hover:bg-blue-600"
                       >
                         Back to Payment
                       </button>
@@ -366,34 +439,64 @@ export default function QRDisplayPage() {
                       </p>
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
                     </div>
-                  ) : qrData?.scannable_code?.image ? (
-                    <div className="space-y-6">
-                      <h2 className="text-h3 font-medium text-black">Scan QR code</h2>
+                ) : qrData?.scannable_code?.image && !isQrExpired ? (
+                  <div className="space-y-6">
+                    <h2 className="text-h3 font-medium text-black">Scan QR code</h2>
         
-                      <div className="space-y-2">
-                        <p className="text-b2 font-regular text-gray-600">
-                          Reference no. {referenceNo}
-                        </p>
-                        <p className="text-h3 font-medium text-orange-500">
-                          THB {course.price.toLocaleString()}.00
-                        </p>
-                      </div>
-        
-                      <div className="flex justify-center">
-                        <img
-                          src={qrData.scannable_code.image.download_uri}
-                          alt="QR Code for payment"
-                          className="w-64 h-64 border border-gray-300 rounded-lg"
-                        />
-                      </div>
-        
-                      <button
-                        onClick={saveQRImage}
-                        className="w-full max-w-[312px] bg-blue-600 text-white py-4 px-4 rounded-md hover:bg-blue-700"
-                      >
-                        Save QR image
-                      </button>
+                    <div className="space-y-2">
+                      <p className="text-b2 font-regular text-gray-600">
+                        Reference no. {referenceNo}
+                      </p>
+                      <p className="text-h3 font-medium text-orange-500">
+                        THB {course.price.toLocaleString()}.00
+                      </p>
                     </div>
+        
+                    <div className="flex justify-center">
+                      <img
+                        src={qrData.scannable_code.image.download_uri}
+                        alt="QR Code for payment"
+                        className="w-64 h-64 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+        
+                    <button
+                      onClick={saveQRImage}
+                      className="w-full max-w-[312px] bg-blue-600 text-white py-4 px-4 rounded-md hover:bg-blue-700"
+                    >
+                      Save QR image
+                    </button>
+                  </div>
+                ) : isQrExpired ? (
+                  <div className="text-center py-8 space-y-4">
+                    <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg
+                        className="w-8 h-8 text-orange-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      QR Code Expired
+                    </h3>
+                    <p className="text-gray-600 mb-6">
+                      This QR code has expired. Please generate a new one to continue payment.
+                    </p>
+                    <button
+                      onClick={generateNewQRCode}
+                      className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700"
+                    >
+                      Generate New QR Code
+                    </button>
+                  </div>
                   ) : (
                     <div className="text-center py-8 space-y-4">
                       <p className="text-gray-600">กำลังโหลด...</p>
