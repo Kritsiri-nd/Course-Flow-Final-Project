@@ -48,7 +48,6 @@ export async function POST(req: Request) {
           amount: Math.round(course.price * 100),
           currency: course.currency
         },
-        return_uri: 'http://localhost:3000/payment/success',
       })
     } else if (method === 'card') {
       if (!token) {
@@ -60,7 +59,6 @@ export async function POST(req: Request) {
         amount: Math.round(course.price * 100),
         currency: course.currency,
         card: token, // ใช้ token ที่ได้จาก client
-        return_uri: 'http://localhost:3000/payment/success',
       })
     } else {
       return NextResponse.json({ error: 'Unsupported payment method' }, { status: 400 })
@@ -84,36 +82,14 @@ export async function POST(req: Request) {
 
     console.log('✅ Payment record saved:', payment.id);
 
-    // Check if payment is successful immediately (for card payments)
-    if (charge.paid && charge.status === 'successful') {
-      // Update payment status to successful
-      await supabase.from('payments')
-        .update({ status: 'successful' })
-        .eq('id', payment.id)
-
-      // Create enrollment
-      const { data: enrollmentData, error: enrollmentError } = await supabase.from('enrollments').insert({
-        user_id,
-        course_id,
-        status: 'in-progress',
-        progress_percentage: 0,
-        enrolled_at: new Date().toISOString(),
-        last_accessed_at: new Date().toISOString()
-      }).select().single()
-
-      if (enrollmentError) {
-        console.error('❌ Error creating enrollment:', enrollmentError)
-        // Don't fail the payment, just log the error
-      } else {
-        console.log('✅ Enrollment created successfully:', enrollmentData)
-        console.log('✅ User ID:', user_id, 'Course ID:', course_id)
-      }
-    }
+    // Payment status and enrollment will be handled by webhook
+    // No need to handle here for immediate payments
 
     return NextResponse.json({
       ...charge,
       payment_id: payment.id,
-      enrollment_created: charge.paid && charge.status === 'successful'
+      // Enrollment will be created by webhook
+      enrollment_created: false
     })
   } catch (err: unknown) {
     let message = 'Unknown error'

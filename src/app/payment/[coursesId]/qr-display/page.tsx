@@ -205,79 +205,8 @@ export default function QRDisplayPage() {
         }
     }, [userId, courseId, course]);
 
-    const checkPaymentStatus = useCallback(async () => {
-        if (!chargeId) return;
-
-        try {
-            console.log('Checking payment status for charge:', chargeId);
-
-            const response = await fetch(`/api/payment/check-status?chargeId=${chargeId}`);
-            const data = await response.json();
-
-            console.log('Payment status response:', data);
-
-            if (response.ok && data.paid) {
-                console.log('Payment successful!');
-                setPaymentStatus('success');
-                
-                // Update payment status to successful first
-                try {
-                    console.log('🔄 Updating payment status to successful...');
-                    const updateResponse = await fetch('/api/payment/update-status', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            charge_id: chargeId,
-                            status: 'successful'
-                        })
-                    });
-
-                    if (updateResponse.ok) {
-                        console.log('✅ Payment status updated to successful');
-                        
-                        // Create enrollment when payment is successful
-                        console.log('🔄 Creating enrollment for user:', userId, 'course:', courseId);
-                        const enrollmentResponse = await fetch('/api/enrollments', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                course_id: parseInt(courseId as string),
-                                user_id: userId
-                            })
-                        });
-
-                        const enrollmentData = await enrollmentResponse.json();
-                        console.log('📝 Enrollment response:', enrollmentData);
-
-                        if (enrollmentResponse.ok) {
-                            console.log('✅ Enrollment created successfully');
-                        } else {
-                            console.error('❌ Failed to create enrollment:', enrollmentData);
-                        }
-                    } else {
-                        console.error('❌ Failed to update payment status');
-                    }
-                } catch (error) {
-                    console.error('❌ Error updating payment status:', error);
-                }
-                
-                // Auto redirect to success page after 2 seconds
-                setTimeout(() => {
-                    router.push(`/payment/${courseId}/success`);
-                }, 2000);
-            } else if (response.ok && data.status === 'failed') {
-                console.log('Payment failed!');
-                setPaymentStatus('failed');
-            }
-            // If still pending, continue checking
-        } catch (error) {
-            console.error('Error checking payment status:', error);
-        }
-    }, [chargeId, courseId, router, userId]);
+    // Webhook จะจัดการ payment status อัตโนมัติ
+    // ไม่ต้อง polling แล้ว
 
     const saveQRImage = () => {
         if (qrData && qrData.scannable_code && qrData.scannable_code.image) {
@@ -339,16 +268,8 @@ export default function QRDisplayPage() {
         }
     }, [course, qrData, loading, generateQRCode, existingChargeId, isQrExpired]);
 
-    // Check payment status periodically
-    useEffect(() => {
-        if (chargeId && paymentStatus === 'pending') {
-            const interval = setInterval(() => {
-                checkPaymentStatus();
-            }, 3000); // Check every 3 seconds
-
-            return () => clearInterval(interval);
-        }
-    }, [chargeId, paymentStatus, checkPaymentStatus]);
+    // Webhook will handle payment status updates automatically
+    // No need for polling anymore
 
     if (!course) {
         return (
