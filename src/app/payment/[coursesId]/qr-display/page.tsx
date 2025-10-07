@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from '@/lib/supabaseClient';
 import Link from "next/link";
+import Footer from "@/components/ui/footer";
 
 declare global {
     interface Window {
@@ -292,117 +293,118 @@ export default function QRDisplayPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <a href={`/payment/${courseId}`} className="text-blue-600 hover:text-blue-800 mb-6 inline-block">← Back</a>
-
-                <div className="flex justify-center">
-                    <div className="bg-white border-2 border-dashed border-blue-300 rounded-lg p-8 max-w-md w-full">
-                        {loading ? (
-                            <div className="text-center py-8">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                                <p className="text-gray-600">กำลังสร้าง QR Code...</p>
-                            </div>
-                        ) : paymentStatus === 'failed' ? (
-                            <div className="text-center py-8">
-                                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">Payment failed</h3>
-                                <p className="text-gray-600 mb-6">Please check your payment details and try again</p>
-                                <button
-                                    onClick={goBackToPayment}
-                                    className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700"
-                                >
-                                    Back to Payment
-                                </button>
-                            </div>
-                        ) : paymentStatus === 'success' ? (
-                            <div className="text-center py-8">
-                                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">Payment Successful!</h3>
-                                <p className="text-gray-600 mb-4">Redirecting to order complete page...</p>
-                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
-                            </div>
-                        ) : qrData && qrData.scannable_code && qrData.scannable_code.image ? (
-                            <div className="text-center space-y-6">
-                                <h2 className="text-2xl font-bold text-gray-900">Scan QR code</h2>
-
-                                <div className="space-y-2">
-                                    <p className="text-sm text-gray-600">Reference no. {referenceNo}</p>
-                                    <p className="text-2xl font-bold text-orange-600">THB {course.price.toLocaleString()}.00</p>
-                                </div>
-
-                                <div className="flex justify-center">
-                                    <img
-                                        src={qrData.scannable_code.image.download_uri}
-                                        alt="QR Code for payment"
-                                        className="w-64 h-64 border border-gray-300 rounded-lg"
-                                    />
-                                </div>
-
-                                <button
-                                    onClick={saveQRImage}
-                                    className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700"
-                                >
-                                    Save QR image
-                                </button>
-
-                                <div className="text-xs text-gray-500">
-                                    <p>QR Code นี้จะหมดอายุใน 15 นาที</p>
-                                    <p>กำลังตรวจสอบสถานะการชำระเงิน...</p>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="text-center py-8 space-y-4">
-                                <p className="text-gray-600">กำลังโหลด...</p>
-                                <div className="text-xs text-gray-400 space-y-1">
-                                    <p>Debug Info:</p>
-                                    <p>Loading: {loading ? 'Yes' : 'No'}</p>
-                                    <p>QR Data: {qrData ? 'Yes' : 'No'}</p>
-                                    <p>Payment Status: {paymentStatus}</p>
-                                    <p>Course: {course ? 'Yes' : 'No'}</p>
-                                    <p>User ID: {userId ? 'Yes' : 'No'}</p>
-                                </div>
-                            </div>
-                        )}
+        <div className="min-h-screen bg-[#FFFFFF] flex flex-col">
+          <div className="flex-1">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+              <Link
+                href={`/payment/${courseId}`}
+                className="text-blue-500 hover:text-blue-600 mb-6 inline-block text-[16px] font-bold"
+              >
+                ← Back
+              </Link>
+        
+              {/* ✅ กล่อง QR Code อยู่กลางแนวนอน */}
+              <div className="flex justify-center">
+                <div className="bg-white rounded-xl shadow-md p-8 w-full max-w-[739px] text-center">
+                  {loading ? (
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                      <p className="text-gray-600">กำลังสร้าง QR Code...</p>
                     </div>
+                  ) : paymentStatus === "failed" ? (
+                    <div className="text-center py-8">
+                      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg
+                          className="w-8 h-8 text-red-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        Payment failed
+                      </h3>
+                      <p className="text-gray-600 mb-6">
+                        Please check your payment details and try again
+                      </p>
+                      <button
+                        onClick={goBackToPayment}
+                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700"
+                      >
+                        Back to Payment
+                      </button>
+                    </div>
+                  ) : paymentStatus === "success" ? (
+                    <div className="text-center py-8">
+                      <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg
+                          className="w-8 h-8 text-green-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        Payment Successful!
+                      </h3>
+                      <p className="text-gray-600 mb-4">
+                        Redirecting to order complete page...
+                      </p>
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+                    </div>
+                  ) : qrData?.scannable_code?.image ? (
+                    <div className="space-y-6">
+                      <h2 className="text-h3 font-medium text-black">Scan QR code</h2>
+        
+                      <div className="space-y-2">
+                        <p className="text-b2 font-regular text-gray-600">
+                          Reference no. {referenceNo}
+                        </p>
+                        <p className="text-h3 font-medium text-orange-500">
+                          THB {course.price.toLocaleString()}.00
+                        </p>
+                      </div>
+        
+                      <div className="flex justify-center">
+                        <img
+                          src={qrData.scannable_code.image.download_uri}
+                          alt="QR Code for payment"
+                          className="w-64 h-64 border border-gray-300 rounded-lg"
+                        />
+                      </div>
+        
+                      <button
+                        onClick={saveQRImage}
+                        className="w-full max-w-[312px] bg-blue-600 text-white py-4 px-4 rounded-md hover:bg-blue-700"
+                      >
+                        Save QR image
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 space-y-4">
+                      <p className="text-gray-600">กำลังโหลด...</p>
+                    </div>
+                  )}
                 </div>
+              </div>
             </div>
-
-            {/* Footer */}
-            <footer className="bg-blue-900 text-white py-8">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center">
-                        <div className="text-xl font-bold">CourseFlow</div>
-                        <div className="flex space-x-6">
-                            <Link href="/non-user/courses" className="hover:text-blue-200">
-                                All Courses
-                            </Link>
-                            <Link href="/bundle" className="hover:text-blue-200">
-                                Bundle Package
-                            </Link>
-                        </div>
-                        <div className="flex space-x-4">
-                            <div className="w-8 h-8 bg-blue-700 rounded-full flex items-center justify-center">
-                                <span className="text-xs">f</span>
-                            </div>
-                            <div className="w-8 h-8 bg-blue-700 rounded-full flex items-center justify-center">
-                                <span className="text-xs">ig</span>
-                            </div>
-                            <div className="w-8 h-8 bg-blue-700 rounded-full flex items-center justify-center">
-                                <span className="text-xs">tw</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </footer>
+          </div>
+          <Footer />
         </div>
-    );
+      );
+      
 }

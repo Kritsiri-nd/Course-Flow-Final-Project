@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { createClient } from '@/lib/supabaseClient';
 import OrderSummary from "@/components/payment/OrderSummary";
 import PaymentForm from "@/components/payment/PaymentForm";
+import Footer from "@/components/ui/footer";
 
 type PaymentMethod = 'card' | 'qr';
 
@@ -239,42 +240,45 @@ export default function PaymentPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#FFFFFF]">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-center">
+        <div className="min-h-screen bg-[#FFFFFF] flex flex-col">
+            <div className="flex-1">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-center">
 
-                    {/* Main Content */}
-                    <div className="w-full">
-                        <Link href="/non-user/courses" className="text-blue-500 hover:text-blue-600 mb-6 inline-block text-[16px] font-bold">
-                            ← Back
-                        </Link>
+                        {/* Main Content */}
+                        <div className="w-full">
+                            <Link href="/non-user/courses" className="text-blue-500 hover:text-blue-600 mb-6 inline-block text-[16px] font-bold">
+                                ← Back
+                            </Link>
 
-                        <h1 className="sm:text-h2 text-h3 text-black mb-10">
-                            Enter payment info to start<br></br>your subscription
-                        </h1>
+                            <h1 className="sm:text-h2 text-h3 text-black mb-10">
+                                Enter payment info to start<br></br>your subscription
+                            </h1>
 
-                        <PaymentForm
+                            <PaymentForm
+                                paymentMethod={paymentMethod}
+                                onPaymentMethodChange={setPaymentMethod}
+                                cardData={cardData}
+                                onCardDataChange={handleCardInputChange}
+                                formatCardNumber={formatCardNumber}
+                                formatExpiry={formatExpiry}
+                            />
+                        </div>
+
+                        {/* Order Summary */}
+                        <div className="w-full">
+                        <OrderSummary
+                            course={course}
                             paymentMethod={paymentMethod}
-                            onPaymentMethodChange={setPaymentMethod}
-                            cardData={cardData}
-                            onCardDataChange={handleCardInputChange}
-                            formatCardNumber={formatCardNumber}
-                            formatExpiry={formatExpiry}
+                            loading={loading}
+                            omiseKey={omiseKey}
+                            onSubmit={handleSubmit}
                         />
-                    </div>
-
-                    {/* Order Summary */}
-                    <div className="w-full">
-                    <OrderSummary
-                        course={course}
-                        paymentMethod={paymentMethod}
-                        loading={loading}
-                        omiseKey={omiseKey}
-                        onSubmit={handleSubmit}
-                    />
+                        </div>
                     </div>
                 </div>
             </div>
+            <Footer />
         </div>
     );
 }
