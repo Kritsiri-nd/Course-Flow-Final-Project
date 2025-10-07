@@ -127,6 +127,52 @@ export default function CourseDetailPage() {
   const [otherCourses, setOtherCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+
+  // Check enrollment status
+  useEffect(() => {
+    const checkEnrollment = async () => {
+      try {
+        // Get current user session first
+        const sessionResponse = await fetch('/api/auth');
+        if (!sessionResponse.ok) {
+          // User not logged in, so not enrolled
+          setIsEnrolled(false);
+          return;
+        }
+        
+        const session = await sessionResponse.json();
+        if (!session.user?.id) {
+          setIsEnrolled(false);
+          return;
+        }
+
+        // Check if user is enrolled in this course
+        const response = await fetch(`/api/enrollments?user_id=${session.user.id}`);
+        if (response.ok) {
+          const data = await response.json();
+          // API returns { success: true, enrollments: [...] }
+          const enrollments = data.enrollments || [];
+          if (Array.isArray(enrollments)) {
+            const isEnrolledInThisCourse = enrollments.some((enrollment: { courses?: { id: number } }) => 
+              enrollment.courses?.id === parseInt(id)
+            );
+            setIsEnrolled(isEnrolledInThisCourse);
+          } else {
+            console.log('Enrollments data is not an array:', enrollments);
+            setIsEnrolled(false);
+          }
+        }
+      } catch (error) {
+        console.error("Error checking enrollment:", error);
+        setIsEnrolled(false);
+      }
+    };
+
+    if (id) {
+      checkEnrollment();
+    }
+  }, [id]);
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -217,7 +263,6 @@ export default function CourseDetailPage() {
   //   (acc, module) => acc + module.lessons.length,
   //   0
   // );
-
   return (
     <>
       <div className="bg-white pt-2 pb-8 sm:pb-16 sm:pt-16 px-2 sm:px-6 md:px-8">
@@ -342,26 +387,35 @@ export default function CourseDetailPage() {
 
                   {/* Bottom Section - Buttons */}
                   <div className="space-y-3 pt-10 border-t border-gray-400">
-                    <Button
-                      variant="outline"
-                      className="w-full py-6 bg-white border-orange-500 text-b2 text-orange-500 hover:bg-blue-50"
-                      onClick={handleAddToWishlist}
-                      disabled={isAddingToWishlist}
-                    >
-                      {isAddingToWishlist ? 'Adding...' : 'Add to Wishlist'}
-                    </Button>
-                    <SubscribeModalAlert
-                      courseTitle={course.title}
-                      onConfirm={() => {
-                        // Add your subscription logic here
-                        console.log(`Subscribing to course: ${course.title}`);
-                        // You can add API calls, navigation, etc. here
-                      }}
-                    >
-                      <Button className="w-full py-6 bg-primary hover:bg-primary/90 text-b2 text-primary-foreground">
-                        Subscribe This Course
+                    {isEnrolled ? (
+                      <Button
+                        className="w-full py-6 bg-green-600 hover:bg-green-700 text-b2 text-white"
+                        onClick={() => router.push(`/user/courses/${course.id}`)}
+                      >
+                        Start Learning
                       </Button>
-                    </SubscribeModalAlert>
+                    ) : (
+                      <>
+                        <Button
+                          variant="outline"
+                          className="w-full py-6 bg-white border-orange-500 text-b2 text-orange-500 hover:bg-blue-50"
+                          onClick={handleAddToWishlist}
+                          disabled={isAddingToWishlist}
+                        >
+                          {isAddingToWishlist ? 'Adding...' : 'Add to Wishlist'}
+                        </Button>
+                        <SubscribeModalAlert
+                          courseTitle={course.title}
+                          onConfirm={() => {
+                            router.push(`/payment/${course.id}`);
+                          }}
+                        >
+                          <Button className="w-full py-6 bg-primary hover:bg-primary/90 text-b2 text-primary-foreground">
+                            Subscribe This Course
+                          </Button>
+                        </SubscribeModalAlert>
+                      </>
+                    )}
                   </div>
                 </div>
               </Card>
@@ -393,6 +447,7 @@ export default function CourseDetailPage() {
                       width={400}
                       height={240}
                       className="w-full h-60 object-cover"
+                      style={{ width: 'auto', height: 'auto' }}
                     />
 
                     {/* Content */}
@@ -467,24 +522,35 @@ export default function CourseDetailPage() {
                   {course?.price?.toLocaleString() || "3,559.00"}
                 </p>
                 <div className="flex gap-3 mt-2">
-                  <Button
-                    variant="outline"
-                    className="flex-1 border-orange-500 !text-orange-500 hover:bg-orange-50 text-b4"
-                    onClick={handleAddToWishlist}
-                    disabled={isAddingToWishlist}
-                  >
-                    {isAddingToWishlist ? 'Adding...' : 'Add to Wishlist'}
-                  </Button>
-                  <SubscribeModalAlert
-                    courseTitle={course?.title || "Service Design Essentials"}
-                    onConfirm={() => {
-                      console.log(`Subscribing to course: ${course?.title}`);
-                    }}
-                  >
-                    <Button className="flex-1 bg-primary hover:bg-primary/90 !text-primary-foreground text-b4">
-                      Subscribe This Course
+                  {isEnrolled ? (
+                    <Button
+                      className="flex-1 bg-green-600 hover:bg-green-700 !text-white text-b4"
+                      onClick={() => router.push(`/user/courses/${course?.id}`)}
+                    >
+                      Start Learning
                     </Button>
-                  </SubscribeModalAlert>
+                  ) : (
+                    <>
+                      <Button
+                        variant="outline"
+                        className="flex-1 border-orange-500 !text-orange-500 hover:bg-orange-50 text-b4"
+                        onClick={handleAddToWishlist}
+                        disabled={isAddingToWishlist}
+                      >
+                        {isAddingToWishlist ? 'Adding...' : 'Add to Wishlist'}
+                      </Button>
+                      <SubscribeModalAlert
+                        courseTitle={course?.title || "Service Design Essentials"}
+                        onConfirm={() => {
+                          router.push(`/payment/${course?.id}`);
+                        }}
+                      >
+                        <Button className="flex-1 bg-primary hover:bg-primary/90 !text-primary-foreground text-b4">
+                          Subscribe This Course
+                        </Button>
+                      </SubscribeModalAlert>
+                    </>
+                  )}
                 </div>
               </div>
             </AccordionItem>

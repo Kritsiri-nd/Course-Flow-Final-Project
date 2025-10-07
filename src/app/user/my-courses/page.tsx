@@ -30,10 +30,13 @@ export default async function MyCoursesPage() {
   // - enrolled_at: timestamp
   // - completed_at: timestamp (nullable)
   
-  const { data: enrollments } = await supabase
+  const { data: enrollments, error: enrollmentsError } = await supabase
     .from('enrollments')
     .select(`
+      id,
       status,
+      progress_percentage,
+      enrolled_at,
       courses (
         id, 
         title, 
@@ -48,6 +51,11 @@ export default async function MyCoursesPage() {
       )
     `)
     .eq('user_id', session.user.id);
+
+  // Debug logging
+  console.log('🔍 Debug - User ID:', session.user.id);
+  console.log('🔍 Debug - Enrollments Error:', enrollmentsError);
+  console.log('🔍 Debug - Enrollments Data:', enrollments);
 
   // นับจำนวน courses แต่ละประเภท
   const coursesInProgress = enrollments?.filter(e => e.status === 'in-progress').length || 0;
