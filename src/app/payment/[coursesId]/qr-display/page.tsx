@@ -205,8 +205,43 @@ export default function QRDisplayPage() {
         }
     }, [userId, courseId, course]);
 
-    // Webhook จะจัดการ payment status อัตโนมัติ
-    // ไม่ต้อง polling แล้ว
+    // Simple polling: Check enrollment status every 3 seconds
+    useEffect(() => {
+        if (chargeId && userId && courseId && paymentStatus === 'pending') {
+            console.log('🔍 Starting enrollment check polling...');
+            
+            const interval = setInterval(async () => {
+                try {
+                    // Check if user is enrolled in this course
+                    const { data: enrollment, error } = await supabase
+                        .from('enrollments')
+                        .select('id')
+                        .eq('user_id', userId)
+                        .eq('course_id', courseId)
+                        .single();
+                    
+                    if (!error && enrollment) {
+                        console.log('✅ Enrollment found! Payment was successful.');
+                        setPaymentStatus('success');
+                        
+                        // Auto redirect to success page after 2 seconds
+                        setTimeout(() => {
+                            console.log('🎉 Redirecting to success page...');
+                            router.push(`/payment/${courseId}/success`);
+                        }, 2000);
+                        
+                        clearInterval(interval);
+                    } else {
+                        console.log('⏳ Payment still pending... checking again in 3 seconds');
+                    }
+                } catch (error) {
+                    console.error('Error checking enrollment:', error);
+                }
+            }, 3000); // Check every 3 seconds
+
+            return () => clearInterval(interval);
+        }
+    }, [chargeId, userId, courseId, paymentStatus, router, supabase]);
 
     const saveQRImage = () => {
         if (qrData && qrData.scannable_code && qrData.scannable_code.image) {
