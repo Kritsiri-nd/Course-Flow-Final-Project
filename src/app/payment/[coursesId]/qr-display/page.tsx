@@ -212,15 +212,11 @@ export default function QRDisplayPage() {
             
             const interval = setInterval(async () => {
                 try {
-                    // Check if user is enrolled in this course
-                    const { data: enrollment, error } = await supabase
-                        .from('enrollments')
-                        .select('id')
-                        .eq('user_id', userId)
-                        .eq('course_id', courseId)
-                        .single();
+                    // ใช้ API Route แทน Direct Supabase Query
+                    const response = await fetch(`/api/payment/check-enrollment?userId=${userId}&courseId=${courseId}`);
+                    const data = await response.json();
                     
-                    if (!error && enrollment) {
+                    if (response.ok && data.enrolled) {
                         console.log('✅ Enrollment found! Payment was successful.');
                         setPaymentStatus('success');
                         
@@ -230,6 +226,10 @@ export default function QRDisplayPage() {
                             router.push(`/payment/${courseId}/success`);
                         }, 2000);
                         
+                        clearInterval(interval);
+                    } else if (response.ok && data.paymentStatus === 'failed') {
+                        console.log('❌ Payment failed detected!');
+                        setPaymentStatus('failed');
                         clearInterval(interval);
                     } else {
                         console.log('⏳ Payment still pending... checking again in 3 seconds');
