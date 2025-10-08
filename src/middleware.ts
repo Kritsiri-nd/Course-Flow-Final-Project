@@ -62,11 +62,12 @@ export async function middleware(request: NextRequest) {
     // ตรวจสอบสิทธิ์การเข้าถึงหน้า Admin
     const pathname = request.nextUrl.pathname
     const isAdminPath = pathname.startsWith('/admin')
+    const isAdminLoginPath = pathname === '/admin/login'
 
-    if (isAdminPath) {
-      // ถ้าไม่มี session ให้ redirect ไป login
+    if (isAdminPath && !isAdminLoginPath) {
+      // ถ้าไม่มี session ให้ redirect ไป admin/login
       if (!session) {
-        const loginUrl = new URL('/auth/login', request.url)
+        const loginUrl = new URL('/admin/login', request.url)
         loginUrl.searchParams.set('redirectTo', pathname)
         return NextResponse.redirect(loginUrl)
       }
@@ -78,21 +79,35 @@ export async function middleware(request: NextRequest) {
         .eq('id', session.user.id)
         .single()
 
-      // ถ้าไม่ใช่ admin ให้ redirect ไปหน้า unauthorized หรือ home
-      if (!profile || profile.role !== 'admin') {
-        const unauthorizedUrl = new URL('/', request.url)
-        return NextResponse.redirect(unauthorizedUrl)
+      // ถ้าไม่มี profile หรือ role ให้ redirect ไป admin/login
+      if (!profile || !profile.role) {
+        const loginUrl = new URL('/admin/login', request.url)
+        loginUrl.searchParams.set('redirectTo', pathname)
+        return NextResponse.redirect(loginUrl)
+      }
+
+      // ถ้า role เป็น user ให้ redirect ไปหน้าแรก
+      if (profile.role === 'user') {
+        const homeUrl = new URL('/', request.url)
+        return NextResponse.redirect(homeUrl)
+      }
+
+      // ถ้า role ไม่ใช่ admin ให้ redirect ไป admin/login
+      if (profile.role !== 'admin') {
+        const loginUrl = new URL('/admin/login', request.url)
+        loginUrl.searchParams.set('redirectTo', pathname)
+        return NextResponse.redirect(loginUrl)
       }
     }
   } catch (error) {
     console.error('Session refresh error:', error)
     
-    // ถ้าเกิด error แล้วเป็น admin path ให้ redirect ไป login
+    // ถ้าเกิด error แล้วเป็น admin path ให้ redirect ไป admin/login
     const pathname = request.nextUrl.pathname
     const isAdminPath = pathname.startsWith('/admin')
     
     if (isAdminPath) {
-      const loginUrl = new URL('/auth/login', request.url)
+      const loginUrl = new URL('/admin/login', request.url)
       loginUrl.searchParams.set('redirectTo', pathname)
       return NextResponse.redirect(loginUrl)
     }
