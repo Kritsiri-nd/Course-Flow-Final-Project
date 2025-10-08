@@ -77,19 +77,109 @@ export async function GET(request: Request) {
 
                 if (row) {
                     if (row.completed_at) {
-                        fraction = 1;
-                        status = "completed";
+                        // Verify that the completion is still valid based on current data
+                        const duration = Number(row.duration_seconds || 0);
+                        const currentPosition = Number(row.last_position_seconds || 0);
+                        const watchedTime = Number(row.seconds_watched || 0);
+
+                        if (duration > 0) {
+                            const positionThreshold = Math.max(duration * 0.9, duration - 5);
+
+                            // Adaptive threshold based on video duration and watch behavior
+                            let watchTimeThreshold;
+                            if (duration <= 30) {
+                                watchTimeThreshold = Math.max(duration * 0.2, 5);
+                            } else if (duration <= 120) {
+                                if (watchedTime >= duration * 0.6) {
+                                    watchTimeThreshold = duration * 0.25;
+                                } else {
+                                    watchTimeThreshold = duration * 0.4;
+                                }
+                            } else if (duration <= 600) {
+                                if (watchedTime >= duration * 0.5) {
+                                    watchTimeThreshold = duration * 0.3;
+                                } else {
+                                    watchTimeThreshold = duration * 0.45;
+                                }
+                            } else {
+                                if (watchedTime >= duration * 0.4) {
+                                    watchTimeThreshold = duration * 0.35;
+                                } else {
+                                    watchTimeThreshold = duration * 0.5;
+                                }
+                            }
+
+                            // Re-validate completion: must satisfy BOTH conditions
+                            if (currentPosition >= positionThreshold && watchedTime >= watchTimeThreshold) {
+                                fraction = 1;
+                                status = "completed";
+                            } else {
+                                // Completion is invalid, treat as in-progress and remove completed_at
+                                fraction = Math.min(1, Math.max(0, currentPosition / duration));
+                                status = "in_progress";
+
+                                // Remove invalid completion from database
+                                await supabase
+                                    .from("lesson_progress")
+                                    .update({ completed_at: null })
+                                    .eq("lesson_id", lessonId)
+                                    .eq("user_id", user.id);
+                            }
+                        } else {
+                            fraction = 1;
+                            status = "completed";
+                        }
                     } else if (row.duration_seconds && row.duration_seconds > 0) {
                         fraction = Math.min(1, Math.max(0, Number(row.last_position_seconds || 0) / Number(row.duration_seconds)));
-                        // Check if video is completed (>= 90% or within last 5 seconds)
-                        const threshold = Math.max(row.duration_seconds * 0.9, row.duration_seconds - 5);
+                        // Check if video is completed: >= 90% position AND adaptive real watch time based on video length
+                        const positionThreshold = Math.max(row.duration_seconds * 0.9, row.duration_seconds - 5);
                         const currentPosition = Number(row.last_position_seconds || 0);
+                        const watchedTime = Number(row.seconds_watched || 0);
                         const duration = Number(row.duration_seconds);
 
-                        console.log(`Lesson ${lessonId}: position=${currentPosition}, duration=${duration}, threshold=${threshold}`);
-                        console.log(`Lesson ${lessonId}: position >= threshold? ${currentPosition >= threshold}`);
+                        // Adaptive threshold based on video duration and watch behavior
+                        let watchTimeThreshold;
+                        if (duration <= 30) {
+                            // Very short videos (≤30s): Very lenient, just need to reach the end
+                            watchTimeThreshold = Math.max(duration * 0.2, 5); // At least 20% or 5 seconds
+                        } else if (duration <= 120) {
+                            // Short videos (30s-2min): Lenient for normal viewing, stricter for skipping
+                            if (watchedTime >= duration * 0.6) {
+                                watchTimeThreshold = duration * 0.25; // Allow x2 speed (50% real time)
+                            } else {
+                                watchTimeThreshold = duration * 0.4; // Block excessive skipping
+                            }
+                        } else if (duration <= 600) {
+                            // Medium videos (2-10min): Balanced approach
+                            if (watchedTime >= duration * 0.5) {
+                                watchTimeThreshold = duration * 0.3; // Allow x2 speed
+                            } else {
+                                watchTimeThreshold = duration * 0.45; // Block skipping
+                            }
+                        } else {
+                            // Long videos (>10min): Stricter to ensure engagement
+                            if (watchedTime >= duration * 0.4) {
+                                watchTimeThreshold = duration * 0.35; // Allow x2 speed
+                            } else {
+                                watchTimeThreshold = duration * 0.5; // Block skipping
+                            }
+                        }
 
-                        if (currentPosition >= threshold) {
+                        // Video length category for logging
+                        let category = "";
+                        if (duration <= 30) category = "very short";
+                        else if (duration <= 120) category = "short";
+                        else if (duration <= 600) category = "medium";
+                        else category = "long";
+
+                        console.log(`Lesson ${lessonId}: position=${currentPosition}, watched=${watchedTime}, duration=${duration}`);
+                        console.log(`Lesson ${lessonId}: Video category: ${category} (${duration}s)`);
+                        console.log(`Lesson ${lessonId}: position >= threshold? ${currentPosition >= positionThreshold}`);
+                        console.log(`Lesson ${lessonId}: watched >= threshold? ${watchedTime >= watchTimeThreshold}`);
+                        console.log(`Lesson ${lessonId}: Threshold: ${Math.round(watchTimeThreshold)}s (${Math.round((watchTimeThreshold / duration) * 100)}% of video)`);
+
+                        // Must satisfy BOTH conditions: reached near end AND watched enough real time
+                        if (currentPosition >= positionThreshold && watchedTime >= watchTimeThreshold) {
                             status = "completed";
                             fraction = 1;
                             console.log(`Lesson ${lessonId}: MARKED AS COMPLETED`);
@@ -193,33 +283,107 @@ export async function POST(request: Request) {
             existing?.last_position_seconds ?? 0,
             position ?? 0
         );
-        const nextWatched = (existing?.seconds_watched ?? 0) + watchedInc;
+        // Cap seconds_watched to prevent integer overflow and unreasonable values
+        const MAX_SECONDS_WATCHED = 2000000000; // 2 billion seconds (~63 years)
+        const existingWatchTime = existing?.seconds_watched ?? 0;
 
-        // Completion heuristic: >= 90% or within last 5 seconds
+        // If existing watch time is unreasonable (more than 5x video duration), cap it
+        const maxReasonableForVideo = nextDuration ? nextDuration * 5 : 1800; // 5x video length or 30 minutes
+        const cappedExisting = Math.min(existingWatchTime, maxReasonableForVideo);
+
+        const nextWatched = Math.round(Math.min(
+            cappedExisting + watchedInc,
+            maxReasonableForVideo
+        ));
+
+        console.log(`POST: Watch time capping: existing=${existingWatchTime}, capped=${cappedExisting}, video=${nextDuration}, maxReasonable=${maxReasonableForVideo}, final=${nextWatched}`);
+
+        // Completion heuristic: >= 90% position AND adaptive real watch time based on video length
         let completedAt = existing?.completed_at ?? null as string | null;
         if (!completedAt && nextDuration && nextDuration > 0) {
-            const threshold = Math.max(nextDuration * 0.9, nextDuration - 5);
-            console.log(`POST: Lesson ${lessonId}: position=${nextPosition}, duration=${nextDuration}, threshold=${threshold}`);
-            if (nextPosition >= threshold) {
+            const positionThreshold = Math.max(nextDuration * 0.9, nextDuration - 5);
+
+            // Adaptive threshold based on video duration and watch behavior
+            let watchTimeThreshold;
+            const duration = nextDuration;
+            const watched = nextWatched;
+
+            if (duration <= 30) {
+                // Very short videos (≤30s): Very lenient, just need to reach the end
+                watchTimeThreshold = Math.max(duration * 0.2, 5); // At least 20% or 5 seconds
+            } else if (duration <= 120) {
+                // Short videos (30s-2min): Lenient for normal viewing, stricter for skipping
+                if (watched >= duration * 0.6) {
+                    watchTimeThreshold = duration * 0.25; // Allow x2 speed (50% real time)
+                } else {
+                    watchTimeThreshold = duration * 0.4; // Block excessive skipping
+                }
+            } else if (duration <= 600) {
+                // Medium videos (2-10min): Balanced approach
+                if (watched >= duration * 0.5) {
+                    watchTimeThreshold = duration * 0.3; // Allow x2 speed
+                } else {
+                    watchTimeThreshold = duration * 0.45; // Block skipping
+                }
+            } else {
+                // Long videos (>10min): Stricter to ensure engagement
+                if (watched >= duration * 0.4) {
+                    watchTimeThreshold = duration * 0.35; // Allow x2 speed
+                } else {
+                    watchTimeThreshold = duration * 0.5; // Block skipping
+                }
+            }
+
+            // Video length category for logging
+            let category = "";
+            if (duration <= 30) category = "very short";
+            else if (duration <= 120) category = "short";
+            else if (duration <= 600) category = "medium";
+            else category = "long";
+
+            console.log(`POST: Lesson ${lessonId}: position=${nextPosition}, watched=${watched}, duration=${duration}`);
+            console.log(`POST: Video category: ${category} (${duration}s)`);
+            console.log(`POST: Position check: ${nextPosition} >= ${positionThreshold}? ${nextPosition >= positionThreshold}`);
+            console.log(`POST: Watch time check: ${watched} >= ${watchTimeThreshold}? ${watched >= watchTimeThreshold}`);
+            console.log(`POST: Threshold: ${Math.round(watchTimeThreshold)}s (${Math.round((watchTimeThreshold / duration) * 100)}% of video)`);
+
+            // Must satisfy BOTH conditions: reached near end AND watched enough real time
+            if (nextPosition >= positionThreshold && nextWatched >= watchTimeThreshold) {
                 completedAt = new Date().toISOString();
                 console.log(`POST: Lesson ${lessonId}: MARKED AS COMPLETED, completedAt=${completedAt}`);
+            } else if (nextPosition >= positionThreshold && nextWatched < watchTimeThreshold) {
+                console.log(`POST: Lesson ${lessonId}: Position reached but insufficient watch time (${nextWatched}/${watchTimeThreshold})`);
             }
         }
 
         if (existing?.id) {
+            const updateData: any = {
+                duration_seconds: nextDuration,
+                last_position_seconds: nextPosition,
+                seconds_watched: nextWatched,
+                updated_at: new Date().toISOString(),
+            };
+
+            // Only update completed_at if we're actually marking it as complete
+            if (completedAt) {
+                updateData.completed_at = completedAt;
+            }
+
             const { data, error } = await supabase
                 .from("lesson_progress")
-                .update({
-                    duration_seconds: nextDuration,
-                    last_position_seconds: nextPosition,
-                    seconds_watched: nextWatched,
-                    completed_at: completedAt,
-                    updated_at: new Date().toISOString(),
-                })
+                .update(updateData)
                 .eq("id", existing.id)
                 .select()
                 .single();
             if (error) {
+                console.error(`POST: Lesson ${lessonId} UPDATE ERROR:`, error);
+                console.error(`POST: Update data:`, {
+                    duration_seconds: nextDuration,
+                    last_position_seconds: nextPosition,
+                    seconds_watched: nextWatched,
+                    completed_at: completedAt,
+                    existing_id: existing.id
+                });
                 return NextResponse.json({ error: error.message }, { status: 500 });
             }
             return NextResponse.json(data, { status: 200 });
@@ -238,6 +402,15 @@ export async function POST(request: Request) {
             .select()
             .single();
         if (error) {
+            console.error(`POST: Lesson ${lessonId} INSERT ERROR:`, error);
+            console.error(`POST: Insert data:`, {
+                user_id: user.id,
+                lesson_id: lessonId,
+                duration_seconds: nextDuration,
+                last_position_seconds: nextPosition,
+                seconds_watched: nextWatched,
+                completed_at: completedAt,
+            });
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
         return NextResponse.json(data, { status: 201 });

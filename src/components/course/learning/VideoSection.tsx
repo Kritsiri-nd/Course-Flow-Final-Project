@@ -72,7 +72,18 @@ export default function VideoSection({
   // Attach event listeners to report progress
   useEffect(() => {
     const el = muxPlayerRef.current as any | null;
-    if (!el || !lessonId || !playbackId) return;
+    console.log("Setting up event listeners:", {
+      hasElement: !!el,
+      lessonId,
+      playbackId,
+      videoUrl,
+      elementTag: el?.tagName,
+    });
+
+    if (!el || !lessonId) {
+      console.log("Skipping event listener setup: missing element or lessonId");
+      return;
+    }
 
     function handleLoaded() {
       try {
@@ -94,6 +105,23 @@ export default function VideoSection({
       );
       const shouldSend = deltaWatch >= 5 || deltaWall >= 8000; // 5s watched or 8s elapsed
       if (!shouldSend) return;
+
+      // Add real elapsed time to total watch time (wall clock time, not video time)
+      const realElapsedSeconds = Math.round(deltaWall / 1000);
+
+      // Prevent integer overflow and cap at reasonable limit
+      const MAX_REASONABLE_WATCH_TIME = 60; // 60 seconds max per report
+      const cappedElapsed = Math.min(
+        realElapsedSeconds,
+        MAX_REASONABLE_WATCH_TIME
+      );
+
+      console.log("Watch time calculation:", {
+        deltaWall,
+        realElapsedSeconds,
+        cappedElapsed,
+      });
+
       lastTickRef.current = now;
       lastReportedTimeRef.current = nowSeconds;
       try {
@@ -104,7 +132,7 @@ export default function VideoSection({
             lesson_id: lessonId,
             duration_seconds: Math.round(durationSeconds || 0),
             last_position_seconds: Math.round(nowSeconds || 0),
-            seconds_watched: deltaWatch,
+            seconds_watched: cappedElapsed, // Send only the increment, not cumulative
           }),
         });
         // Notify parent that progress has changed
@@ -112,7 +140,11 @@ export default function VideoSection({
           lessonId,
           nowSeconds,
           durationSeconds,
+          cappedElapsed,
           deltaWatch,
+          realElapsedSeconds,
+          lastTickRef: lastTickRef.current,
+          deltaWall,
         });
         onProgressChange?.();
       } catch {
@@ -122,18 +154,37 @@ export default function VideoSection({
 
     async function reportFinal(nowSeconds: number, durationSeconds: number) {
       // Force send final progress update without throttling
+      const now = Date.now();
       const deltaWatch = Math.max(
         0,
         Math.round(nowSeconds - (lastReportedTimeRef.current || 0))
       );
-      lastTickRef.current = Date.now();
+      const deltaWall = now - (lastTickRef.current || 0);
+      const realElapsedSeconds = Math.round(deltaWall / 1000);
+
+      // Prevent integer overflow and cap at reasonable limit
+      const MAX_REASONABLE_WATCH_TIME = 60; // 60 seconds max per report
+      const cappedElapsed = Math.min(
+        realElapsedSeconds,
+        MAX_REASONABLE_WATCH_TIME
+      );
+
+      console.log("FINAL Watch time calculation:", {
+        deltaWall,
+        realElapsedSeconds,
+        cappedElapsed,
+      });
+
+      lastTickRef.current = now;
       lastReportedTimeRef.current = nowSeconds;
       try {
         console.log("Sending FINAL progress update:", {
           lessonId,
           nowSeconds,
           durationSeconds,
+          cappedElapsed,
           deltaWatch,
+          realElapsedSeconds,
         });
         await fetch("/api/lesson-progress", {
           method: "POST",
@@ -142,7 +193,7 @@ export default function VideoSection({
             lesson_id: lessonId,
             duration_seconds: Math.round(durationSeconds || 0),
             last_position_seconds: Math.round(nowSeconds || 0),
-            seconds_watched: deltaWatch,
+            seconds_watched: cappedElapsed, // Send only the increment, not cumulative
           }),
         });
         // Notify parent that progress has changed
@@ -150,7 +201,11 @@ export default function VideoSection({
           lessonId,
           nowSeconds,
           durationSeconds,
+          cappedElapsed,
           deltaWatch,
+          realElapsedSeconds,
+          lastTickRef: lastTickRef.current,
+          deltaWall,
         });
         onProgressChange?.();
       } catch (error) {
@@ -176,10 +231,13 @@ export default function VideoSection({
     el.addEventListener("loadedmetadata", handleLoaded);
     el.addEventListener("timeupdate", handleTimeUpdate);
     el.addEventListener("ended", handleEnded);
+    console.log("Event listeners attached successfully");
+
     return () => {
       el.removeEventListener("loadedmetadata", handleLoaded);
       el.removeEventListener("timeupdate", handleTimeUpdate);
       el.removeEventListener("ended", handleEnded);
+      console.log("Event listeners removed");
     };
   }, [lessonId, playbackId]);
 
