@@ -2,305 +2,195 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabaseClient"; // 👈 client-side supabase
-import { validateFirstName, validateLastName, validateDateOfBirth, validateEmail, validateEducationalBackground } from "@/lib/validators";
+import { createClient } from "@/lib/supabaseClient";
+import emailjs from "emailjs-com"; // 👈 เพิ่มตรงนี้
+import {
+  validateFirstName,
+  validateLastName,
+  validateDateOfBirth,
+  validateEmail,
+  validateEducationalBackground,
+} from "@/lib/validators";
 
-export default function ProfileForm({ profile, email }: { profile: unknown; email: string }) {
+export default function ProfileForm({
+  profile,
+  email,
+}: {
+  profile: any;
+  email: string;
+}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string>('');
-  const [message, setMessage] = useState<string>('');
-  
-  // Form state for controlled inputs
-  interface ProfileData {
-    first_name?: string;
-    last_name?: string;
-    date_of_birth?: string;
-    education?: string;
-  }
-  
+  const [error, setError] = useState<string>("");
+  const [message, setMessage] = useState<string>("");
+
   const [formData, setFormData] = useState({
-    first_name: (profile as ProfileData)?.first_name || '',
-    last_name: (profile as ProfileData)?.last_name || '',
-    date_of_birth: (profile as ProfileData)?.date_of_birth || '',
-    education: (profile as ProfileData)?.education || '',
-    email: email || '',
+    first_name: profile?.first_name || "",
+    last_name: profile?.last_name || "",
+    date_of_birth: profile?.date_of_birth || "",
+    education: profile?.education || "",
+    email: email || "",
   });
-  
-  // Real-time validation states
-  const [fieldErrors, setFieldErrors] = useState<{
-    first_name?: string;
-    last_name?: string;
-    date_of_birth?: string;
-    education?: string;
-    email?: string;
-  }>({});
-  
+
   const router = useRouter();
-  const supabase = createClient();
 
-  // Real-time validation function
-  const validateField = (fieldName: string, value: string) => {
-    let validation: { isValid: boolean; message?: string } = { isValid: true };
-    
-    switch (fieldName) {
-      case 'first_name':
-        validation = validateFirstName(value);
-        break;
-      case 'last_name':
-        validation = validateLastName(value);
-        break;
-      case 'date_of_birth':
-        validation = validateDateOfBirth(value);
-        break;
-      case 'email':
-        validation = validateEmail(value);
-        break;
-      case 'education':
-        validation = validateEducationalBackground(value);
-        break;
-    }
-    
-    setFieldErrors(prev => ({
-      ...prev,
-      [fieldName]: validation.isValid ? undefined : validation.message
-    }));
-  };
-
+  // ✅ main handleSubmit
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError('');
-    setMessage('');
+    setError("");
+    setMessage("");
     setIsSubmitting(true);
 
-    // Get form values from state
-    const firstName = formData.first_name;
-    const lastName = formData.last_name;
-    const dateOfBirth = formData.date_of_birth;
-    const education = formData.education;
-    const emailValue = formData.email;
+    const { first_name, last_name, date_of_birth, education, email: newEmail } = formData;
 
-    // Client-side validation
+    // 🧩 Validate ทั้งหมด
     const validationErrors: string[] = [];
-
-    // First name validation
-    const firstNameValidation = validateFirstName(firstName);
-    if (!firstNameValidation.isValid) {
-      validationErrors.push(firstNameValidation.message!);
+    const validators = [
+      validateFirstName(first_name),
+      validateLastName(last_name),
+      validateDateOfBirth(date_of_birth),
+      validateEducationalBackground(education),
+      validateEmail(newEmail),
+    ];
+    for (const v of validators) {
+      if (!v.isValid) validationErrors.push(v.message!);
     }
-
-    // Last name validation
-    const lastNameValidation = validateLastName(lastName);
-    if (!lastNameValidation.isValid) {
-      validationErrors.push(lastNameValidation.message!);
-    }
-
-    // Date of birth validation
-    const dobValidation = validateDateOfBirth(dateOfBirth);
-    if (!dobValidation.isValid) {
-      validationErrors.push(dobValidation.message!);
-    }
-
-    // Email validation
-    const emailValidation = validateEmail(emailValue);
-    if (!emailValidation.isValid) {
-      validationErrors.push(emailValidation.message!);
-    }
-
-    // Education validation
-    const educationValidation = validateEducationalBackground(education);
-    if (!educationValidation.isValid) {
-      validationErrors.push(educationValidation.message!);
-    }
-
-    // If there are validation errors, show them and stop
     if (validationErrors.length > 0) {
-      setError(validationErrors.join(' '));
+      setError(validationErrors.join(" "));
       setIsSubmitting(false);
       return;
     }
 
-    // ✅ สร้าง FormData สำหรับ API
-    const apiFormData = new FormData();
-    apiFormData.append("first_name", firstName);
-    apiFormData.append("last_name", lastName);
-    apiFormData.append("date_of_birth", dateOfBirth);
-    apiFormData.append("education", education);
-    apiFormData.append("email", emailValue);
+    // ✅ Update profiles ปกติ (PUT)
+    const form = new FormData();
+    form.append("first_name", first_name);
+    form.append("last_name", last_name);
+    form.append("date_of_birth", date_of_birth);
+    form.append("education", education);
+    form.append("email", newEmail);
 
-    // ✅ ยิงไป API /api/profile เพื่ออัปเดต profiles + รูป
-    const res = await fetch("/api/profile", {
-      method: "PUT",
-      body: apiFormData,
-    });
-
+    const res = await fetch("/api/profile", { method: "PUT", body: form });
     if (!res.ok) {
       const data = await res.json();
-      setError("❌ Error: " + data.error);
+      setError("❌ Error updating profile: " + data.error);
       setIsSubmitting(false);
       return;
     }
 
-    // ✅ เช็คว่ามีการแก้ไข email หรือเปล่า
-    if (emailValue && emailValue !== email) {
+    // ✅ ถ้ามีการเปลี่ยนอีเมล → ส่งอีเมลยืนยันด้วย EmailJS
+    if (newEmail && newEmail !== email) {
       try {
-        const { error: emailError } = await supabase.auth.updateUser({ email: emailValue });
-
-        if (emailError) {
-          // ถ้าเป็น rate limit error ให้ข้ามไปไม่แสดง error
-          if (emailError.message.includes('seconds')) {
-            // ไม่แสดง error message สำหรับ rate limit
-            console.log('Email update rate limited, skipping...');
-          } else {
-            setError("❌ Error updating email: " + emailError.message);
-            setIsSubmitting(false);
-            return;
-          }
-        } else {
-          // ✅ อัปเดต form state เมื่อ email เปลี่ยนสำเร็จ
-          setFormData(prev => ({ ...prev, email: emailValue }));
-          
-          // ✅ refresh session เพื่อให้ session.user.email อัปเดตทันที
-          await supabase.auth.refreshSession();
+        const token = crypto.randomUUID();
+        const expires = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // หมดอายุใน 1 ชม.
+        const confirm_link = `${process.env.NEXT_PUBLIC_BASE_URL}/user/profile/confirm-email-change?token=${token}`;
+    
+        // ✅ 1. บันทึก token ลง profiles ผ่าน API ใหม่
+        const saveRes = await fetch("/api/user/save-email-token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token, new_email: newEmail, expires }),
+        });
+    
+        if (!saveRes.ok) {
+          const data = await saveRes.json();
+          throw new Error(data.error || "Failed to save token");
         }
-      } catch {
-        // ไม่แสดง error สำหรับ email update
-        console.log('Email update failed, continuing...');
+    
+        // ✅ 2. ส่งอีเมลยืนยันด้วย EmailJS
+        const result = await emailjs.send(
+          process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+          process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
+          {
+            user_name: first_name || "User",
+            current_email: email,
+            new_email: newEmail,
+            confirm_link,
+          },
+          process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
+        );
+    
+        console.log("✅ EmailJS result:", result.text);
+        setMessage("✅ Confirmation email sent to your current email!");
+      } catch (err: any) {
+        console.error("❌ Email send failed:", err);
+        setError("❌ Failed to send confirmation email: " + err.message);
+      } finally {
+        setIsSubmitting(false);
       }
+      return;
     }
+    
 
+    // ✅ ไม่มีการเปลี่ยนอีเมล
     setIsSubmitting(false);
-    setMessage("✅ Profile updated!");
-    
-    // ถ้าไม่มี email update ให้ refresh ปกติ
-    if (!(emailValue && emailValue !== email)) {
-      router.refresh(); // refresh หน้า profile เพื่อโหลด session + profile ใหม่
-    }
-  };
-
-  // Error Icon Component for inside input
-  const ErrorIcon = ({ error }: { error?: string }) => {
-    if (!error) return null;
-    
-    return (
-      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-        <div className="flex items-center justify-center w-4 h-4 rounded-full bg-[#9B2FAC]">
-          <span className="text-white text-xs font-bold">!</span>
-        </div>
-      </div>
-    );
-  };
-
-  // Error Message Component for below input
-  const ErrorMessage = ({ error }: { error?: string }) => {
-    if (!error) return null;
-    
-    return (
-      <div className="flex items-center gap-2 mt-1">
-        <span className="text-[#9B2FAC] text-sm font-bold">!</span>
-        <span className="text-[#9B2FAC] text-sm">{error}</span>
-      </div>
-    );
+    setMessage("✅ Profile updated successfully!");
+    router.refresh();
   };
 
   return (
     <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8">
-      <form
-        onSubmit={handleSubmit}
-        method="POST"
-        noValidate
-        className="mt-8 space-y-6"
-      >
-      <div className="relative">
-        <label className="block b2 text-black mb-1">First Name</label>
+      <form onSubmit={handleSubmit} method="POST" noValidate>
+        <label className="block mb-2">First Name</label>
         <input
           type="text"
           name="first_name"
           value={formData.first_name}
-          onChange={(e) => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
-          placeholder="Enter your First Name"
-          className={`w-full border px-3 py-2 pr-10 rounded-md focus:border-orange-500 focus:ring-orange-500 ${
-            fieldErrors.first_name ? 'border-[#9B2FAC]' : 'border-gray-400'
-          }`}
-          onBlur={(e) => validateField('first_name', e.target.value)}
+          onChange={(e) =>
+            setFormData((p) => ({ ...p, first_name: e.target.value }))
+          }
+          className="border p-2 w-full rounded-md mb-4"
         />
-        <ErrorIcon error={fieldErrors.first_name} />
-        <ErrorMessage error={fieldErrors.first_name} />
-      </div>
 
-      <div className="relative">
-        <label className="block b2 text-black mb-1">Last Name</label>
+        <label className="block mb-2">Last Name</label>
         <input
           type="text"
           name="last_name"
           value={formData.last_name}
-          onChange={(e) => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
-          placeholder="Enter your Last Name"
-          className={`w-full border px-3 py-2 pr-10 rounded-md focus:border-orange-500 focus:ring-orange-500 ${
-            fieldErrors.last_name ? 'border-[#9B2FAC]' : 'border-gray-400'
-          }`}
-          onBlur={(e) => validateField('last_name', e.target.value)}
+          onChange={(e) =>
+            setFormData((p) => ({ ...p, last_name: e.target.value }))
+          }
+          className="border p-2 w-full rounded-md mb-4"
         />
-        <ErrorIcon error={fieldErrors.last_name} />
-        <ErrorMessage error={fieldErrors.last_name} />
-      </div>
 
-      <div className="relative">  
-        <label className="block b2 text-black mb-1">Date of Birth</label>
+        <label className="block mb-2">Date of Birth</label>
         <input
           type="date"
           name="date_of_birth"
           value={formData.date_of_birth}
-          onChange={(e) => setFormData(prev => ({ ...prev, date_of_birth: e.target.value }))}
-          className={`w-full border px-3 py-2 pr-10 rounded-md focus:border-orange-500 focus:ring-orange-500 ${
-            fieldErrors.date_of_birth ? 'border-[#9B2FAC]' : 'border-gray-400'
-          }`}
-          onBlur={(e) => validateField('date_of_birth', e.target.value)}
+          onChange={(e) =>
+            setFormData((p) => ({ ...p, date_of_birth: e.target.value }))
+          }
+          className="border p-2 w-full rounded-md mb-4"
         />
-        <ErrorIcon error={fieldErrors.date_of_birth} />
-        <ErrorMessage error={fieldErrors.date_of_birth} />
-      </div>
 
-      <div className="relative">
-        <label className="block b2 text-black mb-1">Educational Background</label>
+        <label className="block mb-2">Education</label>
         <input
           type="text"
           name="education"
           value={formData.education}
-          onChange={(e) => setFormData(prev => ({ ...prev, education: e.target.value }))}
-          placeholder="Enter Education Background"
-          className={`w-full border px-3 py-2 pr-10 rounded-md focus:border-orange-500 focus:ring-orange-500 ${
-            fieldErrors.education ? 'border-[#9B2FAC]' : 'border-gray-400'
-          }`}
-          onBlur={(e) => validateField('education', e.target.value)}
+          onChange={(e) =>
+            setFormData((p) => ({ ...p, education: e.target.value }))
+          }
+          className="border p-2 w-full rounded-md mb-4"
         />
-        <ErrorIcon error={fieldErrors.education} />
-        <ErrorMessage error={fieldErrors.education} />
-      </div>
 
-      <div className="relative">
-        <label className="block b2 text-black mb-1">Email</label>
+        <label className="block mb-2">Email</label>
         <input
           type="email"
           name="email"
           value={formData.email}
-          onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-          placeholder="Enter Email"
-          className={`w-full border px-3 py-2 pr-10 rounded-md focus:border-orange-500 focus:ring-orange-500 ${
-            fieldErrors.email ? 'border-[#9B2FAC]' : 'border-gray-400'
-          }`}
-          onBlur={(e) => validateField('email', e.target.value)}
+          onChange={(e) =>
+            setFormData((p) => ({ ...p, email: e.target.value }))
+          }
+          className="border p-2 w-full rounded-md mb-4"
         />
-        <ErrorIcon error={fieldErrors.email} />
-        <ErrorMessage error={fieldErrors.email} />
-      </div>
 
-      {message && <p className="text-green-500 text-sm">{message}</p>}
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+        {message && <p className="text-green-600">{message}</p>}
+        {error && <p className="text-red-600">{error}</p>}
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="text-[16px] w-full rounded-lg bg-blue-500 py-3.5 font-bold text-white shadow-lg hover:bg-blue-600 disabled:opacity-60"
+          className="w-full py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
         >
           {isSubmitting ? "Updating..." : "Update Profile"}
         </button>
