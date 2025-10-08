@@ -58,8 +58,44 @@ export async function middleware(request: NextRequest) {
         await supabase.auth.refreshSession()
       }
     }
+
+    // ตรวจสอบสิทธิ์การเข้าถึงหน้า Admin
+    const pathname = request.nextUrl.pathname
+    const isAdminPath = pathname.startsWith('/admin')
+
+    if (isAdminPath) {
+      // ถ้าไม่มี session ให้ redirect ไป login
+      if (!session) {
+        const loginUrl = new URL('/auth/login', request.url)
+        loginUrl.searchParams.set('redirectTo', pathname)
+        return NextResponse.redirect(loginUrl)
+      }
+
+      // ตรวจสอบ role ของ user จาก profiles table
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single()
+
+      // ถ้าไม่ใช่ admin ให้ redirect ไปหน้า unauthorized หรือ home
+      if (!profile || profile.role !== 'admin') {
+        const unauthorizedUrl = new URL('/', request.url)
+        return NextResponse.redirect(unauthorizedUrl)
+      }
+    }
   } catch (error) {
     console.error('Session refresh error:', error)
+    
+    // ถ้าเกิด error แล้วเป็น admin path ให้ redirect ไป login
+    const pathname = request.nextUrl.pathname
+    const isAdminPath = pathname.startsWith('/admin')
+    
+    if (isAdminPath) {
+      const loginUrl = new URL('/auth/login', request.url)
+      loginUrl.searchParams.set('redirectTo', pathname)
+      return NextResponse.redirect(loginUrl)
+    }
   }
   
   return response
@@ -73,7 +109,10 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * 
+     * Special attention to admin paths for role validation
      */
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/admin/:path*', // Explicitly include admin paths
   ],
 }

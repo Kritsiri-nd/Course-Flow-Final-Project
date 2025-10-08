@@ -61,8 +61,8 @@ export async function createClient() {
   const SESSION_TIMEOUT = 30 * 60; // 30 minutes in seconds
 
   return createServerClient(
-    supabaseUrl,
-    supabaseAnonKey,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       auth: {
         autoRefreshToken: true,
