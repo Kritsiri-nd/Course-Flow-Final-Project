@@ -87,7 +87,7 @@ export default function UploadPhoto({ profile }: { profile: unknown }) {
           <button
             onClick={handleUpload}
             disabled={loading}
-            className="bg-blue-500 hover:bg-blue-600 text-[18px] font-bold text-white px-6 py-2 rounded-md"
+            className="bg-blue-500 hover:bg-blue-600 text-[18px] font-bold text-white sm:px-6 px-8 sm:py-2 py-4 rounded-md"
           >
             {loading ? "Uploading..." : "Upload photo"}
           </button>
@@ -96,7 +96,7 @@ export default function UploadPhoto({ profile }: { profile: unknown }) {
             <button
               onClick={handleUpload}
               disabled={loading}
-              className="bg-blue-500 hover:bg-blue-600 text-[18px] font-bold text-white px-6 py-2 rounded-md"
+              className="bg-blue-500 hover:bg-blue-600 text-[18px] font-bold text-white sm:px-6 px-8 sm:py-2 py-4 rounded-md"
             >
               {loading ? "Uploading..." : "Change photo"}
             </button>

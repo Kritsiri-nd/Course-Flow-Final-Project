@@ -31,7 +31,7 @@ export default function OrderSummary({
 
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-b2 font-regular text-gray-700">Subscription</label>
+                        <label className="block text-b2 font-regular text-gray-700 mb-4">Subscription</label>
                         <p className="text-black text-h3 font-medium">{course.title}</p>
                     </div>
 
@@ -51,7 +51,7 @@ export default function OrderSummary({
                         </button>
                     </div>
 
-                    <div className="border-t pt-4 space-y-2">
+                    <div className=" pt-4 space-y-4">
                         <div className="flex justify-between">
                             <span className="text-black text-b2 font-regular">Subtotal</span>
                             <span className="text-gray-700 text-b2 font-regular">{course.price.toLocaleString()}.00</span>
@@ -62,7 +62,7 @@ export default function OrderSummary({
                                 {paymentMethod === 'card' ? 'Credit card / Debit card' : 'QR Payment'}
                             </span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between items-center">
                             <span className="text-black text-b2 font-regular">Total</span>
                             <span className="text-gray-700 text-h3 font-medium">THB {course.price.toLocaleString()}.00</span>
                         </div>

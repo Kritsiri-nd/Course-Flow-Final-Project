@@ -25,10 +25,10 @@ export default async function ProfilePage() {
 
   return (
     <section className="min-h-screen flex flex-col">
-      <main className="flex-1 flex flex-col items-center px-4 py-12">
-        <h1 className="text-h2 mb-10">Profile</h1>
+      <main className="flex-1 flex flex-col items-center px-1 py-12">
+        <h1 className="sm:text-h2 text-h3 mb-10">Profile</h1>
 
-        <div className="flex flex-row gap-12 max-w-4xl w-full">
+        <div className="flex flex-col sm:flex-row gap-12 max-w-4xl w-full">
           {/* ✅ ให้ UploadPhoto จัดการรูปทั้งหมด */}
           <UploadPhoto profile={profile}/>
 

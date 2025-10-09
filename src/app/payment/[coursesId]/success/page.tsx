@@ -23,11 +23,11 @@ export default function PaymentSuccessPage() {
                             </div>
 
                             {/* Success Message */}
-                            <h1 className="text-h3 font-medium text-black mb-4">Thank you for subscribing</h1>
-                            <p className="text-b2 font-regular text-gray-700 mb-8">Your payment is complete. You can start learning the course now.</p>
+                            <h1 className="text-h3 font-medium text-black mb-4">Thank you for subscribing.</h1>
+                            <p className="text-b2 font-regular  text-gray-700 mb-8">Your payment is complete. You can start learning the course now.</p>
 
                             {/* Action Buttons */}
-                            <div className="w-full flex flex-row gap-4">
+                            <div className="w-full flex flex-col sm:flex-row gap-4">
                                 <Link
                                     href={`/non-user/courses/${courseId}`}
                                     className="block w-full text-[16px] font-bold border-2 border-orange-500 text-orange-500 py-3 px-4 rounded-md hover:bg-orange-50 transition-colors"

@@ -190,7 +190,7 @@ export default function ProfileForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="w-full sm:py-3 py-4 bg-blue-600 text-white rounded-md hover:bg-blue-700"
         >
           {isSubmitting ? "Updating..." : "Update Profile"}
         </button>
