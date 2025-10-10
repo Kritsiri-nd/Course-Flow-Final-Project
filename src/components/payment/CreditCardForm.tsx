@@ -1,7 +1,6 @@
 "use client";
 import Image from "next/image";
 
-type PaymentMethod = 'card' | 'qr';
 
 interface CardData {
     number: string;

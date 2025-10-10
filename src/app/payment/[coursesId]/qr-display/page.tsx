@@ -142,7 +142,7 @@ export default function QRDisplayPage() {
 
         // Save payment record to database
         try {
-          const paymentResponse = await fetch('/api/payment/checkout', {
+          await fetch('/api/payment/checkout', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

@@ -42,8 +42,13 @@ export async function POST(req: Request) {
       .eq("id", profile.id);
 
     return NextResponse.json({ success: true, message: "Email updated successfully" });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in confirm-email-change:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  
+    const message =
+      error instanceof Error ? error.message : "Unknown error occurred";
+  
+    return NextResponse.json({ error: message }, { status: 500 });
   }
+  
 }

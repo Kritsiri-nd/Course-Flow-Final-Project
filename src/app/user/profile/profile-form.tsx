@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabaseClient";
 import emailjs from "emailjs-com"; // 👈 เพิ่มตรงนี้
 import {
   validateFirstName,
@@ -110,9 +109,10 @@ export default function ProfileForm({
     
         console.log("✅ EmailJS result:", result.text);
         setMessage("✅ Confirmation email sent to your current email!");
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("❌ Email send failed:", err);
-        setError("❌ Failed to send confirmation email: " + err.message);
+        const errorMessage = err instanceof Error ? err.message : "Unknown error";
+        setError("❌ Failed to send confirmation email: " + errorMessage);
       } finally {
         setIsSubmitting(false);
       }
