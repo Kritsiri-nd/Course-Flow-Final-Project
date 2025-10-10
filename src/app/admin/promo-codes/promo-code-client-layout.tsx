@@ -5,7 +5,6 @@ import {
   SidebarInset,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-
 import { AdminPanel } from '@/components/layouts/sidebar-admin-panel';
 import { PlusCircle, Search } from "lucide-react";
 import Link from "next/link";
@@ -62,7 +61,6 @@ export function PromoCodesClientLayout({
         <main className="flex flex-1 flex-col">
           {children}
         </main>
-
       </SidebarInset>
     </SidebarProvider>
   );
