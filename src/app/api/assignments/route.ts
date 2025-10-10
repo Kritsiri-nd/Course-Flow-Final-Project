@@ -1,15 +1,18 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-export async function GET() {
+export async function GET(request: Request) {
     // Fetch assignments with related course, module, and lesson data
     const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL as string,
         (process.env.SUPABASE_SERVICE_ROLE_KEY as string) || (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string)
     );
 
-    // Query assignments with proper relationships
-    const { data, error } = await supabase
+    const url = new URL(request.url);
+    const lessonId = url.searchParams.get("lesson_id");
+
+    // Base query with proper relationships
+    let query = supabase
         .from("assignments")
         .select(`
       id,
@@ -35,6 +38,17 @@ export async function GET() {
       )
     `)
         .order("created_at", { ascending: false });
+
+    if (lessonId) {
+        const numericLessonId = Number(lessonId);
+        if (!Number.isFinite(numericLessonId)) {
+            return NextResponse.json({ error: "Invalid lesson_id" }, { status: 400 });
+        }
+        query = query.eq("lesson_id", numericLessonId);
+    }
+
+    // Query assignments
+    const { data, error } = await query;
 
     if (error) {
         console.error("Error fetching assignments:", error.message);
@@ -75,7 +89,7 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         console.log("POST /api/assignments - Starting...");
-        
+
         const supabase = createClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL as string,
             (process.env.SUPABASE_SERVICE_ROLE_KEY as string) || (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string)
@@ -83,7 +97,7 @@ export async function POST(request: Request) {
 
         const body = await request.json();
         console.log("Request body:", body);
-        
+
         const { question, answer, lesson_id } = body;
 
         // Validate required fields
@@ -112,7 +126,7 @@ export async function POST(request: Request) {
 
         if (error) {
             console.error("Supabase error:", error);
-            return NextResponse.json({ 
+            return NextResponse.json({
                 error: `Database error: ${error.message}`,
                 details: error
             }, { status: 500 });
@@ -123,7 +137,7 @@ export async function POST(request: Request) {
     } catch (error) {
         console.error("Error in POST /api/assignments:", error);
         return NextResponse.json(
-            { 
+            {
                 error: "Internal server error",
                 details: error instanceof Error ? error.message : "Unknown error"
             },

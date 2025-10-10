@@ -40,6 +40,7 @@ export async function GET(
           lessons (
             id,
             title,
+            video_url,
             video_asset_id,
             order_index,
             created_at
