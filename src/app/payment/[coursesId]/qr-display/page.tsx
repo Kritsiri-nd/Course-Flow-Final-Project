@@ -328,7 +328,7 @@ export default function QRDisplayPage() {
               {/* Back Button */}
               <div className="border-none mb-3">
                 <div className="max-w-[1240px] mx-auto">
-                  <Link href="/payment/${courseId}">
+                  <Link href={`/payment/${courseId}`}>
                     <Button variant="ghost" className="gap-2 text-b2 text-blue-500">
                       <LuArrowLeft className="w-4 h-4" />
                       Back
@@ -369,7 +369,7 @@ export default function QRDisplayPage() {
                   <h3 className="text-h3 font-medium text-black mb-2">
                     Payment failed
                   </h3>
-                  <p className="text-b2 font-regular text-gray-700 mb-10">
+                  <p className="text-b2 font-regular text-gray-700 mb-10 leading-8">
                     Please check your payment details and try again
                   </p>
                   <button

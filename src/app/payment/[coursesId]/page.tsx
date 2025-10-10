@@ -290,7 +290,7 @@ export default function PaymentPage() {
                             {/* Back Button */}
                             <div className="border-none mb-3">
                                 <div className="max-w-[1240px] mx-auto">
-                                    <Link href="/non-user/courses">
+                                    <Link href={`/non-user/courses/${courseId}`}>
                                         <Button variant="ghost" className="gap-2 text-b2 text-blue-500">
                                             <LuArrowLeft className="w-4 h-4" />
                                             Back
