@@ -82,7 +82,7 @@ export default function UploadPhoto({ profile }: { profile: unknown }) {
         onChange={handleFileChange}
       />
 
-      <div className="flex flex-col items-center mt-4 gap-2">
+      <div className="flex flex-col items-center mt-8 gap-2">
         {isDefault ? (
           <button
             onClick={handleUpload}

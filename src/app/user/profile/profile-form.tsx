@@ -129,7 +129,7 @@ export default function ProfileForm({
   return (
     <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8">
       <form onSubmit={handleSubmit} method="POST" noValidate>
-        <label className="block mb-2">First Name</label>
+        <label className="block mb-2 text-b2 text-black">First Name</label>
         <input
           type="text"
           name="first_name"
@@ -137,10 +137,10 @@ export default function ProfileForm({
           onChange={(e) =>
             setFormData((p) => ({ ...p, first_name: e.target.value }))
           }
-          className="border p-2 w-full rounded-md mb-4"
+          className="border border-gray-400 p-2 w-full rounded-md mb-4 text-b2 text-black bg-white"
         />
 
-        <label className="block mb-2">Last Name</label>
+        <label className="block mb-2 text-b2 text-black">Last Name</label>
         <input
           type="text"
           name="last_name"
@@ -148,10 +148,10 @@ export default function ProfileForm({
           onChange={(e) =>
             setFormData((p) => ({ ...p, last_name: e.target.value }))
           }
-          className="border p-2 w-full rounded-md mb-4"
+          className="border border-gray-400 p-2 w-full rounded-md mb-4 text-b2 text-black bg-white"
         />
 
-        <label className="block mb-2">Date of Birth</label>
+        <label className="block mb-2 text-b2 text-black">Date of Birth</label>
         <input
           type="date"
           name="date_of_birth"
@@ -159,10 +159,10 @@ export default function ProfileForm({
           onChange={(e) =>
             setFormData((p) => ({ ...p, date_of_birth: e.target.value }))
           }
-          className="border p-2 w-full rounded-md mb-4"
+          className="border border-gray-400 p-2 w-full rounded-md mb-4 text-b2 text-black bg-white"
         />
 
-        <label className="block mb-2">Education</label>
+        <label className="block mb-2 text-b2 text-black">Education</label>
         <input
           type="text"
           name="education"
@@ -170,10 +170,10 @@ export default function ProfileForm({
           onChange={(e) =>
             setFormData((p) => ({ ...p, education: e.target.value }))
           }
-          className="border p-2 w-full rounded-md mb-4"
+          className="border border-gray-400 p-2 w-full rounded-md mb-4 text-b2 text-black bg-white"
         />
 
-        <label className="block mb-2">Email</label>
+        <label className="block mb-2 text-b2 text-black">Email</label>
         <input
           type="email"
           name="email"
@@ -181,8 +181,8 @@ export default function ProfileForm({
           onChange={(e) =>
             setFormData((p) => ({ ...p, email: e.target.value }))
           }
-          className="border p-2 w-full rounded-md mb-4"
-        />
+          className="border border-gray-400 p-2 w-full rounded-md mb-8 text-b2 text-black bg-white"
+        />  
 
         {message && <p className="text-green-600">{message}</p>}
         {error && <p className="text-red-600">{error}</p>}
@@ -190,7 +190,7 @@ export default function ProfileForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full sm:py-3 py-4 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="w-full sm:py-3 py-4 bg-blue-600 text-white text-[16px] font-bold rounded-md hover:bg-blue-700"
         >
           {isSubmitting ? "Updating..." : "Update Profile"}
         </button>
