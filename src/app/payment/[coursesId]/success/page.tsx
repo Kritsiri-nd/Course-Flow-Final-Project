@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Footer from "@/components/ui/footer";
+import BackgroundImage from "@/components/ui/background-image";
 
 export default function PaymentSuccessPage() {
     const params = useParams();
@@ -13,6 +14,12 @@ export default function PaymentSuccessPage() {
             <div className="flex-1 mt-15">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
                     <div className="flex justify-center">
+                        {/* Background */}
+                        <BackgroundImage
+                            src="/assets/bg-image.png"
+                            alt="background"
+                            className="absolute object-cover -z-10 hidden lg:block"
+                        />
                         {/* Success Card */}
                         <div className="bg-white rounded-xl shadow-md p-8 w-full max-w-[739px] text-center">
                             {/* Success Icon */}
@@ -23,11 +30,11 @@ export default function PaymentSuccessPage() {
                             </div>
 
                             {/* Success Message */}
-                            <h1 className="text-h3 font-medium text-black mb-4">Thank you for subscribing</h1>
-                            <p className="text-b2 font-regular text-gray-700 mb-8">Your payment is complete. You can start learning the course now.</p>
+                            <h1 className="text-h3 font-medium text-black mb-4">Thank you for subscribing.</h1>
+                            <p className="text-b2 font-regular  text-gray-700 mb-8">Your payment is complete. You can start learning the course now.</p>
 
                             {/* Action Buttons */}
-                            <div className="w-full flex flex-row gap-4">
+                            <div className="w-full flex flex-col sm:flex-row gap-4">
                                 <Link
                                     href={`/non-user/courses/${courseId}`}
                                     className="block w-full text-[16px] font-bold border-2 border-orange-500 text-orange-500 py-3 px-4 rounded-md hover:bg-orange-50 transition-colors"

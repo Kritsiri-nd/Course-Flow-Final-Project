@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabaseClient';
 import OrderSummary from "@/components/payment/OrderSummary";
 import PaymentForm from "@/components/payment/PaymentForm";
 import Footer from "@/components/ui/footer";
+import { Button } from "@/components/ui/button";
+import { LuArrowLeft } from "react-icons/lu";
 
 type PaymentMethod = 'card' | 'qr';
 
@@ -159,7 +161,7 @@ export default function PaymentPage() {
             if (data && data.id && qrImageUrl) {
                 // Save payment record to database
                 try {
-                    const paymentResponse = await fetch('/api/payment/checkout', {
+                    await fetch('/api/payment/checkout', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -181,7 +183,7 @@ export default function PaymentPage() {
                 qrDisplayUrl.searchParams.set('referenceNo', refNo);
                 qrDisplayUrl.searchParams.set('qrUrl', qrImageUrl);
                 qrDisplayUrl.searchParams.set('createdAt', createdAt.toString());
-                
+
                 window.location.href = qrDisplayUrl.toString();
             } else {
                 alert("QR Code response ไม่ถูกต้อง");
@@ -281,13 +283,21 @@ export default function PaymentPage() {
         <div className="min-h-screen flex flex-col">
             <div className="flex-1 ">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-center">
+                    <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-center">
 
                         {/* Main Content */}
                         <div className="w-full">
-                            <Link href="/non-user/courses" className="text-blue-500 hover:text-blue-600 mb-6 inline-block text-[16px] font-bold">
-                                ← Back
-                            </Link>
+                            {/* Back Button */}
+                            <div className="border-none mb-3">
+                                <div className="max-w-[1240px] mx-auto">
+                                    <Link href={`/non-user/courses/${courseId}`}>
+                                        <Button variant="ghost" className="gap-2 text-b2 text-blue-500">
+                                            <LuArrowLeft className="w-4 h-4" />
+                                            Back
+                                        </Button>
+                                    </Link>
+                                </div>
+                            </div>
 
                             <h1 className="sm:text-h2 text-h3 text-black mb-10">
                                 Enter payment info to start<br></br>your subscription
@@ -305,13 +315,13 @@ export default function PaymentPage() {
 
                         {/* Order Summary */}
                         <div className="w-full">
-                        <OrderSummary
-                            course={course}
-                            paymentMethod={paymentMethod}
-                            loading={loading}
-                            omiseKey={omiseKey}
-                            onSubmit={handleSubmit}
-                        />
+                            <OrderSummary
+                                course={course}
+                                paymentMethod={paymentMethod}
+                                loading={loading}
+                                omiseKey={omiseKey}
+                                onSubmit={handleSubmit}
+                            />
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { PiBookOpenLight } from "react-icons/pi";
 import { LuClock3 } from "react-icons/lu";
@@ -7,6 +6,8 @@ import Link from "next/link";
 // import Navbar from "@/components/ui/navbar";
 import SubFooter from "@/components/ui/subFooter";
 import Footer from "@/components/ui/footer";
+import BackgroundImage from "@/components/ui/background-image";
+import Image from "next/image";
 
 export default function CourseList() {
   const [courses, setCourses] = useState<unknown[]>([]);
@@ -35,7 +36,7 @@ export default function CourseList() {
     summary: string;
     duration_hours: number;
   }
-  
+
   const filteredCourses = courses.filter(
     (course: unknown) => {
       const c = course as Course;
@@ -57,17 +58,13 @@ export default function CourseList() {
     <section>
 
       <div className="relative py-10 px-4 sm:px-6 md:px-10 lg:px-20 mx-auto max-w-[1240px] w-full">
-        {/* Background */}
-        <Image
-          src="/assets/bg-image.png"
-          alt="background"
-          width={1240}
-          height={300}
-          priority
-          className="absolute object-cover -z-10 "
-        />
 
         <div className="flex flex-col items-center gap-8">
+          {/* Background */}
+          <BackgroundImage
+            src="/assets/bg-image.png"
+            alt="background"
+          />
           <h1 className="text-black text-h2 font-inter">Our Courses</h1>
 
           {/* Search Bar */}
@@ -99,17 +96,17 @@ export default function CourseList() {
           {paginatedCourses.length > 0 ? (
             paginatedCourses.map((course: unknown) => {
               // const firstSentence = course.description.split(".")[0] + ".";
-              
+
               // คำนวณจำนวนบทเรียน
               interface Module {
                 lessons?: unknown[];
               }
-              
+
               const c = course as Course & { modules?: Module[] };
               const totalLessons = c.modules?.reduce((acc: number, module: Module) => {
                 return acc + (module?.lessons?.length || 0);
               }, 0) || 0;
-              
+
               return (
                 <Link key={c.id} href={`/non-user/courses/${c.id}`}>
                   <div className="bg-white rounded-lg shadow hover:shadow-lg transition 
