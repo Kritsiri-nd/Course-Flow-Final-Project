@@ -88,8 +88,12 @@
     line-height: 16px;
   }
   .text-b3 {
-    font-size: var(--B3);
-    line-height: 14px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.5; /* หรือ 150% */
+    letter-spacing: 0;
+    text-align: justify;
   }
   .text-b4 {
     font-size: var(--B4);
