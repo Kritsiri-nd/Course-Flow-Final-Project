@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Footer from "@/components/ui/footer";
+import BackgroundImage from "@/components/ui/background-image";
 
 export default function PaymentSuccessPage() {
     const params = useParams();
@@ -13,6 +14,12 @@ export default function PaymentSuccessPage() {
             <div className="flex-1 mt-15">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
                     <div className="flex justify-center">
+                        {/* Background */}
+                        <BackgroundImage
+                            src="/assets/bg-image.png"
+                            alt="background"
+                            className="absolute object-cover -z-10 hidden lg:block"
+                        />
                         {/* Success Card */}
                         <div className="bg-white rounded-xl shadow-md p-8 w-full max-w-[739px] text-center">
                             {/* Success Icon */}

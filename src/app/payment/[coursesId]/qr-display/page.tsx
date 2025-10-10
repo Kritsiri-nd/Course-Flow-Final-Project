@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import { createClient } from '@/lib/supabaseClient';
 import Link from "next/link";
 import Footer from "@/components/ui/footer";
+import BackgroundImage from "@/components/ui/background-image";
 import { Button } from "@/components/ui/button";
 import { LuArrowLeft } from "react-icons/lu";
 
@@ -343,6 +344,14 @@ export default function QRDisplayPage() {
 
           {/* ✅ กล่อง QR Code อยู่กลางแนวนอน */}
           <div className="flex justify-center">
+            {/* Background - แสดงเฉพาะตอน fail */}
+            {paymentStatus === "failed" && (
+              <BackgroundImage
+                src="/assets/bg-image.png"
+                alt="background"
+                className="absolute object-cover -z-10 hidden lg:block"
+              />
+            )}
             <div className="bg-white rounded-xl shadow-md p-8 w-full max-w-[739px] text-center">
               {loading ? (
                 <div className="text-center py-8">
