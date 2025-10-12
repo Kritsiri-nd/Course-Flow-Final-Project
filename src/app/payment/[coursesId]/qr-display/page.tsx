@@ -251,9 +251,6 @@ export default function QRDisplayPage() {
     }
   };
 
-  const goBackToPayment = () => {
-    router.push(`/payment/${courseId}`);
-  };
 
   const generateNewQRCode = () => {
     // Clear existing data and generate new QR

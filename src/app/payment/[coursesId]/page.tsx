@@ -228,74 +228,7 @@ export default function PaymentPage() {
                 },
                 async (status: number, response: unknown) => {
                     if (status !== 200) {
-                        // ตรวจสอบ error response structure ที่เป็นไปได้
-                        let errorMessage = "Unknown error";
-                        
-                        if (response && typeof response === 'object') {
-                            const errorResponse = response as any;
-                            errorMessage = errorResponse.failure_message ||
-                                         errorResponse.message || 
-                                         errorResponse.error || 
-                                         errorResponse.description || 
-                                         errorResponse.code ||
-                                         errorResponse.failure_code ||
-                                         JSON.stringify(errorResponse);
-                        }
-                        
-                        let userFriendlyMessage = "";
-                        
-                        // แปลง error message ให้เป็นภาษาไทยที่เข้าใจง่าย
-                        const errorLower = errorMessage.toLowerCase();
-                        
-                        // ตรวจสอบ Omise failure codes ตาม test cards
-                        if (errorLower.includes("insufficient_fund")) {
-                            userFriendlyMessage = "ยอดเงินในบัตรไม่เพียงพอ";
-                        } else if (errorLower.includes("stolen_or_lost_card")) {
-                            userFriendlyMessage = "บัตรถูกระบุว่าเป็นบัตรที่สูญหายหรือถูกขโมย";
-                        } else if (errorLower.includes("failed_processing")) {
-                            userFriendlyMessage = "เกิดข้อผิดพลาดในการประมวลผล กรุณาลองใหม่อีกครั้ง";
-                        } else if (errorLower.includes("payment_rejected")) {
-                            userFriendlyMessage = "การชำระเงินถูกปฏิเสธ";
-                        } else if (errorLower.includes("failed_fraud_check")) {
-                            userFriendlyMessage = "การตรวจสอบความปลอดภัยล้มเหลว กรุณาติดต่อธนาคาร";
-                        } else if (errorLower.includes("invalid_account_number")) {
-                            userFriendlyMessage = "หมายเลขบัญชีไม่ถูกต้อง";
-                        } else if (errorLower.includes("invalid_card_number") || 
-                                   errorLower.includes("invalid card") ||
-                                   errorLower.includes("card_number_invalid")) {
-                            userFriendlyMessage = "หมายเลขบัตรเครดิตไม่ถูกต้อง";
-                        } else if (errorLower.includes("invalid_expiry") || 
-                                   errorLower.includes("invalid expiration") ||
-                                   errorLower.includes("expiry_invalid")) {
-                            userFriendlyMessage = "วันหมดอายุบัตรไม่ถูกต้อง";
-                        } else if (errorLower.includes("invalid_security_code") || 
-                                   errorLower.includes("invalid cvv") || 
-                                   errorLower.includes("invalid cvc") ||
-                                   errorLower.includes("security_code_invalid")) {
-                            userFriendlyMessage = "รหัส CVV/CVC ไม่ถูกต้อง";
-                        } else if (errorLower.includes("card_declined") || 
-                                   errorLower.includes("declined") ||
-                                   errorLower.includes("card_declined_by_bank")) {
-                            userFriendlyMessage = "บัตรถูกปฏิเสธโดยธนาคาร";
-                        } else if (errorLower.includes("expired_card") || 
-                                   errorLower.includes("expired") ||
-                                   errorLower.includes("card_expired")) {
-                            userFriendlyMessage = "บัตรหมดอายุแล้ว";
-                        } else if (errorLower.includes("network") || 
-                                   errorLower.includes("connection") ||
-                                   errorLower.includes("timeout")) {
-                            userFriendlyMessage = "เกิดปัญหาการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง";
-                        } else if (errorLower.includes("unknown error") || 
-                                   errorLower.includes("unknown") ||
-                                   errorMessage === "Unknown error") {
-                            // ถ้าเป็น unknown error ให้แสดงข้อความทั่วไป
-                            userFriendlyMessage = "ข้อมูลบัตรเครดิตไม่ถูกต้อง กรุณาตรวจสอบและลองใหม่อีกครั้ง";
-                        } else {
-                            // แสดง error message เดิมพร้อมข้อความอธิบาย
-                            userFriendlyMessage = `ข้อมูลบัตรเครดิตไม่ถูกต้อง: ${errorMessage}`;
-                        }
-                        
-                        window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent(userFriendlyMessage)}&method=card`;
+                        window.location.href = `/payment/${courseId}/fail?method=card`;
                         return;
                     }
 
@@ -317,41 +250,7 @@ export default function PaymentPage() {
                         window.location.href = `/payment/${courseId}/success`;
                     } else {
                         // redirect ไปหน้า fail
-                        let errorMessage = data.failure_message || 
-                                         data.error || 
-                                         data.message || 
-                                         data.failure_code ||
-                                         "Unknown error";
-                        
-                        // แปลง error message ให้เป็นภาษาไทยที่เข้าใจง่าย
-                        const errorLower = errorMessage.toLowerCase();
-                        
-                        // ตรวจสอบ Omise failure codes ตาม test cards
-                        if (errorLower.includes("insufficient_fund")) {
-                            errorMessage = "ยอดเงินในบัตรไม่เพียงพอ";
-                        } else if (errorLower.includes("stolen_or_lost_card")) {
-                            errorMessage = "บัตรถูกระบุว่าเป็นบัตรที่สูญหายหรือถูกขโมย";
-                        } else if (errorLower.includes("failed_processing")) {
-                            errorMessage = "เกิดข้อผิดพลาดในการประมวลผล กรุณาลองใหม่อีกครั้ง";
-                        } else if (errorLower.includes("payment_rejected")) {
-                            errorMessage = "การชำระเงินถูกปฏิเสธ";
-                        } else if (errorLower.includes("failed_fraud_check")) {
-                            errorMessage = "การตรวจสอบความปลอดภัยล้มเหลว กรุณาติดต่อธนาคาร";
-                        } else if (errorLower.includes("invalid_account_number")) {
-                            errorMessage = "หมายเลขบัญชีไม่ถูกต้อง";
-                        } else if (errorLower.includes("card_declined") || errorLower.includes("declined")) {
-                            errorMessage = "บัตรถูกปฏิเสธโดยธนาคาร กรุณาติดต่อธนาคาร";
-                        } else if (errorLower.includes("expired_card") || errorLower.includes("expired")) {
-                            errorMessage = "บัตรหมดอายุแล้ว กรุณาใช้บัตรอื่น";
-                        } else if (errorLower.includes("processing_error") || errorLower.includes("processing")) {
-                            errorMessage = "เกิดข้อผิดพลาดในการประมวลผล กรุณาลองใหม่อีกครั้ง";
-                        } else if (errorLower.includes("network") || errorLower.includes("connection")) {
-                            errorMessage = "เกิดปัญหาการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง";
-                        } else if (errorLower.includes("timeout")) {
-                            errorMessage = "การประมวลผลใช้เวลานานเกินไป กรุณาลองใหม่อีกครั้ง";
-                        }
-                        
-                        window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent(errorMessage)}&method=card`;
+                        window.location.href = `/payment/${courseId}/fail?method=card`;
                     }
                     setLoading(false);
                 }
@@ -359,8 +258,7 @@ export default function PaymentPage() {
         } catch (error) {
             console.error('Error:', error);
             // redirect ไปหน้า fail
-            const errorMessage = error instanceof Error ? error.message : "Unknown error";
-            window.location.href = `/payment/${courseId}/qr-display?status=failed&error=${encodeURIComponent(errorMessage)}`;
+            window.location.href = `/payment/${courseId}/fail?method=card`;
         }
     };
 
