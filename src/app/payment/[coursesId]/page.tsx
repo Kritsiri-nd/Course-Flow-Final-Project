@@ -8,6 +8,7 @@ import PaymentForm from "@/components/payment/PaymentForm";
 import Footer from "@/components/ui/footer";
 import { Button } from "@/components/ui/button";
 import { LuArrowLeft } from "react-icons/lu";
+import { validateCardData } from "@/lib/validators";
 
 type PaymentMethod = 'card' | 'qr';
 
@@ -38,6 +39,7 @@ export default function PaymentPage() {
         expiry: '',
         cvv: ''
     });
+    const [cardErrors, setCardErrors] = useState<Record<string, string>>({});
     // const [qrData, setQrData] = useState<{ scannable_code?: { image?: string } } | null>(null);
 
     // Get user from Supabase
@@ -103,6 +105,15 @@ export default function PaymentPage() {
             ...prev,
             [field]: value
         }));
+        
+        // Clear error for this field when user starts typing
+        if (cardErrors[field]) {
+            setCardErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[field];
+                return newErrors;
+            });
+        }
     };
 
     const formatCardNumber = (value: string) => {
@@ -205,6 +216,18 @@ export default function PaymentPage() {
             return;
         }
 
+        // Validate card data before creating token
+        const validation = validateCardData(cardData);
+        
+        if (!validation.isValid) {
+            setCardErrors(validation.errors);
+            setLoading(false);
+            return;
+        }
+
+        // Clear errors if validation passes
+        setCardErrors({});
+
         if (!userId || !courseId || !omiseKey || !window.Omise) {
             alert("กรุณารอให้ระบบโหลดเสร็จ");
             return;
@@ -304,6 +327,7 @@ export default function PaymentPage() {
                                 onCardDataChange={handleCardInputChange}
                                 formatCardNumber={formatCardNumber}
                                 formatExpiry={formatExpiry}
+                                cardErrors={cardErrors}
                             />
                         </div>
 
