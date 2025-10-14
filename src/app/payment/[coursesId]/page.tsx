@@ -8,6 +8,7 @@ import PaymentForm from "@/components/payment/PaymentForm";
 import Footer from "@/components/ui/footer";
 import { Button } from "@/components/ui/button";
 import { LuArrowLeft } from "react-icons/lu";
+import { validateCardData } from "@/lib/validators";
 
 type PaymentMethod = 'card' | 'qr';
 
@@ -38,6 +39,7 @@ export default function PaymentPage() {
         expiry: '',
         cvv: ''
     });
+    const [cardErrors, setCardErrors] = useState<Record<string, string>>({});
     // const [qrData, setQrData] = useState<{ scannable_code?: { image?: string } } | null>(null);
 
     // Get user from Supabase
@@ -103,6 +105,15 @@ export default function PaymentPage() {
             ...prev,
             [field]: value
         }));
+        
+        // Clear error for this field when user starts typing
+        if (cardErrors[field]) {
+            setCardErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[field];
+                return newErrors;
+            });
+        }
     };
 
     const formatCardNumber = (value: string) => {
@@ -186,14 +197,14 @@ export default function PaymentPage() {
 
                 window.location.href = qrDisplayUrl.toString();
             } else {
-                alert("QR Code response ไม่ถูกต้อง");
-                console.error('Invalid QR response:', data);
-                setLoading(false);
+                // Redirect to fail page instead of showing alert
+                window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent("QR Code response ไม่ถูกต้อง")}&method=qr`;
             }
         } catch (error) {
             console.error('Error:', error);
-            alert("เกิดข้อผิดพลาด: " + error);
-            setLoading(false);
+            // Redirect to fail page instead of showing alert
+            const errorMessage = error instanceof Error ? error.message : "Unknown error";
+            window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent("เกิดข้อผิดพลาด: " + errorMessage)}&method=qr`;
         }
     };
 
@@ -204,6 +215,18 @@ export default function PaymentPage() {
             await handlePromptPay();
             return;
         }
+
+        // Validate card data before creating token
+        const validation = validateCardData(cardData);
+        
+        if (!validation.isValid) {
+            setCardErrors(validation.errors);
+            setLoading(false);
+            return;
+        }
+
+        // Clear errors if validation passes
+        setCardErrors({});
 
         if (!userId || !courseId || !omiseKey || !window.Omise) {
             alert("กรุณารอให้ระบบโหลดเสร็จ");
@@ -228,9 +251,7 @@ export default function PaymentPage() {
                 },
                 async (status: number, response: unknown) => {
                     if (status !== 200) {
-                        const errorMessage = (response as { message?: string })?.message || "Unknown error";
-                        alert("ข้อมูลบัตรเครดิตไม่ถูกต้อง: " + errorMessage);
-                        setLoading(false);
+                        window.location.href = `/payment/${courseId}/fail?method=card`;
                         return;
                     }
 
@@ -248,23 +269,19 @@ export default function PaymentPage() {
 
                     const data = await res.json();
                     if (data.paid) {
-                        if (data.enrollment_created) {
-                            alert("ชำระเงินสำเร็จ! คุณสามารถเข้าเรียนได้แล้ว");
-                        } else {
-                            alert("ชำระเงินสำเร็จ!");
-                        }
-                        // Redirect to success page
+                        // redirect ไปหน้า success
                         window.location.href = `/payment/${courseId}/success`;
                     } else {
-                        alert("ชำระเงินไม่สำเร็จ: " + (data.error || "Unknown error"));
+                        // redirect ไปหน้า fail
+                        window.location.href = `/payment/${courseId}/fail?method=card`;
                     }
                     setLoading(false);
                 }
             );
         } catch (error) {
             console.error('Error:', error);
-            alert("เกิดข้อผิดพลาด: " + error);
-            setLoading(false);
+            // redirect ไปหน้า fail
+            window.location.href = `/payment/${courseId}/fail?method=card`;
         }
     };
 
@@ -310,6 +327,7 @@ export default function PaymentPage() {
                                 onCardDataChange={handleCardInputChange}
                                 formatCardNumber={formatCardNumber}
                                 formatExpiry={formatExpiry}
+                                cardErrors={cardErrors}
                             />
                         </div>
 

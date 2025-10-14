@@ -17,6 +17,7 @@ interface PaymentFormProps {
     onCardDataChange: (field: string, value: string) => void;
     formatCardNumber: (value: string) => string;
     formatExpiry: (value: string) => string;
+    cardErrors?: Record<string, string>;
 }
 
 export default function PaymentForm({
@@ -25,7 +26,8 @@ export default function PaymentForm({
     cardData,
     onCardDataChange,
     formatCardNumber,
-    formatExpiry
+    formatExpiry,
+    cardErrors = {}
 }: PaymentFormProps) {
     return (
         <form id="payment-form" className="space-y-8">
@@ -53,6 +55,7 @@ export default function PaymentForm({
                         onCardDataChange={onCardDataChange}
                         formatCardNumber={formatCardNumber}
                         formatExpiry={formatExpiry}
+                        errors={cardErrors}
                     />
                 </div>
             </div>

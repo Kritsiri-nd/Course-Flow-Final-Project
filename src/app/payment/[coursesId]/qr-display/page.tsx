@@ -2,10 +2,8 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
-import { createClient } from '@/lib/supabaseClient';
 import Link from "next/link";
 import Footer from "@/components/ui/footer";
-import BackgroundImage from "@/components/ui/background-image";
 import { Button } from "@/components/ui/button";
 import { LuArrowLeft } from "react-icons/lu";
 
@@ -32,14 +30,13 @@ export default function QRDisplayPage() {
   const [chargeId, setChargeId] = useState<string>('');
   const [qrCreatedAt, setQrCreatedAt] = useState<number | null>(null);
   const [isQrExpired, setIsQrExpired] = useState(false);
-  const supabase = createClient();
 
-  // Get URL search params for existing QR data
-  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-  const existingChargeId = searchParams?.get('chargeId');
-  const existingReferenceNo = searchParams?.get('referenceNo');
-  const existingQrUrl = searchParams?.get('qrUrl');
-  const existingCreatedAt = searchParams?.get('createdAt');
+    // Get URL search params for existing QR data
+    const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    const existingChargeId = searchParams?.get('chargeId');
+    const existingReferenceNo = searchParams?.get('referenceNo');
+    const existingQrUrl = searchParams?.get('qrUrl');
+    const existingCreatedAt = searchParams?.get('createdAt');
 
   // Check if QR code is expired (Omise QR codes expire after 15 minutes)
   const checkQrExpiration = useCallback((createdAt: number) => {
@@ -49,38 +46,40 @@ export default function QRDisplayPage() {
     return qrAge > expirationTime;
   }, []);
 
-  // Initialize existing QR data if available
-  useEffect(() => {
-    if (existingChargeId && existingReferenceNo && existingQrUrl && existingCreatedAt) {
-      const createdAt = parseInt(existingCreatedAt);
-      const isExpired = checkQrExpiration(createdAt);
+    // Initialize existing QR data if available
+    useEffect(() => {
+        if (existingChargeId && existingReferenceNo && existingQrUrl && existingCreatedAt) {
+            const createdAt = parseInt(existingCreatedAt);
+            const isExpired = checkQrExpiration(createdAt);
+            
+            if (!isExpired) {
+                // Use existing QR data
+                setChargeId(existingChargeId);
+                setReferenceNo(existingReferenceNo);
+                setQrCreatedAt(createdAt);
+                setQrData({
+                    scannable_code: {
+                        image: { download_uri: existingQrUrl }
+                    }
+                });
+            } else {
+                setIsQrExpired(true);
+            }
+        }
+    }, [existingChargeId, existingReferenceNo, existingQrUrl, existingCreatedAt, checkQrExpiration]);
 
-      if (!isExpired) {
-        // Use existing QR data
-        setChargeId(existingChargeId);
-        setReferenceNo(existingReferenceNo);
-        setQrCreatedAt(createdAt);
-        setQrData({
-          scannable_code: {
-            image: { download_uri: existingQrUrl }
-          }
-        });
-      } else {
-        setIsQrExpired(true);
-      }
-    }
-  }, [existingChargeId, existingReferenceNo, existingQrUrl, existingCreatedAt, checkQrExpiration]);
-
-  // Get user from Supabase
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserId(user.id);
-      }
-    };
-    getUser();
-  }, [supabase.auth]);
+   // Get user from Supabase
+   useEffect(() => {
+     const getUser = async () => {
+       const { createClient } = await import('@/lib/supabaseClient');
+       const supabase = createClient();
+       const { data: { user } } = await supabase.auth.getUser();
+       if (user) {
+         setUserId(user.id);
+       }
+     };
+     getUser();
+   }, []);
 
 
   // Get course data
@@ -130,11 +129,11 @@ export default function QRDisplayPage() {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        setPaymentStatus('failed');
-        setLoading(false);
-        return;
-      }
+       if (!response.ok) {
+         // Redirect to fail page instead of setting status
+         window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent("Failed to create QR code")}&method=qr`;
+         return;
+       }
 
       // Store charge ID for status checking
       if (data && data.id) {
@@ -182,11 +181,11 @@ export default function QRDisplayPage() {
             image: data.image
           }
         });
-      } else {
-        setPaymentStatus('failed');
-        setLoading(false);
-        return;
-      }
+       } else {
+         // Redirect to fail page instead of setting status
+         window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent("Invalid QR response")}&method=qr`;
+         return;
+       }
 
       // Update URL with QR parameters for persistence
       if (qrImageUrl && data.id) {
@@ -201,50 +200,45 @@ export default function QRDisplayPage() {
       }
 
       setLoading(false);
-    } catch (error) {
-      console.error('Error in generateQRCode:', error);
-      setPaymentStatus('failed');
-      setLoading(false);
-    }
+     } catch (error) {
+       console.error('Error in generateQRCode:', error);
+       // Redirect to fail page instead of setting status
+       const errorMessage = error instanceof Error ? error.message : "Unknown error";
+       window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent("Error generating QR: " + errorMessage)}&method=qr`;
+     }
   }, [userId, courseId, course]);
 
-  // Simple polling: Check enrollment status every 3 seconds
-  useEffect(() => {
-    if (chargeId && userId && courseId && paymentStatus === 'pending') {
-      console.log('🔍 Starting enrollment check polling...');
-
-      const interval = setInterval(async () => {
+   // Simple polling: Check enrollment status every 3 seconds
+   useEffect(() => {
+     if (chargeId && userId && courseId && paymentStatus === 'pending') {
+       const interval = setInterval(async () => {
         try {
           // ใช้ API Route แทน Direct Supabase Query
           const response = await fetch(`/api/payment/check-enrollment?userId=${userId}&courseId=${courseId}`);
           const data = await response.json();
 
-          if (response.ok && data.enrolled) {
-            console.log('✅ Enrollment found! Payment was successful.');
-            setPaymentStatus('success');
+           if (response.ok && data.enrolled) {
+             setPaymentStatus('success');
 
-            // Auto redirect to success page after 2 seconds
-            setTimeout(() => {
-              console.log('🎉 Redirecting to success page...');
-              router.push(`/payment/${courseId}/success`);
-            }, 2000);
+             // Auto redirect to success page after 2 seconds
+             setTimeout(() => {
+               router.push(`/payment/${courseId}/success`);
+             }, 2000);
 
-            clearInterval(interval);
-          } else if (response.ok && data.paymentStatus === 'failed') {
-            console.log('❌ Payment failed detected!');
-            setPaymentStatus('failed');
-            clearInterval(interval);
-          } else {
-            console.log('⏳ Payment still pending... checking again in 3 seconds');
-          }
+             clearInterval(interval);
+           } else if (response.ok && data.paymentStatus === 'failed') {
+             // Redirect to fail page instead of setting status
+             window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent("Payment failed")}&method=qr`;
+             clearInterval(interval);
+           }
         } catch (error) {
           console.error('Error checking enrollment:', error);
         }
       }, 3000); // Check every 3 seconds
 
-      return () => clearInterval(interval);
-    }
-  }, [chargeId, userId, courseId, paymentStatus, router, supabase]);
+       return () => clearInterval(interval);
+     }
+   }, [chargeId, userId, courseId, paymentStatus, router]);
 
   const saveQRImage = () => {
     if (qrData && qrData.scannable_code && qrData.scannable_code.image) {
@@ -257,9 +251,6 @@ export default function QRDisplayPage() {
     }
   };
 
-  const goBackToPayment = () => {
-    router.push(`/payment/${courseId}`);
-  };
 
   const generateNewQRCode = () => {
     // Clear existing data and generate new QR
@@ -342,53 +333,15 @@ export default function QRDisplayPage() {
             <div className="mb-15"></div>
           )}
 
-          {/* ✅ กล่อง QR Code อยู่กลางแนวนอน */}
-          <div className="flex justify-center">
-            {/* Background - แสดงเฉพาะตอน fail */}
-            {paymentStatus === "failed" && (
-              <BackgroundImage
-                src="/assets/bg-image.png"
-                alt="background"
-                className="absolute object-cover -z-10 hidden lg:block"
-              />
-            )}
-            <div className="bg-white rounded-xl shadow-md p-8 w-full max-w-[739px] text-center">
+           {/* ✅ กล่อง QR Code อยู่กลางแนวนอน */}
+           <div className="flex justify-center">
+             <div className="bg-white rounded-xl shadow-md p-8 w-full max-w-[739px] text-center">
               {loading ? (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
                   <p className="text-gray-600">กำลังสร้าง QR Code...</p>
                 </div>
-              ) : paymentStatus === "failed" ? (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-[#9B2FAC] rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg
-                      className="w-8 h-8 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </div>
-                  <h3 className="text-h3 font-medium text-black mb-2">
-                    Payment failed
-                  </h3>
-                  <p className="text-b2 font-regular text-gray-700 mb-10 leading-8">
-                    Please check your payment details and try again
-                  </p>
-                  <button
-                    onClick={goBackToPayment}
-                    className="w-full max-w-[321px] bg-blue-500 text-white py-3 px-4 rounded-md hover:bg-blue-600"
-                  >
-                    Back to Payment
-                  </button>
-                </div>
-              ) : paymentStatus === "success" ? (
+               ) : paymentStatus === "success" ? (
                 <div className="text-center py-8">
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg
