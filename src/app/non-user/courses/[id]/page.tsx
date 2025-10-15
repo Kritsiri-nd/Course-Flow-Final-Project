@@ -72,11 +72,11 @@ type ApiCourse = {
 
 // Function to extract YouTube video ID from URL
 function extractYouTubeId(url: string): string {
-  if (!url) return '';
-  
+  if (!url) return "";
+
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
   const match = url.match(regExp);
-  return (match && match[2].length === 11) ? match[2] : '';
+  return match && match[2].length === 11 ? match[2] : "";
 }
 
 function mapApiCourseToUiCourse(api: ApiCourse): Course {
@@ -134,13 +134,13 @@ export default function CourseDetailPage() {
     const checkEnrollment = async () => {
       try {
         // Get current user session first
-        const sessionResponse = await fetch('/api/auth');
+        const sessionResponse = await fetch("/api/auth");
         if (!sessionResponse.ok) {
           // User not logged in, so not enrolled
           setIsEnrolled(false);
           return;
         }
-        
+
         const session = await sessionResponse.json();
         if (!session.user?.id) {
           setIsEnrolled(false);
@@ -148,18 +148,21 @@ export default function CourseDetailPage() {
         }
 
         // Check if user is enrolled in this course
-        const response = await fetch(`/api/enrollments?user_id=${session.user.id}`);
+        const response = await fetch(
+          `/api/enrollments?user_id=${session.user.id}`
+        );
         if (response.ok) {
           const data = await response.json();
           // API returns { success: true, enrollments: [...] }
           const enrollments = data.enrollments || [];
           if (Array.isArray(enrollments)) {
-            const isEnrolledInThisCourse = enrollments.some((enrollment: { courses?: { id: number } }) => 
-              enrollment.courses?.id === parseInt(id)
+            const isEnrolledInThisCourse = enrollments.some(
+              (enrollment: { courses?: { id: number } }) =>
+                enrollment.courses?.id === parseInt(id)
             );
             setIsEnrolled(isEnrolledInThisCourse);
           } else {
-            console.log('Enrollments data is not an array:', enrollments);
+            console.log("Enrollments data is not an array:", enrollments);
             setIsEnrolled(false);
           }
         }
@@ -207,29 +210,31 @@ export default function CourseDetailPage() {
 
   const handleAddToWishlist = async () => {
     if (!course || isAddingToWishlist) return;
-    
+
     setIsAddingToWishlist(true);
-    
+
     try {
-      const response = await fetch('/api/wishlist', {
-        method: 'POST',
+      const response = await fetch("/api/wishlist", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ courseId: course.id.toString() }),
       });
-      
+
       if (response.ok) {
         // Navigate to wishlist page
-        router.push('/user/wishlist');
+        router.push("/user/wishlist");
       } else {
         const errorData = await response.json();
-        console.error('Failed to add to wishlist:', errorData);
-        alert(`Failed to add to wishlist: ${errorData.error || 'Unknown error'}`);
+        console.error("Failed to add to wishlist:", errorData);
+        alert(
+          `Failed to add to wishlist: ${errorData.error || "Unknown error"}`
+        );
       }
     } catch (error) {
-      console.error('Error adding to wishlist:', error);
-      alert('Network error. Please try again.');
+      console.error("Error adding to wishlist:", error);
+      alert("Network error. Please try again.");
     } finally {
       setIsAddingToWishlist(false);
     }
@@ -292,7 +297,9 @@ export default function CourseDetailPage() {
                     }}
                   >
                     <iframe
-                      src={`https://www.youtube.com/embed/${extractYouTubeId(course.videoUrl)}`}
+                      src={`https://www.youtube.com/embed/${extractYouTubeId(
+                        course.videoUrl
+                      )}`}
                       className="w-full h-full !m-0 !p-0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
@@ -311,6 +318,47 @@ export default function CourseDetailPage() {
                   </h2>
                   <div className="text-b2 text-muted-foreground leading-relaxed space-y-4 mt-4 sm:mt-8">
                     <p>{course.description}</p>
+                  </div>
+                </div>
+
+                {/*  Attach File */}
+                <div className="space-y-4 mt-6 sm:mt-20">
+                  <h2 className="sm:text-h2 text-h3 font-semibold">
+                    Attach File
+                  </h2>
+                  <div className="mt-4 sm:mt-8">
+                    {/* Mock file - replace with actual file data from DB in future */}
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-center gap-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
+                        <svg
+                          className="w-4 h-4 text-blue-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-b2 font-medium text-gray-900">
+                          Service Design.pdf
+                        </p>
+                        <p className="text-b3 text-gray-500">68 mb</p>
+                      </div>
+                      <button className="text-blue-600 hover:text-blue-800 text-b2 font-medium">
+                        Download
+                      </button>
+                    </div>
+
+                    {/* Uncomment below to show "No attach file" when no files */}
+                    {/* <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+                  <p className="text-b2 text-gray-500">No attach file</p>
+                </div> */}
                   </div>
                 </div>
 
@@ -390,7 +438,9 @@ export default function CourseDetailPage() {
                     {isEnrolled ? (
                       <Button
                         className="w-full py-6 bg-green-600 hover:bg-green-700 text-b2 text-white"
-                        onClick={() => router.push(`/user/courses/${course.id}`)}
+                        onClick={() =>
+                          router.push(`/user/courses/${course.id}/learning`)
+                        }
                       >
                         Start Learning
                       </Button>
@@ -402,7 +452,7 @@ export default function CourseDetailPage() {
                           onClick={handleAddToWishlist}
                           disabled={isAddingToWishlist}
                         >
-                          {isAddingToWishlist ? 'Adding...' : 'Add to Wishlist'}
+                          {isAddingToWishlist ? "Adding..." : "Add to Wishlist"}
                         </Button>
                         <SubscribeModalAlert
                           courseTitle={course.title}
@@ -424,69 +474,71 @@ export default function CourseDetailPage() {
         </div>
       </div>
 
-      {/* Other Interesting Courses */}
-      <div className="bg-gray-100 py-8 sm:py-20">
-        <div className="pt-0 sm:pt-10 sm:px-6 md:px-8 mx-auto max-w-[1240px] w-full">
-          <h2 className="sm:text-h2 text-h3 font-semibold text-center mb-6 sm:mb-14">
-            Other Interesting Courses
-          </h2>
-          <div className="mt-0 sm:mt-10 px-2 sm:px-4 md:px-6 lg:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {otherCourses.slice(0, 3).map((c) => {
-              const courseLessons = c.modules.reduce(
-                (acc, m) => acc + m.lessons.length,
-                0
-              );
-              const firstSentence = (c.description || "").split(".")[0] + ".";
-              return (
-                <Link key={c.id} href={`/non-user/courses/${c.id}`}>
-                  <div className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden cursor-pointer h-full flex flex-col">
-                    {/* Thumbnail */}
-                    <Image
-                      src={c.thumbnail}
-                      alt={c.title}
-                      width={400}
-                      height={240}
-                      className="w-full h-60 object-cover"
-                      style={{ width: 'auto', height: 'auto' }}
-                    />
+      {/* Other Interesting Courses - Only show if not enrolled */}
+      {!isEnrolled && (
+        <div className="bg-gray-100 py-8 sm:py-20">
+          <div className="pt-0 sm:pt-10 sm:px-6 md:px-8 mx-auto max-w-[1240px] w-full">
+            <h2 className="sm:text-h2 text-h3 font-semibold text-center mb-6 sm:mb-14">
+              Other Interesting Courses
+            </h2>
+            <div className="mt-0 sm:mt-10 px-2 sm:px-4 md:px-6 lg:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {otherCourses.slice(0, 3).map((c) => {
+                const courseLessons = c.modules.reduce(
+                  (acc, m) => acc + m.lessons.length,
+                  0
+                );
+                const firstSentence = (c.description || "").split(".")[0] + ".";
+                return (
+                  <Link key={c.id} href={`/non-user/courses/${c.id}`}>
+                    <div className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden cursor-pointer h-full flex flex-col">
+                      {/* Thumbnail */}
+                      <Image
+                        src={c.thumbnail}
+                        alt={c.title}
+                        width={400}
+                        height={240}
+                        className="w-full h-60 object-cover"
+                        style={{ width: "auto", height: "auto" }}
+                      />
 
-                    {/* Content */}
-                    <div className="p-4 flex flex-col flex-grow">
-                      <p className="text-orange-500 text-b3 pb-4">
-                        {c.category}
-                      </p>
-                      <h2 className="text-h3 text-black pb-4">{c.title}</h2>
+                      {/* Content */}
+                      <div className="p-4 flex flex-col flex-grow">
+                        <p className="text-orange-500 text-b3 pb-4">
+                          {c.category}
+                        </p>
+                        <h2 className="text-h3 text-black pb-4">{c.title}</h2>
 
-                      {/* Description */}
-                      <p className="text-b2 text-gray-700 flex-grow leading-relaxed">
-                        {firstSentence}
-                      </p>
+                        {/* Description */}
+                        <p className="text-b2 text-gray-700 flex-grow leading-relaxed">
+                          {firstSentence}
+                        </p>
 
-                      <div className="border-t border-gray-200 my-4 w-full"></div>
+                        <div className="border-t border-gray-200 my-4 w-full"></div>
 
-                      {/* Lesson + Hours (stick to bottom) */}
-                      <div className="flex items-center gap-6 mt-auto">
-                        <div className="flex items-center gap-1">
-                          <PiBookOpenLight className="size-5 text-blue-600" />
-                          <span className="text-b2 text-gray-700">
-                            {courseLessons} Lessons
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <LuClock3 className="size-5 text-blue-600" />
-                          <span className="text-b2 text-gray-700">
-                            {c.durationHours} Hours
-                          </span>
+                        {/* Lesson + Hours (stick to bottom) */}
+                        <div className="flex items-center gap-6 mt-auto">
+                          <div className="flex items-center gap-1">
+                            <PiBookOpenLight className="size-5 text-blue-600" />
+                            <span className="text-b2 text-gray-700">
+                              {courseLessons} Lessons
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <LuClock3 className="size-5 text-blue-600" />
+                            <span className="text-b2 text-gray-700">
+                              {c.durationHours} Hours
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              );
-            })}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Footer */}
       <Footer />
@@ -525,7 +577,9 @@ export default function CourseDetailPage() {
                   {isEnrolled ? (
                     <Button
                       className="flex-1 bg-green-600 hover:bg-green-700 !text-white text-b4"
-                      onClick={() => router.push(`/user/courses/${course?.id}`)}
+                      onClick={() =>
+                        router.push(`/user/courses/${course?.id}/learning`)
+                      }
                     >
                       Start Learning
                     </Button>
@@ -537,10 +591,12 @@ export default function CourseDetailPage() {
                         onClick={handleAddToWishlist}
                         disabled={isAddingToWishlist}
                       >
-                        {isAddingToWishlist ? 'Adding...' : 'Add to Wishlist'}
+                        {isAddingToWishlist ? "Adding..." : "Add to Wishlist"}
                       </Button>
                       <SubscribeModalAlert
-                        courseTitle={course?.title || "Service Design Essentials"}
+                        courseTitle={
+                          course?.title || "Service Design Essentials"
+                        }
                         onConfirm={() => {
                           router.push(`/payment/${course?.id}`);
                         }}
