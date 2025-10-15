@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useRef as useReactRef } from "react";
 import { useRouter } from "next/navigation";
 import { AdminPanel } from "@/components/layouts/sidebar-admin-panel";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
@@ -45,8 +45,11 @@ export default function AddCoursePage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [isUploadingAttachment, setIsUploadingAttachment] = useState(false);
   const [uploadedThumbnailUrl, setUploadedThumbnailUrl] = useState<string | null>(null);
   const [uploadedVideoUrl, setUploadedVideoUrl] = useState<string | null>(null);
+  const [uploadedAttachedFileUrl, setUploadedAttachedFileUrl] = useState<string | null>(null);
+  const attachmentUploadPromiseRef = useRef<Promise<string | null> | null>(null);
   const [previewThumbnailUrl, setPreviewThumbnailUrl] = useState<string | null>(null);
   const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
 
@@ -64,6 +67,11 @@ export default function AddCoursePage() {
     setUploadedVideoUrl(null);
     setFormData(prev => ({ ...prev, video_url: null }));
     if (videoInputRef.current) videoInputRef.current.value = '';
+  };
+
+  const clearAttachment = () => {
+    setUploadedAttachedFileUrl(null);
+    setFormData(prev => ({ ...prev, attachedFile: null }));
   };
   
   // Form data state
@@ -170,6 +178,25 @@ export default function AddCoursePage() {
         })
         .finally(() => setIsUploadingVideo(false));
     }
+    if (field === 'attachedFile') {
+      // Upload optional attachment to a separate folder (will auto-create if not exists)
+    setIsUploadingAttachment(true);
+    const promise = uploadFile(file, 'misc');
+    attachmentUploadPromiseRef.current = promise;
+      console.log('[attachment] start upload');
+    promise
+      .then((url) => {
+        if (url) {
+          console.log('[attachment] uploaded url', url);
+          setUploadedAttachedFileUrl(url);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        setIsUploadingAttachment(false);
+        attachmentUploadPromiseRef.current = null;
+      });
+    }
     // Clear error when file is selected
     if (errors[field]) {
       setErrors(prev => ({
@@ -227,6 +254,7 @@ export default function AddCoursePage() {
       // Upload files if they exist
       let thumbnailUrl = uploadedThumbnailUrl;
       let videoUrl = uploadedVideoUrl;
+      let attachmentUrl = uploadedAttachedFileUrl;
       
       if (!thumbnailUrl && formData.thumbnail) {
         thumbnailUrl = await uploadFile(formData.thumbnail, 'thumbnails');
@@ -234,6 +262,18 @@ export default function AddCoursePage() {
       
       if (!videoUrl && formData.video_url) {
         videoUrl = await uploadFile(formData.video_url, 'videos');
+      }
+
+      // Ensure attachment is uploaded if selected but not uploaded yet
+      if (!attachmentUrl && formData.attachedFile) {
+        if (attachmentUploadPromiseRef.current) {
+          console.log('[attachment] awaiting in-flight upload');
+          attachmentUrl = await attachmentUploadPromiseRef.current;
+        } else {
+          console.log('[attachment] upload on submit');
+          attachmentUrl = await uploadFile(formData.attachedFile, 'misc');
+        }
+        setUploadedAttachedFileUrl(attachmentUrl);
       }
 
       // Prepare course data for API
@@ -248,6 +288,7 @@ export default function AddCoursePage() {
         instructor: formData.instructor || null,
         thumbnail: thumbnailUrl,
         video_url: videoUrl,
+        attachment_url: attachmentUrl ?? null,
         lessons: lessons, // Include lessons data
       };
 
@@ -402,11 +443,14 @@ export default function AddCoursePage() {
               previewVideoUrl={previewVideoUrl}
               uploadedThumbnailUrl={uploadedThumbnailUrl}
               uploadedVideoUrl={uploadedVideoUrl}
+            uploadedAttachedFileUrl={uploadedAttachedFileUrl}
               isUploadingThumbnail={isUploadingThumbnail}
               isUploadingVideo={isUploadingVideo}
+            isUploadingAttachment={isUploadingAttachment}
               onFileUpload={handleFileUpload}
               onClearThumbnail={clearThumbnail}
               onClearVideo={clearVideo}
+            onClearAttachment={clearAttachment}
             />
           </div>
 

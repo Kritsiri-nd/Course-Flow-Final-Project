@@ -16,11 +16,14 @@ interface FileUploadSectionProps {
   previewVideoUrl: string | null;
   uploadedThumbnailUrl: string | null;
   uploadedVideoUrl: string | null;
+  uploadedAttachedFileUrl?: string | null;
   isUploadingThumbnail: boolean;
   isUploadingVideo: boolean;
+  isUploadingAttachment?: boolean;
   onFileUpload: (field: 'thumbnail' | 'video_url' | 'attachedFile', file: File) => void;
   onClearThumbnail: () => void;
   onClearVideo: () => void;
+  onClearAttachment?: () => void;
 }
 
 export function FileUploadSection({
@@ -30,15 +33,60 @@ export function FileUploadSection({
   previewVideoUrl,
   uploadedThumbnailUrl,
   uploadedVideoUrl,
+  uploadedAttachedFileUrl,
   isUploadingThumbnail,
   isUploadingVideo,
+  isUploadingAttachment,
   onFileUpload,
   onClearThumbnail,
-  onClearVideo
+  onClearVideo,
+  onClearAttachment
 }: FileUploadSectionProps) {
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const formatSize = (bytes: number): string => {
+    if (!bytes && bytes !== 0) return "";
+    const mb = bytes / (1024 * 1024);
+    if (mb < 1) {
+      const kb = bytes / 1024;
+      return `${kb.toFixed(0)} kb`;
+    }
+    return `${mb.toFixed(1)} mb`;
+  };
+
+  const getAttachedFileName = (): string | null => {
+    if (formData.attachedFile?.name) return formData.attachedFile.name;
+    if (uploadedAttachedFileUrl) {
+      try {
+        const url = new URL(uploadedAttachedFileUrl);
+        const last = url.pathname.split("/").pop() || null;
+        return last;
+      } catch {
+        const parts = uploadedAttachedFileUrl.split("/");
+        return parts[parts.length - 1] || null;
+      }
+    }
+    return null;
+  };
+
+  const getFileExt = (): string => {
+    const name = getAttachedFileName() || "";
+    const dot = name.lastIndexOf(".");
+    return dot >= 0 ? name.slice(dot + 1).toLowerCase() : "";
+  };
+
+  const FileTypeIcon = () => {
+    const ext = getFileExt();
+    const label = ext ? ext.toUpperCase() : "FILE";
+    const bg = ext === "pdf" ? "#3B82F6" : ext === "txt" ? "#22C55E" : "#94A3B8";
+    return (
+      <div className="w-9 h-9 rounded-md flex items-center justify-center text-white text-[10px] font-semibold" style={{ backgroundColor: bg }}>
+        {label}
+      </div>
+    );
+  };
 
   return (
     <div>
@@ -180,23 +228,59 @@ export function FileUploadSection({
           }}
           className="hidden"
         />
-        <div 
-          className="w-[160px] h-[160px] rounded-lg flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 cursor-pointer transition-colors border-2 border-dashed border-gray-300"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          {formData.attachedFile ? (
-            <div className="text-center">
-              <Upload className="w-6 h-6 text-green-500 mb-2 mx-auto" />
-              <span className="text-b3 text-green-600 font-medium text-center">{formData.attachedFile.name}</span>
-              <p className="text-xs text-gray-500 mt-1">Click to change</p>
+        {!(formData.attachedFile || uploadedAttachedFileUrl) && (
+          <div 
+            className="relative w-[160px] h-[160px] rounded-lg flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 cursor-pointer transition-colors border-2 border-dashed border-gray-300"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Plus className="w-6 h-6 text-blue-400 mb-2" />
+            <span className="text-b3 text-blue-400 font-medium">Upload File</span>
+          </div>
+        )}
+        {isUploadingAttachment && (
+          <p className="text-xs text-gray-500 mt-1">Uploading file...</p>
+        )}
+        {(formData.attachedFile || uploadedAttachedFileUrl) && (
+          <div className="mt-2 rounded-lg p-2">
+            <div className="flex items-start gap-2">
+              <FileTypeIcon />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 min-w-0">
+                  {uploadedAttachedFileUrl ? (
+                    <a href={uploadedAttachedFileUrl} target="_blank" rel="noreferrer" className="block text-sm text-gray-800 truncate">
+                      {getAttachedFileName() || "attachment"}
+                    </a>
+                  ) : (
+                    <span className="block text-sm text-gray-800 truncate">{getAttachedFileName() || "attachment"}</span>
+                  )}
+                  {onClearAttachment && (
+                    <button
+                      type="button"
+                      onClick={onClearAttachment}
+                      className="text-slate-400 hover:text-red-600 text-[24px] leading-none whitespace-nowrap"
+                      aria-label="Remove attachment"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  {formData.attachedFile?.size != null && (
+                    <span className="text-[11px] text-blue-600">{formatSize(formData.attachedFile.size)}</span>
+                  )}
+                  {!uploadedAttachedFileUrl && isUploadingAttachment && (
+                    <span className="text-[11px] text-slate-400">Uploading…</span>
+                  )}
+                </div>
+              </div>
             </div>
-          ) : (
-            <>
-              <Plus className="w-6 h-6 text-blue-400 mb-2" />
-              <span className="text-b3 text-blue-400 font-medium">Upload File</span>
-            </>
-          )}
-        </div>
+            {!uploadedAttachedFileUrl && isUploadingAttachment && (
+              <div className="mt-2 h-1.5 w-full rounded-full bg-violet-100 overflow-hidden">
+                <div className="h-full w-1/2 bg-violet-400 animate-[progress_1.2s_ease_infinite]" style={{ width: "60%" }} />
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

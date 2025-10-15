@@ -70,6 +70,7 @@ export async function POST(request: NextRequest) {
       currency = "THB",
       thumbnail,
       video_url,
+      attachment_url,
       instructor,
       duration_hours,
     } = body ?? {};
@@ -99,6 +100,7 @@ export async function POST(request: NextRequest) {
       currency,
       thumbnail: thumbnail ?? null,
       video_url: video_url ?? null,
+      attachment_url: attachment_url ?? null,
       instructor: instructor ?? null,
       duration_hours,
     };
