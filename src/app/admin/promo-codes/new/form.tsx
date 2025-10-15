@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { useState } from "react";
 import { MultiSelect } from "@/components/ui/multi-select";
 
-
 // Types
 type Course = {
   id: number;
@@ -15,6 +14,7 @@ type Course = {
 
 type AddCouponFormProps = {
   courses: Course[];
+  totalCourses: number;
 };
 
 // Submit Button Component
@@ -22,14 +22,17 @@ function SubmitButton() {
   const { pending } = useFormStatus();
   
   return (
-    <button type="submit" disabled={pending}>
+    <button 
+      type="submit" 
+      disabled={pending}
+      className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+    >
       {pending ? "Creating..." : "Create Promo Code"}
     </button>
   );
 }
 
-export default function AddCouponForm({ courses }: AddCouponFormProps) {
-
+export default function AddCouponForm({ courses, totalCourses }: AddCouponFormProps) {
   const router = useRouter(); 
   const initialState: FormState = { message: "" };
   const [state, dispatch] = useFormState(addPromoCode, initialState);
@@ -37,7 +40,9 @@ export default function AddCouponForm({ courses }: AddCouponFormProps) {
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
 
   return (
-    <div className="max-w-4xl mx-auto p-8 bg-white border border-gray-300 rounded-xl ">
+    <div className="max-w-4xl mx-auto p-8 bg-white border border-gray-300 rounded-xl">
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Add New Promo Code</h1>
+      
       <form action={dispatch} className="space-y-6">
         {/* Promo Code & Minimum Purchase */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -51,7 +56,7 @@ export default function AddCouponForm({ courses }: AddCouponFormProps) {
               name="code" 
               id="code" 
               required 
-              className="block w-full rounded-md  border border-gray-400 focus:border-orange-500 focus:ring-orange-500 sm:text-sm px-3 py-2.5"
+              className="block w-full rounded-md border border-gray-400 focus:border-orange-500 focus:ring-orange-500 sm:text-sm px-3 py-2.5"
             />
             {state.errors?.code && ( 
               <p className="mt-1 text-sm text-red-600"> 
@@ -97,7 +102,7 @@ export default function AddCouponForm({ courses }: AddCouponFormProps) {
                 value="fixed"
                 checked={discountType === "fixed"}
                 onChange={() => setDiscountType("fixed")}
-                className="h-4 w-4  text-indigo-600 border border-gray-400 focus:ring-indigo-500"
+                className="h-4 w-4 text-indigo-600 border border-gray-400 focus:ring-indigo-500"
               />
               <label htmlFor="fixed" className="ml-2 text-sm text-gray-700">
                 Fixed amount (THB)
@@ -179,6 +184,11 @@ export default function AddCouponForm({ courses }: AddCouponFormProps) {
             name="course_ids" 
             value={selectedCourses.join(",")} 
           />
+          <input 
+            type="hidden" 
+            name="total_courses" 
+            value={totalCourses} 
+          />
           {state.errors?.course_ids && (
             <p className="mt-1 text-sm text-red-600">
               {state.errors.course_ids[0]}
@@ -196,12 +206,7 @@ export default function AddCouponForm({ courses }: AddCouponFormProps) {
             Cancel
           </button>
 
-          <button 
-            type="submit"
-            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Save Promo Code
-          </button>
+          <SubmitButton />
         </div>
       </form>
     </div>
