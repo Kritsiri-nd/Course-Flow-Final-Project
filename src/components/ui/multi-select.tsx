@@ -1022,7 +1022,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                         <Command>
                             {searchable && (
                                 <CommandInput
-                                    placeholder="Search options..."
+                                    placeholder="Search courses..."
                                     onKeyDown={handleInputKeyDown}
                                     value={searchValue}
                                     onValueChange={setSearchValue}
@@ -1073,7 +1073,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                                             <span>
                                                 (Select All
                                                 {getAllOptions().length > 20
-                                                    ? ` - ${getAllOptions().length} options`
+                                                    ? ` - ${getAllOptions().length} courses`
                                                     : ""}
                                                 )
                                             </span>

@@ -4,6 +4,8 @@ import { useFormState, useFormStatus } from "react-dom";
 import { addPromoCode, type FormState } from "./action";
 import { useRouter } from 'next/navigation'; 
 import { useState } from "react";
+import { MultiSelect } from "@/components/ui/multi-select";
+
 
 // Types
 type Course = {
@@ -32,6 +34,7 @@ export default function AddCouponForm({ courses }: AddCouponFormProps) {
   const initialState: FormState = { message: "" };
   const [state, dispatch] = useFormState(addPromoCode, initialState);
   const [discountType, setDiscountType] = useState<"fixed" | "percent">("percent");
+  const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
 
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white border border-gray-300 rounded-xl ">
@@ -94,7 +97,7 @@ export default function AddCouponForm({ courses }: AddCouponFormProps) {
                 value="fixed"
                 checked={discountType === "fixed"}
                 onChange={() => setDiscountType("fixed")}
-                className="h-4 w-4 text-indigo-600 border-gray-400 focus:ring-indigo-500"
+                className="h-4 w-4  text-indigo-600 border border-gray-400 focus:ring-indigo-500"
               />
               <label htmlFor="fixed" className="ml-2 text-sm text-gray-700">
                 Fixed amount (THB)
@@ -104,7 +107,7 @@ export default function AddCouponForm({ courses }: AddCouponFormProps) {
                 name="fixed_amount"
                 min="0"
                 disabled={discountType !== "fixed"}
-                className="no-spinner ml-3 block w-32 rounded-md border-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed px-3 py-2.5"
+                className="no-spinner ml-3 block w-32 rounded-md border border-gray-400 shadow-sm focus:border-orange-500 focus:ring-indigo-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed px-3 py-2.5"
               />
             </div>
 
@@ -125,11 +128,24 @@ export default function AddCouponForm({ courses }: AddCouponFormProps) {
               <input
                 type="number"
                 name="percent_amount"
-                min="0"
+                min="0.01"
                 max="100"
+                step="0.01"
                 placeholder="Percent"
                 disabled={discountType !== "percent"}
-                className="no-spinner ml-3 block w-32 rounded-md border-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed px-3 py-2.5"
+                onInput={(e) => {
+                  const value = parseFloat(e.currentTarget.value);
+                  if (value > 100) {
+                    e.currentTarget.value = "100";
+                  }
+                }}
+                onBlur={(e) => {
+                  const value = parseFloat(e.currentTarget.value);
+                  if (value < 0.01 && e.currentTarget.value !== "") {
+                    e.currentTarget.value = "0.01";
+                  }
+                }}
+                className="no-spinner ml-3 block w-32 rounded-md border border-gray-400 shadow-sm focus:border-orange-500 focus:ring-indigo-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed px-3 py-2.5"
               />
             </div>
           </div>
@@ -142,23 +158,27 @@ export default function AddCouponForm({ courses }: AddCouponFormProps) {
 
         {/* Courses Included */}
         <div>
-          <label htmlFor="course_ids" className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Courses Included
           </label>
-          <select 
+          <MultiSelect
+            options={courses.map((course) => ({
+              value: course.id.toString(),
+              label: course.title
+            }))}
+            onValueChange={setSelectedCourses}
+            defaultValue={[]}
+            placeholder="Select courses..."
+            variant="inverted"
+            maxCount={3}
+            hideSelectAll={false}
+            className="focus:border-orange-500 focus:ring-orange-500 data-[state=open]:border-orange-500 data-[state=open]:ring-orange-500"
+          />
+          <input 
+            type="hidden" 
             name="course_ids" 
-            id="course_ids" 
-            defaultValue="all" 
-            multiple={false}
-            className="block w-full rounded-md border-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2.5"
-          >
-            <option value="all">All courses</option>
-            {courses.map((course) => (
-              <option key={course.id} value={course.id}>
-                {course.title}
-              </option>
-            ))}
-          </select>
+            value={selectedCourses.join(",")} 
+          />
           {state.errors?.course_ids && (
             <p className="mt-1 text-sm text-red-600">
               {state.errors.course_ids[0]}
