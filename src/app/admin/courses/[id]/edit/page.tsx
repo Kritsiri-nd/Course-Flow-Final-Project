@@ -61,8 +61,10 @@ export default function EditCoursePage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [isUploadingAttachment, setIsUploadingAttachment] = useState(false);
   const [uploadedThumbnailUrl, setUploadedThumbnailUrl] = useState<string | null>(null);
   const [uploadedVideoUrl, setUploadedVideoUrl] = useState<string | null>(null);
+  const [uploadedAttachedFileUrl, setUploadedAttachedFileUrl] = useState<string | null>(null);
   const [previewThumbnailUrl, setPreviewThumbnailUrl] = useState<string | null>(null);
   const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
 
@@ -131,6 +133,7 @@ export default function EditCoursePage() {
 
         setUploadedThumbnailUrl(data?.thumbnail ?? null);
         setUploadedVideoUrl(data?.video_url ?? null);
+        setUploadedAttachedFileUrl(data?.attachment_url ?? null);
 
         // Map modules -> a single row per module (lesson), count its sub-lessons
         try {
@@ -218,6 +221,14 @@ export default function EditCoursePage() {
         })
         .finally(() => setIsUploadingVideo(false));
     }
+    if (field === "attachedFile") {
+      setIsUploadingAttachment(true);
+      uploadFile(file, "misc")
+        .then(url => {
+          if (url) setUploadedAttachedFileUrl(url);
+        })
+        .finally(() => setIsUploadingAttachment(false));
+    }
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }));
     }
@@ -271,6 +282,11 @@ export default function EditCoursePage() {
     if (videoInputRef.current) videoInputRef.current.value = "";
   };
 
+  const clearAttachment = () => {
+    setUploadedAttachedFileUrl(null);
+    setFormData(prev => ({ ...prev, attachedFile: null }));
+  };
+
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
@@ -297,6 +313,7 @@ export default function EditCoursePage() {
         instructor: formData.instructor || null,
         thumbnail: thumbnailUrl,
         video_url: videoUrl,
+        attachment_url: uploadedAttachedFileUrl,
       };
 
       const response = await fetch(`/api/courses/${courseId}`, {
@@ -465,11 +482,14 @@ export default function EditCoursePage() {
               previewVideoUrl={previewVideoUrl}
               uploadedThumbnailUrl={uploadedThumbnailUrl}
               uploadedVideoUrl={uploadedVideoUrl}
+              uploadedAttachedFileUrl={uploadedAttachedFileUrl}
+              isUploadingAttachment={isUploadingAttachment}
               isUploadingThumbnail={isUploadingThumbnail}
               isUploadingVideo={isUploadingVideo}
               onFileUpload={handleFileUpload}
               onClearThumbnail={clearThumbnail}
               onClearVideo={clearVideo}
+              onClearAttachment={clearAttachment}
             />
           </div>
 

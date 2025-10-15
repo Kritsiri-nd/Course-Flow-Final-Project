@@ -29,6 +29,7 @@ export async function GET(
         currency,
         thumbnail,
         video_url,
+        attachment_url,
         instructor,
         duration_hours,
         created_at,
@@ -99,6 +100,7 @@ export async function PUT(
             currency = "THB",
             thumbnail,
             video_url,
+            attachment_url,
             instructor,
             duration_hours,
         } = body ?? {};
@@ -128,6 +130,7 @@ export async function PUT(
             currency,
             thumbnail: thumbnail ?? null,
             video_url: video_url ?? null,
+            attachment_url: attachment_url ?? null,
             instructor: instructor ?? null,
             duration_hours,
         };

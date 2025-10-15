@@ -55,7 +55,7 @@ export function PromoCodeSection({ promoCode, onPromoCodeChange }: PromoCodeSect
                 className="w-full" 
                 type="number"
                 min="0"
-                step="0.01"
+                step="1"
                 value={promoCode.minPurchaseAmount}
                 onChange={(e) => onPromoCodeChange('minPurchaseAmount', formatNumberInput(e.target.value))}
                 onKeyDown={handleKeyDown}
@@ -85,7 +85,7 @@ export function PromoCodeSection({ promoCode, onPromoCodeChange }: PromoCodeSect
                   className="w-full" 
                   type="number"
                   min="0"
-                  step="0.01"
+                  step="1"
                   value={promoCode.discountType === 'amount' ? promoCode.discountValue : ''}
                   onChange={(e) => onPromoCodeChange('discountValue', formatNumberInput(e.target.value))}
                   onKeyDown={handleKeyDown}
@@ -111,7 +111,7 @@ export function PromoCodeSection({ promoCode, onPromoCodeChange }: PromoCodeSect
                   type="number"
                   min="0"
                   max="100"
-                  step="0.01"
+                  step="1"
                   value={promoCode.discountType === 'percentage' ? promoCode.discountValue : ''}
                   onChange={(e) => onPromoCodeChange('discountValue', formatPercentageInput(e.target.value))}
                   onKeyDown={handleKeyDown}
