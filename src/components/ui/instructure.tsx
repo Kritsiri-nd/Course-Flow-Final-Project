@@ -262,7 +262,7 @@ export default function Instructure() {
           </svg>
 
           {/* Text - Desktop */}
-          <div className="absolute top-[165px] left-[160px] flex flex-col flex-start gap-[24px] w-[643px] hidden sm:flex">
+          <div className="absolute top-[165px] left-[160px] flex-col flex-start gap-[24px] w-[643px] hidden sm:flex">
             <p className="text-[66px] font-medium leading-[125%] tracking-[-2%] text-[#1A1A1A]">
               Best Virtual Classroom Software
             </p>
