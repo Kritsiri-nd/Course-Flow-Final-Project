@@ -140,9 +140,9 @@ export default function RegisterPage() {
   return(
   <>
     <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 font-sans">
-      <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 ">
+      <div className="w-full max-w-lg space-y-8 rounded-lg bg-white p-8 ">
         <div>
-          <h1 className="text-center text-3xl font-bold text-blue-500">Register to start leaning!</h1>
+          <h1 className="text-center text-h2 font-medium text-dark-blue-500"> Register to start leaning! </h1>
         </div>
         <form onSubmit={handleRegister} className="mt-8 space-y-6">
           <div className="grid grid-cols-1 gap-y-6 sm:gap-x-4">
@@ -233,7 +233,7 @@ export default function RegisterPage() {
 
             <button
               type="submit"
-              className="w-full rounded-lg bg-blue-600 py-3.5 font-semibold text-white shadow-lg hover:bg-blue-700 disabled:opacity-60"
+              className="w-full rounded-lg bg-blue-500 py-3.5 font-semibold text-white shadow-lg hover:bg-blue-700 disabled:opacity-60"
                 disabled={isLoading}
               >
               {isLoading ? 'Registering...' : 'Register'}
@@ -241,7 +241,7 @@ export default function RegisterPage() {
           </div>
             <p className="mt-6 text-center text-sm text-gray-600">
               Already have an account?{' '}
-              <Link href="/auth/login" className="font-semibold text-blue-600 hover:underline">
+              <Link href="/auth/login" className="font-semibold text-blue-500 hover:underline">
                 Log in
               </Link>
             </p>

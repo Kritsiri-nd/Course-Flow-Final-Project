@@ -88,13 +88,22 @@
     line-height: 16px;
   }
   .text-b3 {
-    font-size: var(--B3);
-    line-height: 14px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.5; /* หรือ 150% */
+    letter-spacing: 0;
+    text-align: justify;
   }
   .text-b4 {
     font-size: var(--B4);
     line-height: 12px;
   }
+
+  .text-dark-blue-500 {
+    color: #22269E;
+  }
+
 
 .box-shadow1 {
   box-shadow: 2px 2px 12px 0 rgba(0, 0, 0, 0.08);
@@ -226,6 +235,17 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Hide number input spinners */
+  .no-spinner::-webkit-outer-spin-button,
+  .no-spinner::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .no-spinner[type=number] {
+    -moz-appearance: textfield;
   }
 }
 

@@ -42,7 +42,9 @@ export default function LoginForm() {
     <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 font-sans">
       <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-10 shadow-lg">
         <div>
-          <h1 className="text-center text-3xl font-bold text-indigo-600">Welcome back!</h1>
+          <h1 className="text-center text-h2 text-dark-blue-500"
+          
+          >Welcome back!</h1>
         </div>
 
         
@@ -50,7 +52,7 @@ export default function LoginForm() {
           
           
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="email" className="block text-b2 font-medium  text-gray-700">
               Email
             </label>
             <div className="mt-1">
@@ -61,7 +63,7 @@ export default function LoginForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="Enter Email"
-                className="w-full rounded-lg border border-gray-300 p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                className="w-full rounded-lg border border-gray-300 p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-b2"
                 disabled={isLoading}
               />
             </div>
@@ -69,7 +71,7 @@ export default function LoginForm() {
 
           {/* --- Group 2: Password Input --- */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="block text-b2 font-medium  text-gray-700">
               Password
             </label>
             <div className="mt-1">
@@ -80,7 +82,7 @@ export default function LoginForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="Enter Password"
-                className="w-full rounded-lg border border-gray-300 p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                className="w-full rounded-lg border border-gray-300 p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-b2"
                 disabled={isLoading}
               />
             </div>
@@ -94,7 +96,7 @@ export default function LoginForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
+              className="flex w-full justify-center rounded-md border border-transparent bg-blue-500 px-4 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
             >
               {isLoading ? 'Logging in...' : 'Log In'}
             </button>
@@ -103,7 +105,7 @@ export default function LoginForm() {
 
         <p className="text-center text-sm text-gray-500">
          Do you have an Account{' '}
-          <Link href="/auth/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+          <Link href="/auth/register" className="font-medium text-blue-500 hover:text-blue-600">
             Register
           </Link>
         </p>

@@ -1,11 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { Session } from '@supabase/supabase-js';
 import Image from 'next/image';
 
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabaseClient'; 
+import { useRouter } from 'next/navigation'; 
+
+import { signOut } from '@/app/auth/action';
 
 import {
   DropdownMenu,
@@ -35,17 +35,17 @@ type Profile = {
 } | null;
 
 // --- Main Component ---
-export default function UserNav({ userProfile }: { session: Session | null, userProfile: Profile }) {
+export default function UserNav({ userProfile }: { userProfile: Profile }) {
   
   const router = useRouter();
-  const supabase = createClient();
+  // const supabase = createClient();
 
-  const handleLogout = async () => {
+  // const handleLogout = async () => {
 
-    await supabase.auth.signOut();
-    router.refresh();
-    // router.push('/auth/login');
-  }
+  //   await supabase.auth.signOut();
+  //   router.refresh();
+  //   // router.push('/auth/login');
+  // }
 
   
   return (
@@ -108,12 +108,17 @@ export default function UserNav({ userProfile }: { session: Session | null, user
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={handleLogout}
-                className="flex cursor-pointer items-center gap-3 font-sans text-red-600 focus:text-red-600"
-              >
-                <LogoutIcon /> <span>Log out</span>
-              </DropdownMenuItem>
+              <form action={signOut}>
+  <button
+    type="submit"
+    // เราใส่ className ให้ปุ่มมีหน้าตาเหมือน DropdownMenuItem เดิม
+    className="relative flex cursor-pointer select-none items-center 
+               rounded-sm px-2 py-1.5 text-sm outline-none transition-colors 
+               focus:bg-accent w-full text-red-600 focus:text-red-600 gap-3"
+  >
+    <LogoutIcon /> <span>Log out</span>
+  </button>
+</form>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
