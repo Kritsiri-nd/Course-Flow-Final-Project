@@ -135,6 +135,25 @@ export default function EditCoursePage() {
         setUploadedVideoUrl(data?.video_url ?? null);
         setUploadedAttachedFileUrl(data?.attachment_url ?? null);
 
+        // Load existing promo code if available
+        try {
+          const promoResponse = await fetch(`/api/courses/${courseId}/promo-code`);
+          if (promoResponse.ok) {
+            const promoData = await promoResponse.json();
+            if (promoData) {
+              setPromoCode({
+                enabled: true,
+                code: promoData.code || "",
+                minPurchaseAmount: promoData.min_purchase_amount?.toString() || "",
+                discountType: promoData.discount_type === "fixed" ? "amount" : "percentage",
+                discountValue: promoData.discount_value?.toString() || "",
+              });
+            }
+          }
+        } catch (promoError) {
+          console.warn("Could not load promo code data:", promoError);
+        }
+
         // Map modules -> a single row per module (lesson), count its sub-lessons
         try {
           const apiLessons = (data?.modules ?? [])
@@ -314,6 +333,7 @@ export default function EditCoursePage() {
         thumbnail: thumbnailUrl,
         video_url: videoUrl,
         attachment_url: uploadedAttachedFileUrl,
+        promo_code: promoCode, // Include promo code data
       };
 
       const response = await fetch(`/api/courses/${courseId}`, {
