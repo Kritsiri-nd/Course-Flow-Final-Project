@@ -5,6 +5,10 @@ import {
     calculateProgressPercent,
     getLessonStatus,
     capWatchTime,
+    getLessonRequirements,
+    calculateNonVideoProgress,
+    hasVisitedLesson,
+    checkAssignmentCompletion,
     type LessonStatus,
 } from "@/lib/lessonProgressUtils";
 
@@ -82,7 +86,7 @@ async function handleBulkProgress(supabase: any, userId: string, courseId: numbe
     console.log("Lesson IDs:", lessonIds);
 
     // 3. คำนวณสถานะของแต่ละบทเรียน
-    const result = calculateLessonStatuses(lessonIds, progressMap, supabase, userId);
+    const result = await calculateLessonStatuses(lessonIds, progressMap, supabase, userId);
 
     console.log("Final lesson status:", result.lessonStatus);
     console.log("Overall percent:", result.overallPercent);
@@ -134,7 +138,7 @@ async function fetchProgressData(
 }
 
 // คำนวณสถานะของแต่ละบทเรียน
-function calculateLessonStatuses(
+async function calculateLessonStatuses(
     lessonIds: number[],
     progressMap: Map<number, any>,
     supabase: any,
@@ -153,8 +157,8 @@ function calculateLessonStatuses(
     for (const lessonId of lessonIds) {
         const progressData = progressMap.get(lessonId);
 
-        // คำนวณสถานะของบทเรียนนี้
-        const result = calculateSingleLessonStatus(progressData, lessonId, supabase, userId);
+        // คำนวณสถานะของบทเรียนนี้ (ตอนนี้เป็น async)
+        const result = await calculateSingleLessonStatus(progressData, lessonId, supabase, userId);
 
         // เก็บผลลัพธ์
         lessonStatus[lessonId] = {
@@ -185,7 +189,7 @@ function calculateLessonStatuses(
 }
 
 // คำนวณสถานะของบทเรียนเดียว
-function calculateSingleLessonStatus(
+async function calculateSingleLessonStatus(
     progressData: any,
     lessonId: number,
     supabase: any,
@@ -201,13 +205,20 @@ function calculateSingleLessonStatus(
     const watched = Number(progressData.seconds_watched || 0);
     const hasCompletedAt = !!progressData.completed_at;
 
-    // ถ้าไม่มีความยาววิดีโอ = เอาตาม watched time
+    // กรณีไม่มีวิดีโอ (duration <= 0) - auto complete ทันที
     if (duration <= 0) {
-        const status = watched > 0 ? "in_progress" : "not_started";
-        return { status: status as LessonStatus, percent: 0 };
+        const hasVisited = hasVisitedLesson(progressData);
+
+        if (hasVisited) {
+            console.log(`Lesson ${lessonId}: No video and visited - COMPLETED`);
+            return { status: "completed" as LessonStatus, percent: 100 };
+        } else {
+            console.log(`Lesson ${lessonId}: No video but not visited - NOT STARTED`);
+            return { status: "not_started" as LessonStatus, percent: 0 };
+        }
     }
 
-    // ตรวจสอบว่าจบจริงหรือไม่
+    // กรณีมีวิดีโอ - ใช้ logic เดิม
     const completed = isLessonCompleted(position, watched, duration);
 
     // ถ้ามี completed_at แต่ไม่ผ่านเกณฑ์ = ลบ completed_at ออก
@@ -284,7 +295,13 @@ export async function POST(request: Request) {
         // ตรวจสอบว่าจบหรือยัง
         let completedAt = existing?.completed_at ?? null;
 
-        if (!completedAt && nextDuration && nextDuration > 0) {
+        // กรณีไม่มีวิดีโอ (duration <= 0) - auto complete ทันที
+        if (!completedAt && (!nextDuration || nextDuration <= 0)) {
+            completedAt = new Date().toISOString();
+            console.log(`POST: Lesson ${lessonId} COMPLETED (no video)!`);
+        }
+        // กรณีมีวิดีโอ - ใช้ logic เดิม
+        else if (!completedAt && nextDuration && nextDuration > 0) {
             const completed = isLessonCompleted(nextPosition, nextWatched, nextDuration);
 
             if (completed) {

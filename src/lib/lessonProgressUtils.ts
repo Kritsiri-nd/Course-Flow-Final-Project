@@ -177,3 +177,108 @@ export function getLessonStatus(
     return "not_started";
 }
 
+// ====== ฟังก์ชันสำหรับบทเรียนที่ไม่มีวิดีโอ ======
+
+/**
+ * ตรวจสอบว่าบทเรียนนี้ต้องการอะไรบ้าง
+ * ใช้ข้อมูลจาก lesson object หรือ database
+ */
+export function getLessonRequirements(lesson: any) {
+    const hasVideo = !!lesson?.video_url;
+    const hasAssignment = !!lesson?.assignment_id;
+
+    return {
+        hasVideo,
+        hasAssignment,
+        isReadingOnly: !hasVideo && !hasAssignment,
+        needsAssignment: !hasVideo && hasAssignment,
+    };
+}
+
+/**
+ * คำนวณ progress สำหรับบทเรียนที่ไม่มีวิดีโอ
+ * - อ่านอย่างเดียว: เข้าหน้าแล้วผ่านเลย
+ * - มี assignment: ต้องส่ง assignment ให้ครบ
+ */
+export function calculateNonVideoProgress(
+    requirements: ReturnType<typeof getLessonRequirements>,
+    hasVisited: boolean,
+    assignmentCompleted: boolean
+): { percent: number; status: LessonStatus } {
+    // กรณีอ่านอย่างเดียว
+    if (requirements.isReadingOnly) {
+        return {
+            percent: hasVisited ? 100 : 0,
+            status: hasVisited ? "completed" : "not_started"
+        };
+    }
+
+    // กรณีมี assignment
+    if (requirements.needsAssignment) {
+        if (assignmentCompleted) {
+            return { percent: 100, status: "completed" };
+        }
+        if (hasVisited) {
+            return { percent: 50, status: "in_progress" }; // เข้ามาแล้วแต่ยังไม่ส่ง
+        }
+        return { percent: 0, status: "not_started" };
+    }
+
+    // กรณีอื่นๆ
+    return { percent: 0, status: "not_started" };
+}
+
+/**
+ * ตรวจสอบว่าผู้ใช้เคยเข้าหน้าบทเรียนนี้หรือยัง
+ * ดูจาก last_position_seconds > 0 หรือมี record ใน lesson_progress
+ */
+export function hasVisitedLesson(progressData: any): boolean {
+    if (!progressData) return false;
+
+    // ถ้ามี last_position_seconds แสดงว่าเคยเข้าหน้า
+    return Number(progressData.last_position_seconds || 0) > 0;
+}
+
+/**
+ * ตรวจสอบว่าผู้ใช้ส่ง assignment ของบทเรียนนี้แล้วหรือยัง
+ * ต้องใช้ supabase client เพื่อ query ข้อมูล
+ */
+export async function checkAssignmentCompletion(
+    supabase: any,
+    lessonId: number,
+    userId: string
+): Promise<boolean> {
+    try {
+        // ดึงข้อมูล assignment ของบทเรียนนี้
+        const { data: assignment, error: assignmentError } = await supabase
+            .from("assignments")
+            .select("id")
+            .eq("lesson_id", lessonId)
+            .maybeSingle();
+
+        if (assignmentError || !assignment) {
+            // ไม่มี assignment = ไม่ต้องส่ง
+            return true;
+        }
+
+        // ตรวจสอบว่าผู้ใช้ส่ง assignment นี้แล้วหรือยัง
+        const { data: submission, error: submissionError } = await supabase
+            .from("assignment_submissions")
+            .select("id")
+            .eq("assignment_id", assignment.id)
+            .eq("user_id", userId)
+            .maybeSingle();
+
+        if (submissionError) {
+            console.error(`Error checking assignment completion for lesson ${lessonId}:`, submissionError);
+            return false;
+        }
+
+        // ถ้ามี submission = ส่งแล้ว
+        return !!submission;
+    } catch (error) {
+        console.error(`Error checking assignment completion for lesson ${lessonId}:`, error);
+        return false;
+    }
+}
+

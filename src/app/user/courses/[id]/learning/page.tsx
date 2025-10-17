@@ -95,7 +95,10 @@ export default function UserCourseLearningPage() {
               lessonId={selectedLessonId || undefined}
               onProgressChange={handleProgressChange}
             />
-            <AssignmentCard lessonId={selectedLessonId} />
+            <AssignmentCard
+              lessonId={selectedLessonId}
+              onProgressChange={handleProgressChange}
+            />
             <BottomNav />
           </div>
         </div>

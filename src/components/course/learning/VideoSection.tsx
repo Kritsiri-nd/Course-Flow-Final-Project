@@ -95,6 +95,10 @@ export default function VideoSection(props: Props) {
     if (!lessonId) return;
 
     try {
+      console.log(
+        `Sending progress for lesson ${lessonId}: position=${currentPosition}, duration=${duration}, watched=${watchedSeconds}`
+      );
+
       await fetch("/api/lesson-progress", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -108,6 +112,8 @@ export default function VideoSection(props: Props) {
           ), // จำกัด 60 วิ/ครั้ง
         }),
       });
+
+      console.log(`Progress sent successfully for lesson ${lessonId}`);
 
       // แจ้งให้ parent component รู้ว่ามีการเปลี่ยนแปลง
       onProgressChange?.();
@@ -184,7 +190,21 @@ export default function VideoSection(props: Props) {
     };
   }, [lessonId, playbackId]);
 
-  // ====== 7. Render UI ======
+  // ====== 7. Auto-complete สำหรับบทเรียนไม่มีวิดีโอ ======
+  useEffect(() => {
+    if (!lessonId) return;
+
+    // ถ้าไม่มีวิดีโอ (ไม่มี playbackId และไม่มี videoUrl) = ส่ง progress เพื่อ mark ว่าเข้าหน้าแล้ว
+    if (!playbackId && !videoUrl) {
+      console.log(`Lesson ${lessonId}: No video detected, marking as visited`);
+      console.log(
+        `Lesson ${lessonId}: playbackId=${playbackId}, videoUrl=${videoUrl}`
+      );
+      sendProgress(1, 0, 0); // position=1, duration=0, watched=0
+    }
+  }, [lessonId, playbackId, videoUrl]);
+
+  // ====== 8. Render UI ======
   return (
     <div className="space-y-4">
       <h1 className="text-h2">{title}</h1>
@@ -211,9 +231,13 @@ export default function VideoSection(props: Props) {
             allowFullScreen
           />
         ) : (
-          // ไม่มีวิดีโอ
+          // ไม่มีวิดีโอ - แสดงข้อความที่เหมาะสม
           <div className="w-full h-full grid place-items-center text-muted-foreground">
-            No video for this lesson
+            <div className="text-center">
+              <div className="text-4xl mb-4">📖</div>
+              <div className="text-lg font-medium">Reading Material</div>
+              <div className="text-sm mt-2">No video for this lesson</div>
+            </div>
           </div>
         )}
       </div>
