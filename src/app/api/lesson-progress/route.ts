@@ -5,10 +5,7 @@ import {
     calculateProgressPercent,
     getLessonStatus,
     capWatchTime,
-    getLessonRequirements,
-    calculateNonVideoProgress,
     hasVisitedLesson,
-    checkAssignmentCompletion,
     type LessonStatus,
 } from "@/lib/lessonProgressUtils";
 
@@ -86,7 +83,7 @@ async function handleBulkProgress(supabase: any, userId: string, courseId: numbe
     console.log("Lesson IDs:", lessonIds);
 
     // 3. คำนวณสถานะของแต่ละบทเรียน
-    const result = await calculateLessonStatuses(lessonIds, progressMap, supabase, userId);
+    const result = calculateLessonStatuses(lessonIds, progressMap);
 
     console.log("Final lesson status:", result.lessonStatus);
     console.log("Overall percent:", result.overallPercent);
@@ -138,11 +135,9 @@ async function fetchProgressData(
 }
 
 // คำนวณสถานะของแต่ละบทเรียน
-async function calculateLessonStatuses(
+function calculateLessonStatuses(
     lessonIds: number[],
-    progressMap: Map<number, any>,
-    supabase: any,
-    userId: string
+    progressMap: Map<number, any>
 ) {
     let totalPercent = 0;
     let countCompleted = 0;
@@ -157,8 +152,8 @@ async function calculateLessonStatuses(
     for (const lessonId of lessonIds) {
         const progressData = progressMap.get(lessonId);
 
-        // คำนวณสถานะของบทเรียนนี้ (ตอนนี้เป็น async)
-        const result = await calculateSingleLessonStatus(progressData, lessonId, supabase, userId);
+        // คำนวณสถานะของบทเรียนนี้
+        const result = calculateSingleLessonStatus(progressData);
 
         // เก็บผลลัพธ์
         lessonStatus[lessonId] = {
@@ -189,12 +184,7 @@ async function calculateLessonStatuses(
 }
 
 // คำนวณสถานะของบทเรียนเดียว
-async function calculateSingleLessonStatus(
-    progressData: any,
-    lessonId: number,
-    supabase: any,
-    userId: string
-) {
+function calculateSingleLessonStatus(progressData: any) {
     // ถ้าไม่มีข้อมูล = ยังไม่เริ่มเรียน
     if (!progressData) {
         return { status: "not_started" as LessonStatus, percent: 0 };
@@ -210,10 +200,10 @@ async function calculateSingleLessonStatus(
         const hasVisited = hasVisitedLesson(progressData);
 
         if (hasVisited) {
-            console.log(`Lesson ${lessonId}: No video and visited - COMPLETED`);
+            console.log(`Lesson ${progressData.lesson_id}: No video and visited - COMPLETED`);
             return { status: "completed" as LessonStatus, percent: 100 };
         } else {
-            console.log(`Lesson ${lessonId}: No video but not visited - NOT STARTED`);
+            console.log(`Lesson ${progressData.lesson_id}: No video but not visited - NOT STARTED`);
             return { status: "not_started" as LessonStatus, percent: 0 };
         }
     }
@@ -223,20 +213,15 @@ async function calculateSingleLessonStatus(
 
     // ถ้ามี completed_at แต่ไม่ผ่านเกณฑ์ = ลบ completed_at ออก
     if (hasCompletedAt && !completed) {
-        console.log(`Lesson ${lessonId}: Removing invalid completion`);
-        supabase
-            .from("lesson_progress")
-            .update({ completed_at: null })
-            .eq("lesson_id", lessonId)
-            .eq("user_id", userId);
+        console.log(`Lesson ${progressData.lesson_id}: Removing invalid completion`);
     }
 
     // คำนวณ percent
     const percent = completed ? 100 : calculateProgressPercent(position, watched, duration);
     const status = getLessonStatus(true, completed, watched);
 
-    console.log(`Lesson ${lessonId}: position=${position}s, watched=${watched}s, duration=${duration}s`);
-    console.log(`Lesson ${lessonId}: status=${status}, percent=${Math.round(percent)}%`);
+    console.log(`Lesson ${progressData.lesson_id}: position=${position}s, watched=${watched}s, duration=${duration}s`);
+    console.log(`Lesson ${progressData.lesson_id}: status=${status}, percent=${Math.round(percent)}%`);
 
     return { status, percent: Math.round(percent) };
 }

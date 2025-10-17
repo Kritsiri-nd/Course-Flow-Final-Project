@@ -1,15 +1,42 @@
 /**
- * Utility functions สำหรับคำนวณ lesson progress
- * แยก logic ที่ซับซ้อนออกมาเพื่อให้อ่านง่ายขึ้น
+ * ฟังก์ชันคำนวณ progress ของบทเรียน
+ * เขียนแบบง่ายๆ ให้ junior dev อ่านเข้าใจได้
  */
 
-// ====== ฟังก์ชันคำนวณ Threshold สำหรับการจบบทเรียน ======
+// ====== ประเภทข้อมูล ======
+export type LessonStatus = "completed" | "in_progress" | "not_started";
+
+// ====== ฟังก์ชันหลักสำหรับคำนวณ progress ======
+
+/**
+ * ตรวจสอบว่าบทเรียนจบแล้วหรือยัง
+ * เกณฑ์: ต้อง seek ใกล้ท้าย + ดูจริงครบตามเกณฑ์
+ */
+export function isLessonCompleted(
+    currentPosition: number,
+    watchedTime: number,
+    videoDuration: number
+): boolean {
+    if (!videoDuration || videoDuration <= 0) {
+        return false;
+    }
+
+    // ต้อง seek ไปถึง 90% ของวิดีโอ
+    const positionThreshold = Math.max(videoDuration * 0.9, videoDuration - 5);
+    const reachedEnd = currentPosition >= positionThreshold;
+
+    // ต้องดูจริงครบตามเกณฑ์ (ขึ้นอยู่กับความยาววิดีโอ)
+    const watchTimeThreshold = calculateWatchTimeThreshold(videoDuration, watchedTime);
+    const watchedEnough = watchedTime >= watchTimeThreshold;
+
+    return reachedEnd && watchedEnough;
+}
 
 /**
  * คำนวณว่าต้องดูวิดีโอกี่วินาทีถึงจะถือว่าจบ
  * วิดีโอสั้นใช้เกณฑ์ผ่อนปรน วิดีโอยาวใช้เกณฑ์เข้มงวดขึ้น
  */
-export function calculateWatchTimeThreshold(
+function calculateWatchTimeThreshold(
     videoDuration: number,
     currentWatchedTime: number
 ): number {
@@ -20,11 +47,9 @@ export function calculateWatchTimeThreshold(
 
     // วิดีโอสั้น (30 วินาที - 2 นาที)
     if (videoDuration <= 120) {
-        // ถ้าดูไปแล้วเยอะ (≥60%) = ผ่อนปรน (อาจจะดูเร็ว x2)
         if (currentWatchedTime >= videoDuration * 0.6) {
             return videoDuration * 0.25; // ดูอย่างน้อย 25%
         }
-        // ถ้าดูไปยังน้อย = เข้มงวดขึ้น (กันการ skip)
         return videoDuration * 0.4; // ดูอย่างน้อย 40%
     }
 
@@ -41,38 +66,6 @@ export function calculateWatchTimeThreshold(
         return videoDuration * 0.35; // ดูอย่างน้อย 35%
     }
     return videoDuration * 0.5; // ดูอย่างน้อย 50%
-}
-
-/**
- * คำนวณว่าต้อง seek ไปถึงตำแหน่งไหนถึงจะถือว่าเกือบจบ
- * ตอบ: ≥90% ของความยาววิดีโอ หรือ เหลืออีก 5 วินาทีก็จบ
- */
-export function calculatePositionThreshold(videoDuration: number): number {
-    return Math.max(videoDuration * 0.9, videoDuration - 5);
-}
-
-// ====== ฟังก์ชันตรวจสอบสถานะ ======
-
-/**
- * ตรวจสอบว่าบทเรียนนี้จบแล้วหรือยัง
- * เกณฑ์: ต้อง seek ใกล้ท้าย + ดูจริงครบตาม threshold
- */
-export function isLessonCompleted(
-    currentPosition: number,
-    watchedTime: number,
-    videoDuration: number
-): boolean {
-    if (!videoDuration || videoDuration <= 0) {
-        return false;
-    }
-
-    const positionThreshold = calculatePositionThreshold(videoDuration);
-    const watchTimeThreshold = calculateWatchTimeThreshold(videoDuration, watchedTime);
-
-    const reachedEnd = currentPosition >= positionThreshold;
-    const watchedEnough = watchedTime >= watchTimeThreshold;
-
-    return reachedEnd && watchedEnough;
 }
 
 /**
@@ -102,10 +95,38 @@ export function calculateProgressPercent(
     return Math.min(100, Math.max(0, percent * 100));
 }
 
-// ====== ฟังก์ชันคำนวณตำแหน่ง Resume ======
+/**
+ * แปลงสถานะเป็น string เพื่อความชัดเจน
+ */
+export function getLessonStatus(
+    hasProgress: boolean,
+    isCompleted: boolean,
+    watchedTime: number
+): LessonStatus {
+    if (isCompleted) {
+        return "completed";
+    }
+
+    if (hasProgress && watchedTime > 0) {
+        return "in_progress";
+    }
+
+    return "not_started";
+}
 
 /**
- * คำนวณว่าควร resume จากตำแหน่งไหน
+ * ตรวจสอบว่าผู้ใช้เคยเข้าหน้าบทเรียนนี้หรือยัง
+ * ดูจาก last_position_seconds > 0 หรือมี record ใน lesson_progress
+ */
+export function hasVisitedLesson(progressData: any): boolean {
+    if (!progressData) return false;
+
+    // ถ้ามี last_position_seconds แสดงว่าเคยเข้าหน้า
+    return Number(progressData.last_position_seconds || 0) > 0;
+}
+
+/**
+ * คำนวณตำแหน่ง resume ที่เหมาะสม
  * ถ้า user skip ไปจบแต่ดูจริงยังไม่พอ จะ adjust ให้ resume จากตำแหน่งที่เหมาะสม
  */
 export function calculateResumePosition(
@@ -120,7 +141,7 @@ export function calculateResumePosition(
     }
 
     // ถ้ายังไม่จบ ตรวจสอบว่าตำแหน่งสมเหตุสมผลหรือไม่
-    const positionThreshold = calculatePositionThreshold(videoDuration);
+    const positionThreshold = Math.max(videoDuration * 0.9, videoDuration - 5);
     const isNearEnd = lastPosition >= positionThreshold;
     const hasLowWatchTime = watchedTime < videoDuration * 0.3;
 
@@ -138,8 +159,6 @@ export function calculateResumePosition(
     return lastPosition;
 }
 
-// ====== ฟังก์ชันป้องกัน watch time ผิดปกติ ======
-
 /**
  * จำกัด watch time ไม่ให้สูงเกินไป
  * ป้องกันข้อมูลผิดพลาดและ integer overflow
@@ -153,132 +172,3 @@ export function capWatchTime(
 
     return Math.min(existingWatchTime, maxAllowed);
 }
-
-// ====== ฟังก์ชันแสดงสถานะเป็น string ======
-
-/**
- * แปลงสถานะเป็น string เพื่อความชัดเจน
- */
-export type LessonStatus = "completed" | "in_progress" | "not_started";
-
-export function getLessonStatus(
-    hasProgress: boolean,
-    isCompleted: boolean,
-    watchedTime: number
-): LessonStatus {
-    if (isCompleted) {
-        return "completed";
-    }
-
-    if (hasProgress && watchedTime > 0) {
-        return "in_progress";
-    }
-
-    return "not_started";
-}
-
-// ====== ฟังก์ชันสำหรับบทเรียนที่ไม่มีวิดีโอ ======
-
-/**
- * ตรวจสอบว่าบทเรียนนี้ต้องการอะไรบ้าง
- * ใช้ข้อมูลจาก lesson object หรือ database
- */
-export function getLessonRequirements(lesson: any) {
-    const hasVideo = !!lesson?.video_url;
-    const hasAssignment = !!lesson?.assignment_id;
-
-    return {
-        hasVideo,
-        hasAssignment,
-        isReadingOnly: !hasVideo && !hasAssignment,
-        needsAssignment: !hasVideo && hasAssignment,
-    };
-}
-
-/**
- * คำนวณ progress สำหรับบทเรียนที่ไม่มีวิดีโอ
- * - อ่านอย่างเดียว: เข้าหน้าแล้วผ่านเลย
- * - มี assignment: ต้องส่ง assignment ให้ครบ
- */
-export function calculateNonVideoProgress(
-    requirements: ReturnType<typeof getLessonRequirements>,
-    hasVisited: boolean,
-    assignmentCompleted: boolean
-): { percent: number; status: LessonStatus } {
-    // กรณีอ่านอย่างเดียว
-    if (requirements.isReadingOnly) {
-        return {
-            percent: hasVisited ? 100 : 0,
-            status: hasVisited ? "completed" : "not_started"
-        };
-    }
-
-    // กรณีมี assignment
-    if (requirements.needsAssignment) {
-        if (assignmentCompleted) {
-            return { percent: 100, status: "completed" };
-        }
-        if (hasVisited) {
-            return { percent: 50, status: "in_progress" }; // เข้ามาแล้วแต่ยังไม่ส่ง
-        }
-        return { percent: 0, status: "not_started" };
-    }
-
-    // กรณีอื่นๆ
-    return { percent: 0, status: "not_started" };
-}
-
-/**
- * ตรวจสอบว่าผู้ใช้เคยเข้าหน้าบทเรียนนี้หรือยัง
- * ดูจาก last_position_seconds > 0 หรือมี record ใน lesson_progress
- */
-export function hasVisitedLesson(progressData: any): boolean {
-    if (!progressData) return false;
-
-    // ถ้ามี last_position_seconds แสดงว่าเคยเข้าหน้า
-    return Number(progressData.last_position_seconds || 0) > 0;
-}
-
-/**
- * ตรวจสอบว่าผู้ใช้ส่ง assignment ของบทเรียนนี้แล้วหรือยัง
- * ต้องใช้ supabase client เพื่อ query ข้อมูล
- */
-export async function checkAssignmentCompletion(
-    supabase: any,
-    lessonId: number,
-    userId: string
-): Promise<boolean> {
-    try {
-        // ดึงข้อมูล assignment ของบทเรียนนี้
-        const { data: assignment, error: assignmentError } = await supabase
-            .from("assignments")
-            .select("id")
-            .eq("lesson_id", lessonId)
-            .maybeSingle();
-
-        if (assignmentError || !assignment) {
-            // ไม่มี assignment = ไม่ต้องส่ง
-            return true;
-        }
-
-        // ตรวจสอบว่าผู้ใช้ส่ง assignment นี้แล้วหรือยัง
-        const { data: submission, error: submissionError } = await supabase
-            .from("assignment_submissions")
-            .select("id")
-            .eq("assignment_id", assignment.id)
-            .eq("user_id", userId)
-            .maybeSingle();
-
-        if (submissionError) {
-            console.error(`Error checking assignment completion for lesson ${lessonId}:`, submissionError);
-            return false;
-        }
-
-        // ถ้ามี submission = ส่งแล้ว
-        return !!submission;
-    } catch (error) {
-        console.error(`Error checking assignment completion for lesson ${lessonId}:`, error);
-        return false;
-    }
-}
-

@@ -65,7 +65,6 @@ export default function VideoSection(props: Props) {
         const isCompleted = !!data.completed_at;
 
         // คำนวณตำแหน่ง resume ที่เหมาะสม
-        // (ถ้า skip ไปจบแต่ดูจริงยังน้อย จะ adjust ให้เหมาะสม)
         const resumePosition = calculateResumePosition(
           lastPosition,
           watchedTime,
