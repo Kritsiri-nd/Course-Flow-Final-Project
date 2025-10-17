@@ -73,6 +73,7 @@ export async function POST(request: NextRequest) {
       attachment_url,
       instructor,
       duration_hours,
+      promo_code,
     } = body ?? {};
 
     // Basic validation
@@ -110,7 +111,7 @@ export async function POST(request: NextRequest) {
       (process.env.SUPABASE_SERVICE_ROLE_KEY as string) || (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string)
     );
 
-    const { data, error } = await supabase
+    const { data: courseData, error } = await supabase
       .from("courses")
       .insert(payload)
       .select()
@@ -128,7 +129,47 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(data, { status: 201 });
+    // Handle promo code creation if provided
+    if (promo_code && promo_code.enabled && promo_code.code && promo_code.discountValue) {
+      try {
+        // Create promo code data
+        const promoCodeData = {
+          code: promo_code.code.toUpperCase(),
+          discount_type: promo_code.discountType === "amount" ? "fixed" : "percentage",
+          discount_value: parseFloat(promo_code.discountValue),
+          min_purchase_amount: parseFloat(promo_code.minPurchaseAmount || "0"),
+          applies_to_all_courses: false, // This promo code applies only to this specific course
+        };
+
+        const { data: newPromoCode, error: promoCodeError } = await supabase
+          .from("promo_codes")
+          .insert(promoCodeData)
+          .select("id")
+          .single();
+
+        if (promoCodeError) {
+          console.error("Error creating promo code:", promoCodeError);
+          // Don't fail the entire course creation if promo code fails
+        } else if (newPromoCode) {
+          // Link promo code to the course
+          const { error: linkError } = await supabase
+            .from("promo_code_courses")
+            .insert({
+              promo_code_id: newPromoCode.id,
+              course_id: courseData.id,
+            });
+
+          if (linkError) {
+            console.error("Error linking promo code to course:", linkError);
+          }
+        }
+      } catch (promoError) {
+        console.error("Unexpected error creating promo code:", promoError);
+        // Don't fail the entire course creation
+      }
+    }
+
+    return NextResponse.json(courseData, { status: 201 });
   } catch (err: unknown) {
     console.error("Unexpected error creating course:", (err as Error)?.message || err);
     return NextResponse.json(

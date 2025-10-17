@@ -290,6 +290,7 @@ export default function AddCoursePage() {
         video_url: videoUrl,
         attachment_url: attachmentUrl ?? null,
         lessons: lessons, // Include lessons data
+        promo_code: promoCode, // Include promo code data
       };
 
       // Submit to API

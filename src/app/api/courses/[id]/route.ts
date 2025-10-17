@@ -103,6 +103,7 @@ export async function PUT(
             attachment_url,
             instructor,
             duration_hours,
+            promo_code,
         } = body ?? {};
 
         // Basic validation mirroring POST API
@@ -140,7 +141,7 @@ export async function PUT(
             (process.env.SUPABASE_SERVICE_ROLE_KEY as string) || (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string)
         );
 
-        const { data, error } = await adminSupabase
+        const { data: courseData, error } = await adminSupabase
             .from("courses")
             .update(payload)
             .eq("id", courseId)
@@ -152,7 +153,67 @@ export async function PUT(
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        return NextResponse.json(data, { status: 200 });
+        // Handle promo code update if provided
+        if (promo_code && promo_code.enabled && promo_code.code && promo_code.discountValue) {
+            try {
+                // First, check if there's an existing promo code for this course
+                const { data: existingPromoCode, error: fetchError } = await adminSupabase
+                    .from("promo_codes")
+                    .select(`
+                        id,
+                        promo_code_courses!inner(course_id)
+                    `)
+                    .eq("promo_code_courses.course_id", courseId)
+                    .single();
+
+                const promoCodeData = {
+                    code: promo_code.code.toUpperCase(),
+                    discount_type: promo_code.discountType === "amount" ? "fixed" : "percentage",
+                    discount_value: parseFloat(promo_code.discountValue),
+                    min_purchase_amount: parseFloat(promo_code.minPurchaseAmount || "0"),
+                    applies_to_all_courses: false,
+                };
+
+                if (existingPromoCode && !fetchError) {
+                    // Update existing promo code
+                    const { error: updateError } = await adminSupabase
+                        .from("promo_codes")
+                        .update(promoCodeData)
+                        .eq("id", existingPromoCode.id);
+
+                    if (updateError) {
+                        console.error("Error updating promo code:", updateError);
+                    }
+                } else {
+                    // Create new promo code and link to course
+                    const { data: newPromoCode, error: createError } = await adminSupabase
+                        .from("promo_codes")
+                        .insert(promoCodeData)
+                        .select("id")
+                        .single();
+
+                    if (createError) {
+                        console.error("Error creating promo code:", createError);
+                    } else if (newPromoCode) {
+                        // Link promo code to the course
+                        const { error: linkError } = await adminSupabase
+                            .from("promo_code_courses")
+                            .insert({
+                                promo_code_id: newPromoCode.id,
+                                course_id: courseId,
+                            });
+
+                        if (linkError) {
+                            console.error("Error linking promo code to course:", linkError);
+                        }
+                    }
+                }
+            } catch (promoError) {
+                console.error("Unexpected error handling promo code:", promoError);
+            }
+        }
+
+        return NextResponse.json(courseData, { status: 200 });
     } catch (err: unknown) {
         console.error("Unexpected error updating course:", (err as Error)?.message || err);
         return NextResponse.json(
