@@ -137,6 +137,27 @@ export async function POST(req: Request) {
       } else {
         console.log('ℹ️ User already enrolled in this course')
       }
+
+      // บันทึกการใช้งานโปรโมโค้ดถ้ามี
+      if (payment.promo_code_id) {
+        const { error: usageError } = await supabase
+          .from('promo_code_usages')
+          .insert({
+            promo_code_id: payment.promo_code_id,
+            user_id: payment.user_id,
+            course_id: payment.course_id,
+            order_id: payment.id,
+            discount_amount: payment.discount_amount || 0,
+            original_amount: payment.original_amount || payment.amount,
+            final_amount: payment.amount
+          })
+
+        if (usageError) {
+          console.error('❌ Error recording promo code usage:', usageError)
+        } else {
+          console.log('✅ Promo code usage recorded successfully')
+        }
+      }
     } else {
       console.log('🔔 Payment not successful or payment not found')
     }

@@ -124,7 +124,7 @@ export default function PaymentPage() {
         return value.replace(/\D/g, '').replace(/(.{2})/, '$1/');
     };
 
-    const handlePromptPay = async () => {
+    const handlePromptPay = async (promoCodeData?: any) => {
         if (!userId || !courseId || !course) {
             alert("กรุณารอให้ระบบโหลดเสร็จ");
             return;
@@ -137,6 +137,9 @@ export default function PaymentPage() {
             const refNo = `CF${Date.now()}`;
             const createdAt = Date.now();
 
+            // ใช้ราคาสุทธิจากโปรโมโค้ดถ้ามี
+            const finalAmount = promoCodeData ? promoCodeData.finalAmount : course.price;
+
             // Create PromptPay charge using our API (same as QR display page)
             const response = await fetch('/api/payment/create-qr', {
                 method: 'POST',
@@ -144,7 +147,7 @@ export default function PaymentPage() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    amount: course.price * 100, // Convert to satang
+                    amount: finalAmount * 100, // Convert to satang
                     currency: 'thb',
                 }),
             });
@@ -181,7 +184,11 @@ export default function PaymentPage() {
                             course_id: parseInt(courseId as string),
                             user_id: userId,
                             method: 'promptpay',
-                            charge_id: data.id
+                            charge_id: data.id,
+                            promo_code_id: promoCodeData?.id || null,
+                            discount_amount: promoCodeData?.discountAmount || 0,
+                            original_amount: promoCodeData?.originalAmount || course.price,
+                            final_amount: finalAmount
                         })
                     });
                 } catch (error) {
@@ -208,11 +215,9 @@ export default function PaymentPage() {
         }
     };
 
-    const handleSubmit = async (e?: React.FormEvent) => {
-        if (e) e.preventDefault();
-
+    const handleSubmit = async (promoCodeData?: any) => {
         if (paymentMethod === 'qr') {
-            await handlePromptPay();
+            await handlePromptPay(promoCodeData);
             return;
         }
 
@@ -264,6 +269,10 @@ export default function PaymentPage() {
                             user_id: userId,
                             method: "card",
                             token,
+                            promo_code_id: promoCodeData?.id || null,
+                            discount_amount: promoCodeData?.discountAmount || 0,
+                            original_amount: promoCodeData?.originalAmount || course.price,
+                            final_amount: promoCodeData?.finalAmount || course.price,
                         }),
                     });
 
@@ -338,6 +347,7 @@ export default function PaymentPage() {
                                 paymentMethod={paymentMethod}
                                 loading={loading}
                                 omiseKey={omiseKey}
+                                userId={userId || ''}
                                 onSubmit={handleSubmit}
                             />
                         </div>
