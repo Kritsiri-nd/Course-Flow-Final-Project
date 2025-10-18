@@ -66,6 +66,48 @@ export interface User {
     created_at: string;
 }
 
+// Promo Code related types
+export interface PromoCode {
+    id: number; // เปลี่ยนจาก string เป็น number เพราะเป็น BIGINT
+    code: string;
+    discount_type: 'fixed' | 'percentage';
+    discount_value: number;
+    min_purchase_amount: number;
+    is_active: boolean;
+    applies_to_all_courses: boolean;
+    created_at: string;
+    expires_at?: string;
+}
+
+export interface PromoCodeUsage {
+    id: number;
+    promo_code_id: number;
+    user_id: string;
+    course_id: number;
+    order_id: string;
+    discount_amount: number;
+    original_amount: number;
+    final_amount: number;
+    used_at: string;
+    created_at: string;
+}
+
+export interface Payment {
+    id: string;
+    user_id: string;
+    course_id: number;
+    amount: number;
+    currency: string;
+    status: 'pending' | 'successful' | 'failed';
+    provider: string;
+    provider_payment_id: string;
+    promo_code_id?: number;
+    original_amount?: number;
+    discount_amount?: number;
+    created_at: string;
+    updated_at: string;
+}
+
 // API Response types
 export interface ApiResponse<T> {
     data?: T;
