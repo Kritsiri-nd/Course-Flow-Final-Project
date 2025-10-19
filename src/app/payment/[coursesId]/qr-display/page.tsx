@@ -30,6 +30,12 @@ export default function QRDisplayPage() {
   const [chargeId, setChargeId] = useState<string>('');
   const [qrCreatedAt, setQrCreatedAt] = useState<number | null>(null);
   const [isQrExpired, setIsQrExpired] = useState(false);
+  // เพิ่ม state สำหรับเก็บข้อมูลราคาที่คำนวณแล้ว
+  const [paymentAmounts, setPaymentAmounts] = useState<{
+    original_amount: number;
+    discount_amount: number;
+    final_amount: number;
+  } | null>(null);
 
     // Get URL search params for existing QR data
     const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
@@ -37,6 +43,7 @@ export default function QRDisplayPage() {
     const existingReferenceNo = searchParams?.get('referenceNo');
     const existingQrUrl = searchParams?.get('qrUrl');
     const existingCreatedAt = searchParams?.get('createdAt');
+    const existingPromoCodeId = searchParams?.get('promoCodeId');
 
   // Check if QR code is expired (Omise QR codes expire after 15 minutes)
   const checkQrExpiration = useCallback((createdAt: number) => {
@@ -99,6 +106,27 @@ export default function QRDisplayPage() {
     };
     getCourse();
   }, [courseId]);
+
+  // ดึงข้อมูล payment record เพื่อดูราคาที่ Backend คำนวณแล้ว
+  useEffect(() => {
+    const getPaymentData = async () => {
+      if (chargeId) {
+        try {
+          // ดึงข้อมูล payment record จาก charge ID
+          const res = await fetch(`/api/payment/record/${chargeId}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.calculated_amounts) {
+              setPaymentAmounts(data.calculated_amounts);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching payment data:', error);
+        }
+      }
+    };
+    getPaymentData();
+  }, [chargeId]);
 
 
   const generateQRCode = useCallback(async () => {
@@ -374,9 +402,16 @@ export default function QRDisplayPage() {
                     <p className="text-b2 font-regular text-gray-600">
                       Reference no. {referenceNo}
                     </p>
-                    <p className="text-h3 font-medium text-orange-500">
-                      THB {course.price.toLocaleString()}.00
-                    </p>
+                    {/* แสดงราคาสุดท้ายเท่านั้น */}
+                    {paymentAmounts ? (
+                      <p className="text-h3 font-medium text-orange-500">
+                        THB {paymentAmounts.final_amount.toLocaleString()}.00
+                      </p>
+                    ) : (
+                      <p className="text-h3 font-medium text-orange-500">
+                        THB {course?.price.toLocaleString()}.00
+                      </p>
+                    )}
                   </div>
 
                   <div className="flex justify-center">
