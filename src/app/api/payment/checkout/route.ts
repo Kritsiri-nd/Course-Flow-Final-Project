@@ -9,9 +9,7 @@ export async function POST(req: Request) {
       course_id, 
       user_id, 
       method, 
-      token, 
-      phone_number, 
-      charge_id,
+      token,
       promo_code_id // รับเฉพาะ ID
       // ❌ ไม่รับ final_amount, original_amount, discount_amount จาก Frontend
     } = await req.json()
@@ -21,14 +19,10 @@ export async function POST(req: Request) {
       user_id, 
       method, 
       token, 
-      phone_number, 
-      charge_id,
       promo_code_id
     });
     // method = "promptpay" | "card"
     // token = card token ที่สร้างจาก Omise.js (ใช้เฉพาะกับบัตร)
-    // phone_number = หมายเลขโทรศัพท์สำหรับ PromptPay
-    // charge_id = charge ID ที่มีอยู่แล้ว (สำหรับ QR payment)
 
     const supabase = await createSupabaseServerClient()
 
@@ -119,23 +113,13 @@ export async function POST(req: Request) {
 
     // 4. สั่งจ่ายเงินด้วยราคาที่ Backend คำนวณได้
 
-    if (charge_id) {
-      console.log('Using existing charge:', charge_id);
-      charge = { id: charge_id, paid: false, status: 'pending' };
-    } else if (method === 'promptpay') {
-      if (!phone_number) {
-        return NextResponse.json({ error: 'Missing phone number for PromptPay' }, { status: 400 })
-      }
-      
+    if (method === 'promptpay') {
       charge = await omise.charges.create({
         amount: Math.round(finalAmount * 100), // ใช้ราคาที่ Backend คำนวณ
         currency: course.currency,
-        source: { 
-          type: 'promptpay', 
-          phone_number: phone_number!,
-          amount: Math.round(finalAmount * 100),
-          currency: course.currency
-        },
+        source: {
+          type: 'promptpay'
+        }
       })
     } else if (method === 'card') {
       if (!token) {
