@@ -185,10 +185,8 @@ export default function PaymentPage() {
                             user_id: userId,
                             method: 'promptpay',
                             charge_id: data.id,
-                            promo_code_id: promoCodeData?.id || null,
-                            discount_amount: promoCodeData?.discountAmount || 0,
-                            original_amount: promoCodeData?.originalAmount || course.price,
-                            final_amount: finalAmount
+                            promo_code_id: promoCodeData?.id || null, // ส่งเฉพาะ ID
+                            // ❌ ไม่ส่ง discount_amount, original_amount, final_amount จาก Frontend
                         })
                     });
                 } catch (error) {
@@ -201,6 +199,9 @@ export default function PaymentPage() {
                 qrDisplayUrl.searchParams.set('referenceNo', refNo);
                 qrDisplayUrl.searchParams.set('qrUrl', qrImageUrl);
                 qrDisplayUrl.searchParams.set('createdAt', createdAt.toString());
+                if (promoCodeData?.id) {
+                    qrDisplayUrl.searchParams.set('promoCodeId', promoCodeData.id.toString());
+                }
 
                 window.location.href = qrDisplayUrl.toString();
             } else {
@@ -269,10 +270,8 @@ export default function PaymentPage() {
                             user_id: userId,
                             method: "card",
                             token,
-                            promo_code_id: promoCodeData?.id || null,
-                            discount_amount: promoCodeData?.discountAmount || 0,
-                            original_amount: promoCodeData?.originalAmount || course.price,
-                            final_amount: promoCodeData?.finalAmount || course.price,
+                            promo_code_id: promoCodeData?.id || null, // ส่งเฉพาะ ID
+                            // ❌ ไม่ส่ง discount_amount, original_amount, final_amount จาก Frontend
                         }),
                     });
 
