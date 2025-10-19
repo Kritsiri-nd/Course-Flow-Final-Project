@@ -137,104 +137,69 @@ export default function QRDisplayPage() {
     setLoading(true);
 
     try {
-      // Generate reference number
       const refNo = `CF${Date.now()}`;
-      setReferenceNo(refNo);
       const createdAt = Date.now();
-      setQrCreatedAt(createdAt);
 
-      // Create PromptPay source using our API
-      const response = await fetch('/api/payment/create-qr', {
+      // Call the secure checkout endpoint
+      const response = await fetch('/api/payment/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          amount: course.price * 100, // Convert to satang
-          currency: 'thb',
+          course_id: parseInt(courseId as string),
+          user_id: userId,
+          method: 'promptpay',
+          // No need to send amount, backend will calculate it
+          promo_code_id: existingPromoCodeId ? parseInt(existingPromoCodeId) : null,
         }),
       });
 
       const data = await response.json();
 
-       if (!response.ok) {
-         // Redirect to fail page instead of setting status
-         window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent("Failed to create QR code")}&method=qr`;
-         return;
-       }
-
-      // Store charge ID for status checking
-      if (data && data.id) {
-        setChargeId(data.id);
-
-        // Save payment record to database
-        try {
-          await fetch('/api/payment/checkout', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              course_id: parseInt(courseId as string),
-              user_id: userId,
-              method: 'promptpay',
-              charge_id: data.id
-            })
-          });
-        } catch (error) {
-          console.error('Error saving payment record:', error);
-        }
+      if (!response.ok) {
+        const errorMessage = data.error || "Failed to create QR code";
+        window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent(errorMessage)}&method=qr`;
+        return;
       }
 
-      let qrImageUrl = '';
+      // Backend now returns the full charge object and payment details
+      if (data && data.id) {
+        setChargeId(data.id);
+        setReferenceNo(refNo);
+        setQrCreatedAt(createdAt);
+        
+        // Set payment amounts from the secure backend response
+        if (data.calculated_amounts) {
+          setPaymentAmounts(data.calculated_amounts);
+        }
 
-      // Check different possible response structures
-      if (data && data.source && data.source.scannable_code && data.source.scannable_code.image) {
-        setQrData(data.source);
-        qrImageUrl = data.source.scannable_code.image.download_uri || data.source.scannable_code.image;
-      } else if (data && data.scannable_code && data.scannable_code.image) {
-        setQrData(data);
-        qrImageUrl = data.scannable_code.image.download_uri || data.scannable_code.image;
-      } else if (data && data.source && data.source.image) {
-        qrImageUrl = data.source.image.download_uri || data.source.image;
-        setQrData({
-          scannable_code: {
-            image: data.source.image
-          }
-        });
-      } else if (data && data.image) {
-        qrImageUrl = data.image.download_uri || data.image;
-        setQrData({
-          scannable_code: {
-            image: data.image
-          }
-        });
-       } else {
-         // Redirect to fail page instead of setting status
-         window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent("Invalid QR response")}&method=qr`;
-         return;
-       }
+        const qrImageUrl = data.source?.scannable_code?.image?.download_uri;
 
-      // Update URL with QR parameters for persistence
-      if (qrImageUrl && data.id) {
-        const newUrl = new URL(window.location.href);
-        newUrl.searchParams.set('chargeId', data.id);
-        newUrl.searchParams.set('referenceNo', refNo);
-        newUrl.searchParams.set('qrUrl', qrImageUrl);
-        newUrl.searchParams.set('createdAt', createdAt.toString());
+        if (qrImageUrl) {
+          setQrData(data.source);
 
-        // Update URL without causing a page reload
-        window.history.replaceState({}, '', newUrl.toString());
+          // Update URL with new, secure data
+          const newUrl = new URL(window.location.href);
+          newUrl.searchParams.set('chargeId', data.id);
+          newUrl.searchParams.set('referenceNo', refNo);
+          newUrl.searchParams.set('qrUrl', qrImageUrl);
+          newUrl.searchParams.set('createdAt', createdAt.toString());
+          window.history.replaceState({}, '', newUrl.toString());
+        } else {
+          throw new Error("Invalid QR data in response from server");
+        }
+      } else {
+        throw new Error("Invalid response from server");
       }
 
       setLoading(false);
-     } catch (error) {
-       console.error('Error in generateQRCode:', error);
-       // Redirect to fail page instead of setting status
-       const errorMessage = error instanceof Error ? error.message : "Unknown error";
-       window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent("Error generating QR: " + errorMessage)}&method=qr`;
-     }
-  }, [userId, courseId, course]);
+    } catch (error) {
+      console.error('Error in generateQRCode:', error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent("Error generating QR: " + errorMessage)}&method=qr`;
+    }
+  }, [userId, courseId, course, existingPromoCodeId]);
 
    // Simple polling: Check enrollment status every 3 seconds
    useEffect(() => {
