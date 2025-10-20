@@ -20,9 +20,13 @@ interface AssignmentWithSubmission extends Assignment {
 
 type AssignmentCardProps = {
   lessonId?: number | null;
+  onProgressChange?: () => void; // เพิ่ม callback สำหรับอัพเดท progress
 };
 
-export default function AssignmentCard({ lessonId }: AssignmentCardProps) {
+export default function AssignmentCard({
+  lessonId,
+  onProgressChange,
+}: AssignmentCardProps) {
   const [assignments, setAssignments] = useState<
     AssignmentWithSubmission[] | null
   >(null);
@@ -166,6 +170,10 @@ export default function AssignmentCard({ lessonId }: AssignmentCardProps) {
 
       if (response.ok) {
         setSubmittedAssignments((prev) => new Set([...prev, assignmentId]));
+
+        // Trigger progress update เพื่อให้ sidebar อัพเดทสถานะ
+        onProgressChange?.();
+
         // Reload assignments to get updated status
         const res = await fetch(`/api/assignments?lesson_id=${lessonId}`);
         const data = await res.json();
