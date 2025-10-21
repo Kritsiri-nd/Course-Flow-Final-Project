@@ -136,13 +136,13 @@ export default function AssignmentCard({ assignment, onSubmit, onAnswerChange }:
           )}
         </div>
 
-        {/* Button Box - Responsive */}
-        <div className="flex lg:flex-col items-center justify-center rounded-lg p-4">
-          <div className="flex flex-row lg:flex-col gap-3 items-center">
+        {/* Button Box - Vertical Layout */}
+        <div className="flex flex-col items-center justify-center rounded-lg p-4">
+          <div className="flex flex-col gap-3 items-center">
              {assignment.status !== 'submitted' && (
                <button
                  onClick={handleSubmit}
-                 className="w-[119px] h-[60px] px-8 py-[18px] gap-[10px] rounded-xl bg-[#2F5FAC] text-white text-center font-medium hover:bg-blue-600 transition-colors"
+                 className="w-[279px] sm:w-[119px] h-[60px] pt-[18px] pr-[32px] pb-[18px] pl-[32px] sm:px-8 sm:py-[18px] gap-[10px] rounded-[12px] sm:rounded-xl bg-[#2F5FAC] text-white text-center font-medium hover:bg-blue-600 transition-colors"
                >
                  Submit
                </button>
