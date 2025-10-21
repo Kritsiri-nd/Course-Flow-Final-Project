@@ -186,6 +186,7 @@ export default async function UserAssignmentsPage() {
       lessonTitle: lesson?.title || 'Unknown Lesson',
       question: assignment.question,
       answer: userAnswer,
+      modelAnswer: assignment.answer || '', // เฉลยจาก admin
       status,
       courseId: course?.id?.toString() || '1'
     };
