@@ -83,55 +83,63 @@ export default function PaginationUI({
   };
 
   return (
-    <div className={`flex justify-center items-center gap-2 mt-8 ${className}`}>
-      {/* Previous Button */}
-      <button
-        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        onClick={handlePrevPage}
-        disabled={currentPage === 1}
-        aria-label="Previous page"
-      >
-        Previous
-      </button>
-
-      {/* Page Numbers */}
-      <div className="flex gap-1">
-        {getPageNumbers().map((page, index) => (
+    <>
+      <div className="flex flex-col items-center">
+        <div
+          className={`flex justify-center items-center gap-2 mt-8 ${className}`}
+        >
+          {/* Previous Button */}
           <button
-            key={index}
-            className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-              page === currentPage
-                ? "text-white bg-blue-600 border border-blue-600"
-                : page === "..."
-                ? "text-gray-500 cursor-default"
-                : "text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700"
-            }`}
-            onClick={() => typeof page === "number" && handlePageClick(page)}
-            disabled={page === "..."}
-            aria-label={
-              typeof page === "number" ? `Go to page ${page}` : undefined
-            }
-            aria-current={page === currentPage ? "page" : undefined}
+            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            onClick={handlePrevPage}
+            disabled={currentPage === 1}
+            aria-label="Previous page"
           >
-            {page}
+            Previous
           </button>
-        ))}
-      </div>
 
-      {/* Next Button */}
-      <button
-        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        onClick={handleNextPage}
-        disabled={currentPage === totalPages}
-        aria-label="Next page"
-      >
-        Next
-      </button>
+          {/* Page Numbers */}
+          <div className="flex gap-1">
+            {getPageNumbers().map((page, index) => (
+              <button
+                key={index}
+                className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  page === currentPage
+                    ? "text-white bg-blue-600 border border-blue-600"
+                    : page === "..."
+                    ? "text-gray-500 cursor-default"
+                    : "text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700"
+                }`}
+                onClick={() =>
+                  typeof page === "number" && handlePageClick(page)
+                }
+                disabled={page === "..."}
+                aria-label={
+                  typeof page === "number" ? `Go to page ${page}` : undefined
+                }
+                aria-current={page === currentPage ? "page" : undefined}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
 
-      {/* Page Info */}
-      <div className="ml-4 text-sm text-gray-700">
-        Showing {startIndex + 1} to {endIndex} of {totalItems} results
+          {/* Next Button */}
+          <button
+            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}
+            aria-label="Next page"
+          >
+            Next
+          </button>
+        </div>
+
+        {/* Page Info */}
+        <div className="text-sm text-gray-400 mb-6">
+          Showing {startIndex + 1} to {endIndex} of {totalItems} results
+        </div>
       </div>
-    </div>
+    </>
   );
 }

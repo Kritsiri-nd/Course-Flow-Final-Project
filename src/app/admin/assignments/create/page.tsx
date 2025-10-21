@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/sidebar";
 import { AdminPanel } from "@/components/layouts/sidebar-admin-panel";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, ChevronDown } from "lucide-react"; 
 
 interface AssignmentFormData {
   question: string;
@@ -105,13 +105,19 @@ export default function CreateAssignmentPage() {
     }
 
     if (!selectedModuleId) {
+      
       newErrors.lesson_id = "Please select a lesson";
     }
 
     if (!selectedLessonId) {
+     
       newErrors.sub_lesson = "Please select a sub-lesson";
     }
 
+  
+    delete errors.answer;
+    delete errors.lesson_id;
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -209,6 +215,7 @@ export default function CreateAssignmentPage() {
         {/* Form Content */}
         <div className="flex-1 overflow-auto p-8">
           <div className="max-w-4xl mx-auto bg-white rounded-lg p-6 shadow-sm border border-gray-200 space-y-6">
+            
             {/* Course Selection */}
             <div>
               <label className="block text-b3 font-medium text-gray-700 mb-2">
@@ -216,7 +223,7 @@ export default function CreateAssignmentPage() {
               </label>
               <div className="relative">
                 <select
-                  className={`w-full h-12 p-3 pr-10 border rounded-lg focus:ring-2 ${
+                 className={`w-full h-12 p-3 pr-12 border rounded-lg appearance-none focus:ring-2 ${
                     errors.course_id
                       ? "border-[#9B2FAC] focus:border-[#9B2FAC] focus:ring-[#9B2FAC]"
                       : "border-gray-300 focus:ring-orange-500 focus:border-orange-500"
@@ -231,6 +238,15 @@ export default function CreateAssignmentPage() {
                     </option>
                   ))}
                 </select>
+
+                {/* ************************************************
+                    * เพิ่ม: ไอคอนลูกศรชี้ลง (แสดงตลอดเวลา)
+                    * ใช้ right-5 เพื่อขยับไปทางซ้ายนิดนึง
+                    * ************************************************ */}
+                {!errors.course_id && (
+                    <ChevronDown className="absolute inset-y-0 right-5 w-5 h-full text-gray-500 pointer-events-none" />
+                )}
+                
                 {errors.course_id && (
                   <AlertCircle className="absolute right-3 top-3 h-4 w-4 text-[#9B2FAC]" />
                 )}
@@ -247,7 +263,8 @@ export default function CreateAssignmentPage() {
               </label>
               <div className="relative">
                 <select
-                  className={`w-full h-12 p-3 pr-10 border rounded-lg focus:ring-2 ${
+              
+                  className={`w-full h-12 p-3 pr-12 border rounded-lg appearance-none focus:ring-2 ${
                     errors.lesson_id
                       ? "border-[#9B2FAC] focus:border-[#9B2FAC] focus:ring-[#9B2FAC]"
                       : "border-gray-300 focus:ring-orange-500 focus:border-orange-500"
@@ -263,6 +280,15 @@ export default function CreateAssignmentPage() {
                     </option>
                   ))}
                 </select>
+
+                {/* ************************************************
+                    * เพิ่ม: ไอคอนลูกศรชี้ลง (แสดงตลอดเวลา)
+                    * ใช้ right-5 เพื่อขยับไปทางซ้ายนิดนึง
+                    * ************************************************ */}
+                {!errors.lesson_id && (
+                    <ChevronDown className="absolute inset-y-0 right-5 w-5 h-full text-gray-500 pointer-events-none" />
+                )}
+
                 {errors.lesson_id && (
                   <AlertCircle className="absolute right-3 top-3 h-4 w-4 text-[#9B2FAC]" />
                 )}
@@ -279,7 +305,8 @@ export default function CreateAssignmentPage() {
               </label>
               <div className="relative">
                 <select
-                  className={`w-full h-12 p-3 pr-10 border rounded-lg focus:ring-2 ${
+                 
+                  className={`w-full h-12 p-3 pr-12 border rounded-lg appearance-none focus:ring-2 ${
                     errors.sub_lesson
                       ? "border-[#9B2FAC] focus:border-[#9B2FAC] focus:ring-[#9B2FAC]"
                       : "border-gray-300 focus:ring-orange-500 focus:border-orange-500"
@@ -295,6 +322,15 @@ export default function CreateAssignmentPage() {
                     </option>
                   ))}
                 </select>
+
+                {/* ************************************************
+                    * เพิ่ม: ไอคอนลูกศรชี้ลง (แสดงตลอดเวลา)
+                    * ใช้ right-5 เพื่อขยับไปทางซ้ายนิดนึง
+                    * ************************************************ */}
+                {!errors.sub_lesson && (
+                    <ChevronDown className="absolute inset-y-0 right-5 w-5 h-full text-gray-500 pointer-events-none" />
+                )}
+                
                 {errors.sub_lesson && (
                   <AlertCircle className="absolute right-3 top-3 h-4 w-4 text-[#9B2FAC]" />
                 )}
@@ -314,7 +350,8 @@ export default function CreateAssignmentPage() {
                 <div className="relative">
                   <textarea
                     placeholder="Enter assignment question"
-                    className={`w-full h-32 p-3 pr-10 border rounded-lg resize-none focus:ring-2 ${
+                 
+                    className={`w-full h-32 p-3 pr-12 border rounded-lg resize-none focus:ring-2 ${
                       errors.question
                         ? "border-[#9B2FAC] focus:border-[#9B2FAC] focus:ring-[#9B2FAC]"
                         : "border-gray-300 focus:ring-orange-500 focus:border-orange-500"

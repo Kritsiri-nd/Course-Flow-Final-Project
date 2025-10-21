@@ -25,7 +25,7 @@ export default function Instructure() {
     <>
       <div className="flex flex-col items-center justify-center">
         {/* Hero Section - Desktop + Mobile Responsive */}
-        <div className="h-[600px] sm:h-[700px] w-[100vw] bg-[#E5ECF8] relative overflow-hidden">
+        <div className="h-[600px] sm:h-[700px] w-full bg-[#E5ECF8] relative overflow-hidden">
           {/* Wave - Desktop Only */}
           <svg
             width="1032"
@@ -262,7 +262,7 @@ export default function Instructure() {
           </svg>
 
           {/* Text - Desktop */}
-          <div className="absolute top-[165px] left-[160px] flex flex-col flex-start gap-[24px] w-[643px] hidden sm:flex">
+          <div className="absolute top-[165px] left-[160px] flex-col flex-start gap-[24px] w-[643px] hidden sm:flex">
             <p className="text-[66px] font-medium leading-[125%] tracking-[-2%] text-[#1A1A1A]">
               Best Virtual Classroom Software
             </p>
@@ -700,7 +700,7 @@ export default function Instructure() {
                 className="w-[12px] h-[13px] absolute  right-[25px] bottom-[710px]  sm:hidden z-10"
               />
       
-          <div className="h-auto lg:h-[742px] w-[100vw] flex flex-col gap-[20px] sm:gap-[30px] lg:gap-[25px] px-4 sm:px-6 lg:px-8 mt-[20px] sm:mt-20">
+          <div className="h-auto lg:h-[742px] w-full flex flex-col gap-[20px] sm:gap-[30px] lg:gap-[25px] px-4 sm:px-6 lg:px-8 mt-[20px] sm:mt-20">
             <p className="text-[24px] lg:text-4xl font-semibold text-center text-gray-900 justify-center items-center">
               Our Graduates
             </p>

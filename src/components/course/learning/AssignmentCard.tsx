@@ -1,6 +1,5 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import { Assignment } from "@/types";
 
@@ -114,7 +113,7 @@ export default function AssignmentCard({
   const getStatusStyle = (status: string) => {
     switch (status) {
       case "pending":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-[#FFFBDB] text-[#996500]";
       case "submitted":
         return "bg-green-100 text-green-800";
       default:
@@ -206,7 +205,7 @@ export default function AssignmentCard({
   };
 
   return (
-    <Card className="bg-blue-50/60 border-none p-6 md:p-8">
+    <div>
       {!lessonId ? (
         <p className="text-b2 text-muted-foreground">
           Select a lesson to view assignment.
@@ -226,13 +225,13 @@ export default function AssignmentCard({
             return (
               <div
                 key={assignment.id}
-                className="bg-blue-50 rounded-lg p-6 shadow-sm border border-blue-100"
+                className="bg-[#E5ECF8] rounded-lg p-6 shadow-sm border border-blue-100"
               >
                 {/* Header with Title and Status */}
                 <div className="flex justify-between items-start mb-6">
-                  <h3 className="text-2xl font-bold text-black">Assignment</h3>
+                  <h3 className="text-2xl font-normal text-black">Assignment</h3>
                   <span
-                    className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusStyle(
+                    className={`px-3 py-2 text-sm font-medium rounded-sm ${getStatusStyle(
                       status
                     )}`}
                   >
@@ -242,7 +241,7 @@ export default function AssignmentCard({
 
                 {/* Question */}
                 <div className="mb-6">
-                  <h4 className="text-lg font-medium text-gray-800 mb-4">
+                  <h4 className="text-lg font-normal text-black mb-4">
                     {assignment.question}
                   </h4>
                 </div>
@@ -278,7 +277,7 @@ export default function AssignmentCard({
                         handleAnswerChange(assignment.id, e.target.value)
                       }
                       placeholder="Answer..."
-                      className="w-full h-32 p-4 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full h-32 p-4 border border-gray-400 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                     />
                   )}
                 </div>
@@ -288,14 +287,12 @@ export default function AssignmentCard({
                   {!isSubmitted && (
                     <button
                       onClick={() => handleSubmit(assignment.id)}
-                      className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                      className="px-6 py-4 bg-[#2F5FAC] text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
                     >
                       Send Assignment
                     </button>
                   )}
-                  <span className="text-gray-500 text-sm">
-                    Assign within 2 days
-                  </span>
+                 
                 </div>
               </div>
             );
@@ -306,6 +303,6 @@ export default function AssignmentCard({
           No assignment for this lesson.
         </p>
       )}
-    </Card>
+    </div>
   );
 }
