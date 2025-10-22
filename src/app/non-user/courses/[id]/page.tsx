@@ -30,6 +30,7 @@ interface Course {
   instructor: string;
   durationHours: number;
   summary: string;
+  attachmentUrl: string | null;
   modules: {
     id: number;
     title: string;
@@ -66,6 +67,7 @@ type ApiCourse = {
   instructor: string | null;
   duration_hours?: number | null;
   summary?: string | null;
+  attachment_url?: string | null;
   created_at?: string | null;
   modules?: ApiModule[] | null;
 };
@@ -115,6 +117,7 @@ function mapApiCourseToUiCourse(api: ApiCourse): Course {
     videoUrl: api.video_url ?? "",
     instructor: api.instructor ?? "",
     durationHours: safeNumber(api.duration_hours ?? 0, 0),
+    attachmentUrl: api.attachment_url ?? null,
     modules,
   };
 }
@@ -128,6 +131,7 @@ export default function CourseDetailPage() {
   const [loading, setLoading] = useState(true);
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // Check enrollment status
   useEffect(() => {
@@ -240,6 +244,42 @@ export default function CourseDetailPage() {
     }
   };
 
+  const handleDownloadFile = async () => {
+    if (!course?.attachmentUrl || isDownloading) return;
+
+    setIsDownloading(true);
+
+    try {
+      // Fetch the file from Supabase
+      const response = await fetch(course.attachmentUrl);
+      if (!response.ok) throw new Error("Failed to download file");
+
+      // Get the blob
+      const blob = await response.blob();
+
+      // Extract filename from URL or use default
+      const urlParts = course.attachmentUrl.split("/");
+      const filename = urlParts[urlParts.length - 1] || "attachment";
+
+      // Create blob URL and trigger download
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      alert("Failed to download file. Please try again.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -327,38 +367,42 @@ export default function CourseDetailPage() {
                     Attach File
                   </h2>
                   <div className="mt-4 sm:mt-8">
-                    {/* Mock file - replace with actual file data from DB in future */}
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-center gap-3">
-                      <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
-                        <svg
-                          className="w-4 h-4 text-blue-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                    {course.attachmentUrl ? (
+                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-center gap-3">
+                        <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
+                          <svg
+                            className="w-4 h-4 text-blue-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-b2 font-medium text-gray-900">
+                            {course.attachmentUrl.split("/").pop() ||
+                              "Attachment"}
+                          </p>
+                        </div>
+                        <button
+                          onClick={handleDownloadFile}
+                          disabled={isDownloading}
+                          className="text-blue-600 hover:text-blue-800 text-b2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
+                          {isDownloading ? "Downloading..." : "Download"}
+                        </button>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-b2 font-medium text-gray-900">
-                          Service Design.pdf
-                        </p>
-                        <p className="text-b3 text-gray-500">68 mb</p>
+                    ) : (
+                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+                        <p className="text-b2 text-gray-500">No attach file</p>
                       </div>
-                      <button className="text-blue-600 hover:text-blue-800 text-b2 font-medium">
-                        Download
-                      </button>
-                    </div>
-
-                    {/* Uncomment below to show "No attach file" when no files */}
-                    {/* <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-                  <p className="text-b2 text-gray-500">No attach file</p>
-                </div> */}
+                    )}
                   </div>
                 </div>
 
