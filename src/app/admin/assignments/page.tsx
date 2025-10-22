@@ -16,7 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit, Plus } from "lucide-react";
+import { Edit, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { Assignment } from "@/types";
 import { assignmentService } from "@/services/assignmentService";
@@ -112,18 +112,21 @@ export default function Assignments() {
       <AdminPanel />
       <SidebarInset className="bg-gray-100">
         {/* header */}
-        <header className="flex h-23 shrink-0 items-center gap-2 bg-white border-b border-gray-300 px-4 sticky top-0 z-20">
-          <SidebarTrigger className="-ml-1" />
-          <h1 className="text-h3 font-semibold">Assignments</h1>
+        <header className="flex h-23 shrink-0 items-center gap-2 bg-white border-b border-gray-300 px-4 pr-12 sticky top-0 z-20">
+          
+          <h1 className="text-h3 font-semibold ml-7">Assignments</h1>
 
           {/* searchbar & add course button */}
           <div className="ml-auto gap-4 flex items-center">
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search courses..."
-              className="h-12 w-64 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search assignments..."
+                className="h-12 w-64 rounded-lg border border-gray-300 pl-10 pr-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
             <Link href="/admin/assignments/create">
               <Button className="bg-primary hover:bg-primary/90 text-primary-foreground h-15 rounded-lg px-8 cursor-pointer">
                 <Plus className="h-4 w-4" />
@@ -196,8 +199,8 @@ export default function Assignments() {
                       <TableCell className="text-rigth text-b3">
                         {new Date(assignment.created_at).toLocaleDateString()}
                       </TableCell>
-                      <TableCell className="text-rigth">
-                        <div className="flex gap-2">
+                      <TableCell className="py-3">
+                        <div className="flex gap-2 -ml-3">
                           <DeleteModalAlert
                             delText="assignment"
                             onDelete={() => handleDelete(assignment.id)}
@@ -205,7 +208,7 @@ export default function Assignments() {
                           />
                           <Link
                             href={`/admin/assignments/${assignment.id}/edit`}
-                            className="p-2 hover:bg-gray-200 rounded transition-colors"
+                            className="p-2 hover:bg-gray-200 rounded transition-colors cursor-pointer"
                             title="Edit"
                           >
                             <Edit className="h-4 w-4 text-blue-300" />

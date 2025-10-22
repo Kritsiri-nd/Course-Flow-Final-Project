@@ -22,7 +22,7 @@ export default function DeleteModalAlert({ delText, onDelete, isDeleting = false
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <button
-          className="p-2 hover:bg-gray-200 rounded transition-colors"
+          className="p-2 hover:bg-gray-200 rounded transition-colors cursor-pointer"
           title="Delete"
         >
           <Trash className="h-4 w-4 text-blue-300" />

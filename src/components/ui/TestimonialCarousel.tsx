@@ -33,19 +33,31 @@ const testimonials: TestimonialData[] = [
     id: 3,
     name: "John Smith",
     text: "The courses are well-structured and the instructors are very knowledgeable. A great learning experience.",
-    imageSrc: "/images/man.png"
+    imageSrc: "/images/m1.jpg"
   },
   {
     id: 4,
     name: "Emily White",
     text: "I learned so much in a short amount of time. The practical exercises were incredibly helpful.",
-    imageSrc: "/images/woman.png"
+    imageSrc: "/images/w2.jpg"
   },
   {
     id: 5,
     name: "David Green",
     text: "A fantastic resource for anyone looking to break into tech. The community support is also a big plus!",
-    imageSrc: "/images/man.png"
+    imageSrc: "/images/m2.jpg"
+  },
+  {
+    id: 6,
+    name: "Tony Stark",
+    text: "The hands-on projects and real-world examples made learning so much easier. I've already landed my first job thanks to the skills I gained here!",
+    imageSrc: "/images/m3.jpg"
+  },
+  {
+    id: 7,
+    name: "Robert Johnson",
+    text: "Amazing platform with comprehensive courses. The instructors are patient and the content is always up-to-date with industry standards.",
+    imageSrc: "/images/m4.jpg"
   },
 ];
 

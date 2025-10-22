@@ -90,7 +90,7 @@ export default function PaginationUI({
         >
           {/* Previous Button */}
           <button
-            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
             onClick={handlePrevPage}
             disabled={currentPage === 1}
             aria-label="Previous page"
@@ -105,10 +105,10 @@ export default function PaginationUI({
                 key={index}
                 className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                   page === currentPage
-                    ? "text-white bg-blue-600 border border-blue-600"
+                    ? "text-white bg-blue-600 border border-blue-600 cursor-pointer"
                     : page === "..."
                     ? "text-gray-500 cursor-default"
-                    : "text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700"
+                    : "text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 cursor-pointer"
                 }`}
                 onClick={() =>
                   typeof page === "number" && handlePageClick(page)
@@ -126,7 +126,7 @@ export default function PaginationUI({
 
           {/* Next Button */}
           <button
-            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
             onClick={handleNextPage}
             disabled={currentPage === totalPages}
             aria-label="Next page"
