@@ -9,6 +9,7 @@ interface Assignment {
   lessonTitle: string;
   question: string;
   answer: string;
+  modelAnswer?: string; // เฉลยจาก admin
   status: 'pending' | 'in-progress' | 'submitted' | 'overdue';
   courseId: string;
 }

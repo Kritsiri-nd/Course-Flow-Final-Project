@@ -9,6 +9,7 @@ interface Assignment {
   lessonTitle: string;
   question: string;
   answer: string;
+  modelAnswer?: string; // เฉลยจาก admin
   status: 'pending' | 'in-progress' | 'submitted' | 'overdue';
   courseId: string;
 }
@@ -122,8 +123,24 @@ export default function AssignmentCard({ assignment, onSubmit, onAnswerChange }:
           <h4 className="text-gray-800 font-medium mb-3">{assignment.question}</h4>
           
           {assignment.status === 'submitted' ? (
-            <div className="text-gray-600 leading-relaxed">
-              {assignment.answer}
+            <div className="space-y-4">
+              {/* User's Answer */}
+              <div>
+                <h5 className="text-gray-600 font-medium mb-2">Your Answer:</h5>
+                <div className="bg-gray-50 p-3 rounded-lg text-gray-700 leading-relaxed whitespace-pre-line">
+                  {assignment.answer}
+                </div>
+              </div>
+              
+              {/* Model Answer/Solution */}
+              {assignment.modelAnswer && (
+                <div>
+                  <h5 className="text-gray-600 font-medium mb-2">Model Answer (เฉลย):</h5>
+                  <div className="bg-blue-50 p-3 rounded-lg text-gray-700 leading-relaxed whitespace-pre-line border-l-4 border-blue-500">
+                    {assignment.modelAnswer}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <textarea

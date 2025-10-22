@@ -460,7 +460,7 @@ export default function EditAssignmentPage() {
             {/* Assignment Detail */}
             <div>
               <h3 className="text-b1 font-bold text-gray-700 mb-4">Assignment detail</h3>
-              <div>
+              <div className="mb-6">
                 <label className="block text-b3 font-medium text-gray-700 mb-2">
                   Assignment <span className="text-red-500">*</span>
                 </label>
@@ -482,6 +482,24 @@ export default function EditAssignmentPage() {
                 {errors.question && (
                   <p className="text-[#9B2FAC] text-sm mt-1">{errors.question}</p>
                 )}
+              </div>
+
+              {/* Answer/Solution Field */}
+              <div>
+                <label className="block text-b3 font-medium text-gray-700 mb-2">
+                  Answer
+                </label>
+                <div className="relative">
+                  <textarea
+                    placeholder="Enter answer/solution (optional)"
+                    className="w-full h-32 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    value={formData.answer}
+                    onChange={(e) => handleInputChange("answer", e.target.value)}
+                  />
+                </div>
+                <p className="text-gray-500 text-sm mt-1">
+                  This answer will be shown to students after they submit their assignment.
+                </p>
               </div>
             </div>
           </div>

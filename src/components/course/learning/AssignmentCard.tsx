@@ -249,26 +249,28 @@ export default function AssignmentCard({
                 {/* Answer Section */}
                 <div className="mb-6">
                   {isSubmitted ? (
-                    <div>
-                      <h5 className="text-gray-600 font-medium mb-3">
-                        {assignment.question.includes("4 elements")
-                          ? "Four Key Elements of Service Design"
-                          : "Answer:"}
-                      </h5>
-                      <div className="text-gray-700 leading-relaxed">
-                        {assignment.question.includes("4 elements") ? (
-                          <div className="space-y-2">
-                            <div className="ml-4">• People.</div>
-                            <div className="ml-4">• Processes.</div>
-                            <div className="ml-4">• Products.</div>
-                            <div className="ml-4">• Partners.</div>
-                          </div>
-                        ) : (
-                          <div className="whitespace-pre-line">
-                            {currentAnswer}
-                          </div>
-                        )}
+                    <div className="space-y-4">
+                      {/* User's Answer */}
+                      <div>
+                        <h5 className="text-gray-600 font-medium mb-3">
+                          Your Answer:
+                        </h5>
+                        <div className="bg-gray-50 p-4 rounded-lg text-gray-700 leading-relaxed whitespace-pre-line">
+                          {currentAnswer}
+                        </div>
                       </div>
+                      
+                      {/* Model Answer/Solution */}
+                      {assignment.answer && (
+                        <div>
+                          <h5 className="text-gray-600 font-medium mb-3">
+                            Model Answer (เฉลย):
+                          </h5>
+                          <div className="bg-blue-50 p-4 rounded-lg text-gray-700 leading-relaxed whitespace-pre-line border-l-4 border-blue-500">
+                            {assignment.answer}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <textarea
