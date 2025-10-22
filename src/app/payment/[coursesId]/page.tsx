@@ -124,95 +124,72 @@ export default function PaymentPage() {
         return value.replace(/\D/g, '').replace(/(.{2})/, '$1/');
     };
 
-    const handlePromptPay = async () => {
+    const handlePromptPay = async (promoCodeData?: any) => {
         if (!userId || !courseId || !course) {
-            alert("กรุณารอให้ระบบโหลดเสร็จ");
+            alert("Please wait for the system to load completely.");
             return;
         }
-
+    
         setLoading(true);
-
+    
         try {
-            // Generate reference number and timestamp
-            const refNo = `CF${Date.now()}`;
-            const createdAt = Date.now();
-
-            // Create PromptPay charge using our API (same as QR display page)
-            const response = await fetch('/api/payment/create-qr', {
+            // Call the single, secure checkout endpoint
+            const response = await fetch('/api/payment/checkout', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    amount: course.price * 100, // Convert to satang
-                    currency: 'thb',
+                    course_id: parseInt(courseId as string),
+                    user_id: userId,
+                    method: 'promptpay',
+                    promo_code_id: promoCodeData?.id || null, // Send promo code ID if available
                 }),
             });
-
+    
             const data = await response.json();
-
+    
             if (!response.ok) {
-                alert("สร้าง QR Code ไม่สำเร็จ: " + (data.error || "Unknown error"));
-                setLoading(false);
+                // Redirect to fail page with error from backend
+                const errorMessage = data.error || "Failed to initiate QR payment";
+                window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent(errorMessage)}&method=qr`;
                 return;
             }
-
-            // Extract QR image URL from different possible response structures
-            let qrImageUrl = '';
-            if (data && data.source && data.source.scannable_code && data.source.scannable_code.image) {
-                qrImageUrl = data.source.scannable_code.image.download_uri || data.source.scannable_code.image;
-            } else if (data && data.scannable_code && data.scannable_code.image) {
-                qrImageUrl = data.scannable_code.image.download_uri || data.scannable_code.image;
-            } else if (data && data.source && data.source.image) {
-                qrImageUrl = data.source.image.download_uri || data.source.image;
-            } else if (data && data.image) {
-                qrImageUrl = data.image.download_uri || data.image;
-            }
-
-            if (data && data.id && qrImageUrl) {
-                // Save payment record to database
-                try {
-                    await fetch('/api/payment/checkout', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            course_id: parseInt(courseId as string),
-                            user_id: userId,
-                            method: 'promptpay',
-                            charge_id: data.id
-                        })
-                    });
-                } catch (error) {
-                    console.error('Error saving payment record:', error);
-                }
-
-                // Redirect to QR display page with all necessary parameters
+    
+            const qrImageUrl = data.source?.scannable_code?.image?.download_uri;
+    
+            if (data.id && qrImageUrl) {
+                // Redirect to QR display page, passing all necessary data via URL params
+                const refNo = `CF${Date.now()}`;
+                const createdAt = Date.now();
                 const qrDisplayUrl = new URL(`/payment/${courseId}/qr-display`, window.location.origin);
+                
                 qrDisplayUrl.searchParams.set('chargeId', data.id);
                 qrDisplayUrl.searchParams.set('referenceNo', refNo);
                 qrDisplayUrl.searchParams.set('qrUrl', qrImageUrl);
                 qrDisplayUrl.searchParams.set('createdAt', createdAt.toString());
-
+                if (promoCodeData?.id) {
+                    qrDisplayUrl.searchParams.set('promoCodeId', promoCodeData.id.toString());
+                }
+    
                 window.location.href = qrDisplayUrl.toString();
             } else {
-                // Redirect to fail page instead of showing alert
-                window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent("QR Code response ไม่ถูกต้อง")}&method=qr`;
+                // Handle cases where the response is missing QR data
+                window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent("Invalid response from server when creating QR code.")}&method=qr`;
             }
+    
         } catch (error) {
-            console.error('Error:', error);
-            // Redirect to fail page instead of showing alert
-            const errorMessage = error instanceof Error ? error.message : "Unknown error";
-            window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent("เกิดข้อผิดพลาด: " + errorMessage)}&method=qr`;
+            console.error('Error handling PromptPay:', error);
+            const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+            window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent(errorMessage)}&method=qr`;
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleSubmit = async (e?: React.FormEvent) => {
-        if (e) e.preventDefault();
-
+    const handleSubmit = async (promoCodeData?: any) => {
         if (paymentMethod === 'qr') {
-            await handlePromptPay();
+            await handlePromptPay(promoCodeData);
             return;
         }
 
@@ -264,6 +241,8 @@ export default function PaymentPage() {
                             user_id: userId,
                             method: "card",
                             token,
+                            promo_code_id: promoCodeData?.id || null, // ส่งเฉพาะ ID
+                            // ❌ ไม่ส่ง discount_amount, original_amount, final_amount จาก Frontend
                         }),
                     });
 
@@ -338,6 +317,7 @@ export default function PaymentPage() {
                                 paymentMethod={paymentMethod}
                                 loading={loading}
                                 omiseKey={omiseKey}
+                                userId={userId || ''}
                                 onSubmit={handleSubmit}
                             />
                         </div>

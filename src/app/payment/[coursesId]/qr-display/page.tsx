@@ -30,6 +30,12 @@ export default function QRDisplayPage() {
   const [chargeId, setChargeId] = useState<string>('');
   const [qrCreatedAt, setQrCreatedAt] = useState<number | null>(null);
   const [isQrExpired, setIsQrExpired] = useState(false);
+  // เพิ่ม state สำหรับเก็บข้อมูลราคาที่คำนวณแล้ว
+  const [paymentAmounts, setPaymentAmounts] = useState<{
+    original_amount: number;
+    discount_amount: number;
+    final_amount: number;
+  } | null>(null);
 
     // Get URL search params for existing QR data
     const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
@@ -37,6 +43,7 @@ export default function QRDisplayPage() {
     const existingReferenceNo = searchParams?.get('referenceNo');
     const existingQrUrl = searchParams?.get('qrUrl');
     const existingCreatedAt = searchParams?.get('createdAt');
+    const existingPromoCodeId = searchParams?.get('promoCodeId');
 
   // Check if QR code is expired (Omise QR codes expire after 15 minutes)
   const checkQrExpiration = useCallback((createdAt: number) => {
@@ -100,6 +107,27 @@ export default function QRDisplayPage() {
     getCourse();
   }, [courseId]);
 
+  // ดึงข้อมูล payment record เพื่อดูราคาที่ Backend คำนวณแล้ว
+  useEffect(() => {
+    const getPaymentData = async () => {
+      if (chargeId) {
+        try {
+          // ดึงข้อมูล payment record จาก charge ID
+          const res = await fetch(`/api/payment/record/${chargeId}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.calculated_amounts) {
+              setPaymentAmounts(data.calculated_amounts);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching payment data:', error);
+        }
+      }
+    };
+    getPaymentData();
+  }, [chargeId]);
+
 
   const generateQRCode = useCallback(async () => {
     if (!userId || !courseId || !course) {
@@ -109,104 +137,69 @@ export default function QRDisplayPage() {
     setLoading(true);
 
     try {
-      // Generate reference number
       const refNo = `CF${Date.now()}`;
-      setReferenceNo(refNo);
       const createdAt = Date.now();
-      setQrCreatedAt(createdAt);
 
-      // Create PromptPay source using our API
-      const response = await fetch('/api/payment/create-qr', {
+      // Call the secure checkout endpoint
+      const response = await fetch('/api/payment/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          amount: course.price * 100, // Convert to satang
-          currency: 'thb',
+          course_id: parseInt(courseId as string),
+          user_id: userId,
+          method: 'promptpay',
+          // No need to send amount, backend will calculate it
+          promo_code_id: existingPromoCodeId ? parseInt(existingPromoCodeId) : null,
         }),
       });
 
       const data = await response.json();
 
-       if (!response.ok) {
-         // Redirect to fail page instead of setting status
-         window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent("Failed to create QR code")}&method=qr`;
-         return;
-       }
-
-      // Store charge ID for status checking
-      if (data && data.id) {
-        setChargeId(data.id);
-
-        // Save payment record to database
-        try {
-          await fetch('/api/payment/checkout', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              course_id: parseInt(courseId as string),
-              user_id: userId,
-              method: 'promptpay',
-              charge_id: data.id
-            })
-          });
-        } catch (error) {
-          console.error('Error saving payment record:', error);
-        }
+      if (!response.ok) {
+        const errorMessage = data.error || "Failed to create QR code";
+        window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent(errorMessage)}&method=qr`;
+        return;
       }
 
-      let qrImageUrl = '';
+      // Backend now returns the full charge object and payment details
+      if (data && data.id) {
+        setChargeId(data.id);
+        setReferenceNo(refNo);
+        setQrCreatedAt(createdAt);
+        
+        // Set payment amounts from the secure backend response
+        if (data.calculated_amounts) {
+          setPaymentAmounts(data.calculated_amounts);
+        }
 
-      // Check different possible response structures
-      if (data && data.source && data.source.scannable_code && data.source.scannable_code.image) {
-        setQrData(data.source);
-        qrImageUrl = data.source.scannable_code.image.download_uri || data.source.scannable_code.image;
-      } else if (data && data.scannable_code && data.scannable_code.image) {
-        setQrData(data);
-        qrImageUrl = data.scannable_code.image.download_uri || data.scannable_code.image;
-      } else if (data && data.source && data.source.image) {
-        qrImageUrl = data.source.image.download_uri || data.source.image;
-        setQrData({
-          scannable_code: {
-            image: data.source.image
-          }
-        });
-      } else if (data && data.image) {
-        qrImageUrl = data.image.download_uri || data.image;
-        setQrData({
-          scannable_code: {
-            image: data.image
-          }
-        });
-       } else {
-         // Redirect to fail page instead of setting status
-         window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent("Invalid QR response")}&method=qr`;
-         return;
-       }
+        const qrImageUrl = data.source?.scannable_code?.image?.download_uri;
 
-      // Update URL with QR parameters for persistence
-      if (qrImageUrl && data.id) {
-        const newUrl = new URL(window.location.href);
-        newUrl.searchParams.set('chargeId', data.id);
-        newUrl.searchParams.set('referenceNo', refNo);
-        newUrl.searchParams.set('qrUrl', qrImageUrl);
-        newUrl.searchParams.set('createdAt', createdAt.toString());
+        if (qrImageUrl) {
+          setQrData(data.source);
 
-        // Update URL without causing a page reload
-        window.history.replaceState({}, '', newUrl.toString());
+          // Update URL with new, secure data
+          const newUrl = new URL(window.location.href);
+          newUrl.searchParams.set('chargeId', data.id);
+          newUrl.searchParams.set('referenceNo', refNo);
+          newUrl.searchParams.set('qrUrl', qrImageUrl);
+          newUrl.searchParams.set('createdAt', createdAt.toString());
+          window.history.replaceState({}, '', newUrl.toString());
+        } else {
+          throw new Error("Invalid QR data in response from server");
+        }
+      } else {
+        throw new Error("Invalid response from server");
       }
 
       setLoading(false);
-     } catch (error) {
-       console.error('Error in generateQRCode:', error);
-       // Redirect to fail page instead of setting status
-       const errorMessage = error instanceof Error ? error.message : "Unknown error";
-       window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent("Error generating QR: " + errorMessage)}&method=qr`;
-     }
-  }, [userId, courseId, course]);
+    } catch (error) {
+      console.error('Error in generateQRCode:', error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent("Error generating QR: " + errorMessage)}&method=qr`;
+    }
+  }, [userId, courseId, course, existingPromoCodeId]);
 
    // Simple polling: Check enrollment status every 3 seconds
    useEffect(() => {
@@ -374,9 +367,16 @@ export default function QRDisplayPage() {
                     <p className="text-b2 font-regular text-gray-600">
                       Reference no. {referenceNo}
                     </p>
-                    <p className="text-h3 font-medium text-orange-500">
-                      THB {course.price.toLocaleString()}.00
-                    </p>
+                    {/* แสดงราคาสุดท้ายเท่านั้น */}
+                    {paymentAmounts ? (
+                      <p className="text-h3 font-medium text-orange-500">
+                        THB {paymentAmounts.final_amount.toLocaleString()}.00
+                      </p>
+                    ) : (
+                      <p className="text-h3 font-medium text-orange-500">
+                        THB {course?.price.toLocaleString()}.00
+                      </p>
+                    )}
                   </div>
 
                   <div className="flex justify-center">
