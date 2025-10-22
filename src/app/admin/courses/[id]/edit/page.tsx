@@ -22,6 +22,7 @@ import { PromoCodeSection } from "@/components/course/PromoCodeSection";
 import { FileUploadSection } from "@/components/course/FileUploadSection";
 import { LessonManagement } from "@/components/course/LessonManagement";
 import { validateCourseForm } from "@/lib/formUtils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CourseFormData {
   title: string;
@@ -30,6 +31,7 @@ interface CourseFormData {
   category: string;
   summary: string;
   description: string;
+  content: string;
   instructor: string;
   thumbnail: File | null;
   video_url: File | null;
@@ -57,7 +59,7 @@ export default function EditCoursePage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
@@ -75,6 +77,7 @@ export default function EditCoursePage() {
     category: "",
     summary: "",
     description: "",
+    content: "",
     instructor: "",
     thumbnail: null,
     video_url: null,
@@ -128,6 +131,7 @@ export default function EditCoursePage() {
           category: data?.category ?? "",
           summary: data?.summary ?? "",
           description: data?.description ?? "",
+          content: data?.content ?? "",
           instructor: data?.instructor ?? "",
         }));
 
@@ -325,6 +329,7 @@ export default function EditCoursePage() {
         title: formData.title,
         description: formData.description,
         summary: formData.summary,
+        content: formData.content,
         price: parseFloat(formData.price),
         currency: "THB",
         category: formData.category || "general",
@@ -392,6 +397,91 @@ export default function EditCoursePage() {
     }
   };
 
+  // Loading skeleton component
+  const CourseFormSkeleton = () => (
+    <div className="max-w-4xl mx-auto bg-white rounded-lg p-6 shadow-sm border border-gray-200 space-y-8">
+      {/* Course Information Skeleton */}
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      </div>
+
+      {/* Promo Code Section Skeleton */}
+      <div className="space-y-4">
+        <div className="flex items-center space-x-2">
+          <Skeleton className="h-4 w-4" />
+          <Skeleton className="h-4 w-32" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </div>
+      </div>
+
+      {/* Summary, Description and Content Skeleton */}
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-20 w-full" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-48 w-full" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+      </div>
+
+      {/* File Upload Section Skeleton */}
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-32 w-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-32 w-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-32 w-full" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <SidebarProvider>
       <AdminPanel />
@@ -404,14 +494,18 @@ export default function EditCoursePage() {
               onClick={() => router.push("/admin/courses")}
             />
             <span className="text-[#9AA1B9] font-inter font-medium text-2xl leading-[125%] tracking-[-0.02em] align-middle">Course</span>
-            <span className="text-black font-inter font-bold text-2xl leading-[125%] tracking-[-0.02em] align-middle">&apos;{formData.title || `ID: ${courseId}`}&apos;</span>
+            {isLoading ? (
+              <Skeleton className="h-8 w-48 ml-2" />
+            ) : (
+              <span className="text-black font-inter font-bold text-2xl leading-[125%] tracking-[-0.02em] align-middle">&apos;{formData.title || `ID: ${courseId}`}&apos;</span>
+            )}
           </div>
 
           <div className="ml-auto gap-4 flex items-center">
             <Button
               variant="outline"
               onClick={handleCancel}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isLoading}
               className="w-[119px] h-[60px] px-8 py-[18px] gap-[10px] rounded-xl border border-[#F47E20] text-[#F47E20] shadow-[4px_4px_24px_0px_#00000014] opacity-100 text-center font-inter font-bold text-base leading-[150%] tracking-normal hover:bg-transparent hover:text-[#F47E20] cursor-pointer disabled:opacity-50"
             >
               Cancel
@@ -419,13 +513,18 @@ export default function EditCoursePage() {
             <Button
               variant="outline"
               onClick={handleSubmit}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isLoading}
               className="w-[119px] h-[60px] px-8 py-[18px] gap-[10px] rounded-xl bg-[#2F5FAC] text-white shadow-[4px_4px_24px_0px_#00000014] opacity-100 text-center font-inter font-bold text-base leading-[150%] tracking-normal hover:bg-[#2F5FAC] hover:text-white cursor-pointer disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Saving...
+                  Saving
+                </>
+              ) : isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Loading
                 </>
               ) : (
                 "Edit"
@@ -435,100 +534,131 @@ export default function EditCoursePage() {
         </header>
 
         <div className="flex-1 overflow-auto p-8">
-          <div className="max-w-4xl mx-auto bg-white rounded-lg p-6 shadow-sm border border-gray-200 space-y-8">
-            <CourseInformation
-              formData={formData}
-              errors={errors}
-              onInputChange={handleInputChange}
-            />
-
-            <PromoCodeSection
-              promoCode={promoCode}
-              onPromoCodeChange={handlePromoCodeChange}
-            />
-
-            <div>
-              <label className="block text-b3 font-medium text-gray-700 mb-2">
-                Course summary <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <textarea
-                  placeholder="Enter course summary"
-                  className={`w-full h-[72px] p-3 pr-10 border rounded-lg resize-none focus:ring-2 ${
-                    errors.summary
-                      ? "border-[#9B2FAC] focus:border-[#9B2FAC] focus:ring-[#9B2FAC]"
-                      : "border-gray-300 focus:ring-orange-500 focus:border-orange-500"
-                  }`}
-                  value={formData.summary}
-                  onChange={(e) => handleInputChange("summary", e.target.value)}
+          {isLoading ? (
+            <CourseFormSkeleton />
+          ) : (
+            <>
+              <div className="max-w-4xl mx-auto bg-white rounded-lg p-6 shadow-sm border border-gray-200 space-y-8">
+                <CourseInformation
+                  formData={formData}
+                  errors={errors}
+                  onInputChange={handleInputChange}
                 />
-                {errors.summary && (
-                  <AlertCircle className="absolute right-3 top-3 h-4 w-4 text-[#9B2FAC]" />
-                )}
-              </div>
-              {errors.summary && (
-                <p className="text-[#9B2FAC] text-sm mt-1">{errors.summary}</p>
-              )}
-            </div>
 
-            <div>
-              <label className="block text-b3 font-medium text-gray-700 mb-2">
-                Course detail <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <textarea
-                  placeholder="Enter course detail"
-                  className={`w-full h-[192px] p-3 pr-10 border rounded-lg resize-none focus:ring-2 ${
-                    errors.description
-                      ? "border-[#9B2FAC] focus:border-[#9B2FAC] focus:ring-[#9B2FAC]"
-                      : "border-gray-300 focus:ring-orange-500 focus:border-orange-500"
-                  }`}
-                  value={formData.description}
-                  onChange={(e) => handleInputChange("description", e.target.value)}
+                <PromoCodeSection
+                  promoCode={promoCode}
+                  onPromoCodeChange={handlePromoCodeChange}
                 />
-                {errors.description && (
-                  <AlertCircle className="absolute right-3 top-3 h-4 w-4 text-[#9B2FAC]" />
-                )}
+
+                <div>
+                  <label className="block text-b3 font-medium text-gray-700 mb-2">
+                    Course summary <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <textarea
+                      placeholder="Enter course summary"
+                      className={`w-full h-[72px] p-3 pr-10 border rounded-lg resize-none focus:ring-2 ${
+                        errors.summary
+                          ? "border-[#9B2FAC] focus:border-[#9B2FAC] focus:ring-[#9B2FAC]"
+                          : "border-gray-300 focus:ring-orange-500 focus:border-orange-500"
+                      }`}
+                      value={formData.summary}
+                      onChange={(e) => handleInputChange("summary", e.target.value)}
+                    />
+                    {errors.summary && (
+                      <AlertCircle className="absolute right-3 top-3 h-4 w-4 text-[#9B2FAC]" />
+                    )}
+                  </div>
+                  {errors.summary && (
+                    <p className="text-[#9B2FAC] text-sm mt-1">{errors.summary}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-b3 font-medium text-gray-700 mb-2">
+                    Course detail <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <textarea
+                      placeholder="Enter course detail"
+                      className={`w-full h-[192px] p-3 pr-10 border rounded-lg resize-none focus:ring-2 ${
+                        errors.description
+                          ? "border-[#9B2FAC] focus:border-[#9B2FAC] focus:ring-[#9B2FAC]"
+                          : "border-gray-300 focus:ring-orange-500 focus:border-orange-500"
+                      }`}
+                      value={formData.description}
+                      onChange={(e) => handleInputChange("description", e.target.value)}
+                    />
+                    {errors.description && (
+                      <AlertCircle className="absolute right-3 top-3 h-4 w-4 text-[#9B2FAC]" />
+                    )}
+                  </div>
+                  {errors.description && (
+                    <p className="text-[#9B2FAC] text-sm mt-1">{errors.description}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-b3 font-medium text-gray-700 mb-2">
+                    Course content
+                  </label>
+                  <div className="relative">
+                    <textarea
+                      placeholder="Enter course content (optional)"
+                      className={`w-full h-[128px] p-3 pr-10 border rounded-lg resize-none focus:ring-2 ${
+                        errors.content
+                          ? "border-[#9B2FAC] focus:border-[#9B2FAC] focus:ring-[#9B2FAC]"
+                          : "border-gray-300 focus:ring-orange-500 focus:border-orange-500"
+                      }`}
+                      value={formData.content}
+                      onChange={(e) => handleInputChange("content", e.target.value)}
+                    />
+                    {errors.content && (
+                      <AlertCircle className="absolute right-3 top-3 h-4 w-4 text-[#9B2FAC]" />
+                    )}
+                  </div>
+                  {errors.content && (
+                    <p className="text-[#9B2FAC] text-sm mt-1">{errors.content}</p>
+                  )}
+                </div>
+
+                <FileUploadSection
+                  formData={formData}
+                  errors={errors}
+                  previewThumbnailUrl={previewThumbnailUrl}
+                  previewVideoUrl={previewVideoUrl}
+                  uploadedThumbnailUrl={uploadedThumbnailUrl}
+                  uploadedVideoUrl={uploadedVideoUrl}
+                  uploadedAttachedFileUrl={uploadedAttachedFileUrl}
+                  isUploadingAttachment={isUploadingAttachment}
+                  isUploadingThumbnail={isUploadingThumbnail}
+                  isUploadingVideo={isUploadingVideo}
+                  onFileUpload={handleFileUpload}
+                  onClearThumbnail={clearThumbnail}
+                  onClearVideo={clearVideo}
+                  onClearAttachment={clearAttachment}
+                />
               </div>
-              {errors.description && (
-                <p className="text-[#9B2FAC] text-sm mt-1">{errors.description}</p>
-              )}
-            </div>
 
-            <FileUploadSection
-              formData={formData}
-              errors={errors}
-              previewThumbnailUrl={previewThumbnailUrl}
-              previewVideoUrl={previewVideoUrl}
-              uploadedThumbnailUrl={uploadedThumbnailUrl}
-              uploadedVideoUrl={uploadedVideoUrl}
-              uploadedAttachedFileUrl={uploadedAttachedFileUrl}
-              isUploadingAttachment={isUploadingAttachment}
-              isUploadingThumbnail={isUploadingThumbnail}
-              isUploadingVideo={isUploadingVideo}
-              onFileUpload={handleFileUpload}
-              onClearThumbnail={clearThumbnail}
-              onClearVideo={clearVideo}
-              onClearAttachment={clearAttachment}
-            />
-          </div>
-
-          <LessonManagement
-            lessons={lessons}
-            errors={errors}
-            onLessonsChange={handleLessonsChange}
-            courseId={courseId}
-          />
+              <LessonManagement
+                lessons={lessons}
+                errors={errors}
+                onLessonsChange={handleLessonsChange}
+                courseId={courseId}
+              />
+            </>
+          )}
           {/* Bottom actions */}
-          <div className="max-w-4xl mx-auto mt-6 flex justify-end">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <button
-                  className="p-0 m-0 bg-transparent border-0 text-[#2F5FAC] font-inter font-bold text-base leading-[150%] tracking-normal cursor-pointer"
-                >
-                  Delete Course
-                </button>
-              </AlertDialogTrigger>
+          {!isLoading && (
+            <div className="max-w-4xl mx-auto mt-6 flex justify-end">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button
+                    className="p-0 m-0 bg-transparent border-0 text-[#2F5FAC] font-inter font-bold text-base leading-[150%] tracking-normal cursor-pointer"
+                  >
+                    Delete Course
+                  </button>
+                </AlertDialogTrigger>
               <AlertDialogContent className="max-w-md p-0 !rounded-xl">
                 <AlertDialogHeader>
                   <AlertDialogTitle className="text-b1 font-medium h-14 border-b border-gray-300 py-4 px-6 flex justify-between items-center">
@@ -547,10 +677,17 @@ export default function EditCoursePage() {
                 <AlertDialogFooter className="pb-6 pt-2 px-6 flex gap-3 !justify-center">
                   <AlertDialogAction
                     asChild
-                    className="h-15 w-2/3 border border-orange-500 !text-orange-500 bg-transparent hover:bg-orange-100 px-4 py-2 rounded-lg text-b2 font-medium"
+                    className="h-15 w-2/3 border border-orange-500 !text-orange-500 bg-transparent hover:bg-orange-100 px-4 py-2 rounded-lg text-b2 font-medium disabled:opacity-50"
                   >
                     <button onClick={handleDelete} disabled={isDeleting}>
-                      {isDeleting ? "Deleting..." : "Yes, I want to delete this course"}
+                      {isDeleting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2 inline" />
+                          Deleting...
+                        </>
+                      ) : (
+                        "Yes, I want to delete this course"
+                      )}
                     </button>
                   </AlertDialogAction>
                   <AlertDialogCancel className="h-15 w-1/3 bg-[#2F5FAC] hover:bg-[#2F5FAC] !text-white px-4 py-2 rounded-lg text-b2 font-medium">
@@ -560,6 +697,7 @@ export default function EditCoursePage() {
               </AlertDialogContent>
             </AlertDialog>
           </div>
+          )}
         </div>
       </SidebarInset>
     </SidebarProvider>

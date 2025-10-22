@@ -36,6 +36,7 @@ import { CSS } from "@dnd-kit/utilities";
 type SubLesson = {
   id: number;
   name: string;
+  content: string;
   file: File | null;
   previewUrl?: string | null;
   existingUrl?: string | null;
@@ -58,6 +59,7 @@ interface SortableSubLessonProps {
   subLesson: SubLesson;
   onRemove: (id: number) => void;
   onChangeName: (id: number, value: string) => void;
+  onChangeContent: (id: number, value: string) => void;
   onFilePick: (id: number, file: File | null) => void;
   onClearVideo: (id: number) => void;
   fileInputsRef: React.MutableRefObject<
@@ -70,6 +72,7 @@ function SortableSubLesson({
   subLesson,
   onRemove,
   onChangeName,
+  onChangeContent,
   onFilePick,
   onClearVideo,
   fileInputsRef,
@@ -126,49 +129,67 @@ function SortableSubLesson({
         </div>
       </div>
 
-      <div className="pl-7">
-        <label className="block font-inter font-normal text-[16px] leading-[150%] tracking-[0%] text-black mb-2">
-          Video <span className="text-red-500">*</span>
-        </label>
-        <div className="flex items-center gap-6">
-          {subLesson.previewUrl ? (
-            <div className="relative w-[160px] h-[160px]">
-              <video
-                src={subLesson.previewUrl}
-                className="w-[160px] h-[160px] rounded-[12px] object-cover"
-                controls
-              />
-              <button
-                type="button"
-                onClick={() => onClearVideo(subLesson.id)}
-                disabled={isDeletingVideo}
-                className="absolute top-2 right-2 h-7 w-7 rounded-full bg-[#6B3FEA] text-white flex items-center justify-center shadow-md hover:bg-[#5a2fe4] focus:outline-none focus:ring-2 focus:ring-[#6B3FEA]/40 disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Clear video"
-              >
-                {isDeletingVideo ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <X className="h-4 w-4" />
-                )}
-              </button>
-            </div>
-          ) : (
-            <label className="w-[160px] h-[160px] rounded-[12px] border border-dashed border-[#D6D9E4] bg-white flex flex-col items-center justify-center text-[#2F5FAC] cursor-pointer hover:bg-gray-50">
-              <Plus className="h-5 w-5 mb-1" />
-              <span className="text-xs">Upload Video</span>
-              <input
-                ref={(el) => {
-                  fileInputsRef.current[subLesson.id] = el;
-                }}
-                type="file"
-                accept="video/*"
-                className="hidden"
-                onChange={(e) =>
-                  onFilePick(subLesson.id, e.target.files?.[0] || null)
-                }
-              />
-            </label>
-          )}
+      <div className="flex items-start gap-3 mb-4">
+        <div className="w-7"></div>
+        <div className="flex-1">
+          <label className="block font-inter font-normal text-[16px] leading-[150%] tracking-[0%] text-black mb-2">
+            Content
+          </label>
+          <textarea
+            placeholder="Enter sub-lesson content (optional)"
+            value={subLesson.content}
+            onChange={(e) => onChangeContent(subLesson.id, e.target.value)}
+            className="w-full h-[80px] p-3 border border-[#D6D9E4] rounded-lg resize-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white text-black placeholder:text-[#9AA1B9] font-inter font-normal text-base leading-[150%] tracking-[0%]"
+          />
+        </div>
+      </div>
+
+      <div className="pl-7 space-y-4">
+
+        <div>
+          <label className="block font-inter font-normal text-[16px] leading-[150%] tracking-[0%] text-black mb-2">
+            Video <span className="text-red-500">*</span>
+          </label>
+          <div className="flex items-center gap-6">
+            {subLesson.previewUrl ? (
+              <div className="relative w-[160px] h-[160px]">
+                <video
+                  src={subLesson.previewUrl}
+                  className="w-[160px] h-[160px] rounded-[12px] object-cover"
+                  controls
+                />
+                <button
+                  type="button"
+                  onClick={() => onClearVideo(subLesson.id)}
+                  disabled={isDeletingVideo}
+                  className="absolute top-2 right-2 h-7 w-7 rounded-full bg-[#6B3FEA] text-white flex items-center justify-center shadow-md hover:bg-[#5a2fe4] focus:outline-none focus:ring-2 focus:ring-[#6B3FEA]/40 disabled:opacity-50 disabled:cursor-not-allowed"
+                  aria-label="Clear video"
+                >
+                  {isDeletingVideo ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <X className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+            ) : (
+              <label className="w-[160px] h-[160px] rounded-[12px] border border-dashed border-[#D6D9E4] bg-white flex flex-col items-center justify-center text-[#2F5FAC] cursor-pointer hover:bg-gray-50">
+                <Plus className="h-5 w-5 mb-1" />
+                <span className="text-xs">Upload Video</span>
+                <input
+                  ref={(el) => {
+                    fileInputsRef.current[subLesson.id] = el;
+                  }}
+                  type="file"
+                  accept="video/*"
+                  className="hidden"
+                  onChange={(e) =>
+                    onFilePick(subLesson.id, e.target.files?.[0] || null)
+                  }
+                />
+              </label>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -245,7 +266,7 @@ export function SubLessonForm({
     const nextId = Math.max(0, ...subLessons.map((s) => s.id)) + 1;
     onSubLessonsChange([
       ...subLessons,
-      { id: nextId, name: "", file: null, previewUrl: null },
+      { id: nextId, name: "", content: "", file: null, previewUrl: null },
     ]);
   };
 
@@ -256,6 +277,12 @@ export function SubLessonForm({
   const changeSubLessonName = (id: number, value: string) => {
     onSubLessonsChange(
       subLessons.map((s) => (s.id === id ? { ...s, name: value } : s))
+    );
+  };
+
+  const changeSubLessonContent = (id: number, value: string) => {
+    onSubLessonsChange(
+      subLessons.map((s) => (s.id === id ? { ...s, content: value } : s))
     );
   };
 
@@ -405,6 +432,7 @@ export function SubLessonForm({
                 subLesson={s}
                 onRemove={removeSubLesson}
                 onChangeName={changeSubLessonName}
+                onChangeContent={changeSubLessonContent}
                 onFilePick={onFilePick}
                 onClearVideo={clearVideo}
                 fileInputsRef={fileInputsRef}
