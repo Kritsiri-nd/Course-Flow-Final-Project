@@ -270,7 +270,7 @@ export default function CourseDetailPage() {
   // );
   return (
     <>
-      <div className="bg-white pt-2 pb-8 sm:pb-16 sm:pt-16 px-2 sm:px-6 md:px-8">
+      <div className="bg-white pt-2 pb-8 sm:pb-16 sm:pt-16 px-4 sm:px-6 md:px-8">
         {/* Back Button */}
         <div className="border-none mb-3">
           <div className="max-w-[1240px] mx-auto">
@@ -481,7 +481,7 @@ export default function CourseDetailPage() {
             <h2 className="sm:text-h2 text-h3 font-semibold text-center mb-6 sm:mb-14">
               Other Interesting Courses
             </h2>
-            <div className="mt-0 sm:mt-10 px-2 sm:px-4 md:px-6 lg:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="mt-0 sm:mt-10 px-4 md:px-6 lg:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {otherCourses.slice(0, 3).map((c) => {
                 const courseLessons = c.modules.reduce(
                   (acc, m) => acc + m.lessons.length,
