@@ -134,7 +134,7 @@ export default function AdminCourses() {
               />
             </div>
             <Link href="/admin/courses/create">
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground h-15 rounded-lg px-8">
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground h-15 rounded-lg px-8 cursor-pointer">
                 <Plus className="h-4 w-4" />
                 Add course
               </Button>
@@ -253,7 +253,7 @@ export default function AdminCourses() {
                           />
                           <Link
                             href={`/admin/courses/${c.id}/edit`}
-                            className="p-2 hover:bg-gray-200 rounded transition-colors"
+                            className="p-2 hover:bg-gray-200 rounded transition-colors cursor-pointer"
                             title="Edit"
                           >
                             <Edit className="h-4 w-4 text-blue-300" />

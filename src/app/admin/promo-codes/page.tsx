@@ -94,7 +94,7 @@ export default function PromoCodeListPage() {
               />
             </div>
             <Link href="/admin/promo-codes/new">
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground h-15 rounded-lg px-8">
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground h-15 rounded-lg px-8 cursor-pointer">
                 <Plus className="h-4 w-4" />
                 Add promo code
               </Button>
@@ -159,7 +159,7 @@ export default function PromoCodeListPage() {
                         />
                         <Link
                           href={`/admin/promo-codes/${promo.id}/edit`}
-                          className="p-2 hover:bg-gray-200 rounded transition-colors"
+                          className="p-2 hover:bg-gray-200 rounded transition-colors cursor-pointer"
                           title="Edit"
                         >
                           <Edit className="h-4 w-4 text-blue-300" />

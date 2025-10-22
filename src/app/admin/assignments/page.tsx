@@ -208,7 +208,7 @@ export default function Assignments() {
                           />
                           <Link
                             href={`/admin/assignments/${assignment.id}/edit`}
-                            className="p-2 hover:bg-gray-200 rounded transition-colors"
+                            className="p-2 hover:bg-gray-200 rounded transition-colors cursor-pointer"
                             title="Edit"
                           >
                             <Edit className="h-4 w-4 text-blue-300" />
