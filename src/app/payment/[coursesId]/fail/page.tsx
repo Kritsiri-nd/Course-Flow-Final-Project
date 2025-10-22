@@ -9,8 +9,6 @@ export default function PaymentFailPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const courseId = params?.coursesId;
-  const error = searchParams?.get('error');
-  const method = searchParams?.get('method'); // เพิ่ม method parameter
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -29,14 +27,9 @@ export default function PaymentFailPage() {
                 </svg>
               </div>
               <h3 className="text-h3 font-medium text-black mb-2">Payment failed</h3>
-              <p className="text-b2 font-regular text-gray-700 mb-6 leading-8">
+              <p className="text-b2 font-regular text-gray-700 mb-6 !leading-normal">
                 {"Please check your payment details and try again"}
               </p>
-              {error && method === 'card' && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                  <p className="text-sm text-red-600 mt-1">{error}</p>
-                </div>
-              )}
               <Link
                 href={`/payment/${courseId}`}
                 className="block w-full max-w-[321px] bg-blue-500 text-white py-3 px-4 rounded-md hover:bg-blue-600 mx-auto"
