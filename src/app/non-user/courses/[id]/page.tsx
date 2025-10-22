@@ -30,6 +30,7 @@ interface Course {
   instructor: string;
   durationHours: number;
   summary: string;
+  attachmentUrl: string | null;
   modules: {
     id: number;
     title: string;
@@ -66,6 +67,7 @@ type ApiCourse = {
   instructor: string | null;
   duration_hours?: number | null;
   summary?: string | null;
+  attachment_url?: string | null;
   created_at?: string | null;
   modules?: ApiModule[] | null;
 };
@@ -77,6 +79,27 @@ function extractYouTubeId(url: string): string {
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
   const match = url.match(regExp);
   return match && match[2].length === 11 ? match[2] : "";
+}
+
+// Function to check if URL is YouTube
+function isYouTubeUrl(url: string): boolean {
+  if (!url) return false;
+  return url.includes("youtube.com") || url.includes("youtu.be");
+}
+
+// Function to format file size
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+}
+
+// Function to get random items from array
+function getRandomItems<T>(array: T[], count: number): T[] {
+  const shuffled = [...array].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, Math.min(count, array.length));
 }
 
 function mapApiCourseToUiCourse(api: ApiCourse): Course {
@@ -115,6 +138,7 @@ function mapApiCourseToUiCourse(api: ApiCourse): Course {
     videoUrl: api.video_url ?? "",
     instructor: api.instructor ?? "",
     durationHours: safeNumber(api.duration_hours ?? 0, 0),
+    attachmentUrl: api.attachment_url ?? null,
     modules,
   };
 }
@@ -125,9 +149,12 @@ export default function CourseDetailPage() {
   const id = params?.id as string;
   const [course, setCourse] = useState<Course | null>(null);
   const [otherCourses, setOtherCourses] = useState<Course[]>([]);
+  const [randomCourses, setRandomCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [fileSize, setFileSize] = useState<string>("");
 
   // Check enrollment status
   useEffect(() => {
@@ -195,6 +222,8 @@ export default function CourseDetailPage() {
           // Filter out current course
           const filtered = mapped.filter((c) => c.id !== parseInt(id));
           setOtherCourses(filtered);
+          // Random 3 courses to display
+          setRandomCourses(getRandomItems(filtered, 3));
         }
       } catch (error) {
         console.error("Error fetching course:", error);
@@ -207,6 +236,35 @@ export default function CourseDetailPage() {
       fetchCourse();
     }
   }, [id]);
+
+  // Fetch file size
+  useEffect(() => {
+    const fetchFileSize = async () => {
+      if (!course?.attachmentUrl) {
+        setFileSize("");
+        return;
+      }
+
+      try {
+        const response = await fetch(course.attachmentUrl, {
+          method: "HEAD",
+        });
+
+        if (response.ok) {
+          const contentLength = response.headers.get("Content-Length");
+          if (contentLength) {
+            const sizeInBytes = parseInt(contentLength, 10);
+            setFileSize(formatFileSize(sizeInBytes));
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching file size:", error);
+        setFileSize("");
+      }
+    };
+
+    fetchFileSize();
+  }, [course?.attachmentUrl]);
 
   const handleAddToWishlist = async () => {
     if (!course || isAddingToWishlist) return;
@@ -240,6 +298,42 @@ export default function CourseDetailPage() {
     }
   };
 
+  const handleDownloadFile = async () => {
+    if (!course?.attachmentUrl || isDownloading) return;
+
+    setIsDownloading(true);
+
+    try {
+      // Fetch the file from Supabase
+      const response = await fetch(course.attachmentUrl);
+      if (!response.ok) throw new Error("Failed to download file");
+
+      // Get the blob
+      const blob = await response.blob();
+
+      // Extract filename from URL or use default
+      const urlParts = course.attachmentUrl.split("/");
+      const filename = urlParts[urlParts.length - 1] || "attachment";
+
+      // Create blob URL and trigger download
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      alert("Failed to download file. Please try again.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -270,7 +364,7 @@ export default function CourseDetailPage() {
   // );
   return (
     <>
-      <div className="bg-white pt-2 pb-8 sm:pb-16 sm:pt-16 px-2 sm:px-6 md:px-8">
+      <div className="bg-white pt-2 pb-8 sm:pb-16 sm:pt-16 px-4 sm:px-6 md:px-8">
         {/* Back Button */}
         <div className="border-none mb-3">
           <div className="max-w-[1240px] mx-auto">
@@ -290,21 +384,16 @@ export default function CourseDetailPage() {
               {/* Video/Image */}
               <div className="relative">
                 <Card className="overflow-hidden !p-0">
-                  <div
-                    className="relative aspect-video !m-0"
-                    style={{
-                      aspectRatio: "739/460",
-                    }}
-                  >
-                    <iframe
-                      src={`https://www.youtube.com/embed/${extractYouTubeId(
-                        course.videoUrl
-                      )}`}
-                      className="w-full h-full !m-0 !p-0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      title={course.title}
-                    />
+                  <div className="relative aspect-video !m-0">
+                    <video
+                      src={course.videoUrl}
+                      poster={course.thumbnail}
+                      controls
+                      className="w-full h-full aspect-video !m-0 !p-0 object-cover"
+                      controlsList="nodownload"
+                    >
+                      Your browser does not support the video tag.
+                    </video>
                   </div>
                 </Card>
               </div>
@@ -316,7 +405,7 @@ export default function CourseDetailPage() {
                   <h2 className="sm:text-h2 text-h3 font-semibold">
                     Course Detail
                   </h2>
-                  <div className="text-b2 text-muted-foreground leading-relaxed space-y-4 mt-4 sm:mt-8">
+                  <div className="text-b2 text-muted-foreground !leading-snug space-y-4 mt-4 sm:mt-8">
                     <p>{course.description}</p>
                   </div>
                 </div>
@@ -327,38 +416,50 @@ export default function CourseDetailPage() {
                     Attach File
                   </h2>
                   <div className="mt-4 sm:mt-8">
-                    {/* Mock file - replace with actual file data from DB in future */}
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-center gap-3">
-                      <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
-                        <svg
-                          className="w-4 h-4 text-blue-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-b2 font-medium text-gray-900">
-                          Service Design.pdf
-                        </p>
-                        <p className="text-b3 text-gray-500">68 mb</p>
-                      </div>
-                      <button className="text-blue-600 hover:text-blue-800 text-b2 font-medium">
-                        Download
+                    {course.attachmentUrl ? (
+                      <button
+                        onClick={handleDownloadFile}
+                        disabled={isDownloading}
+                        className="w-full md:w-auto"
+                      >
+                        <div className="bg-blue-100 border-none rounded-lg p-4 flex items-center gap-3">
+                          <div className="w-14 h-14 bg-white rounded flex items-center justify-center">
+                            <svg
+                              className="w-6 h-6 text-blue-500"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                              />
+                            </svg>
+                          </div>
+                          <div className="flex flex-col gap-2 items-start">
+                            {isDownloading ? (
+                              "Downloading..."
+                            ) : (
+                              <p className="text-b2 font-medium text-gray-900">
+                                {course.attachmentUrl.split("/").pop() ||
+                                  "Attachment"}
+                              </p>
+                            )}
+                            {fileSize && (
+                              <p className="text-b4 text-blue-500">
+                                {fileSize}
+                              </p>
+                            )}
+                          </div>
+                        </div>
                       </button>
-                    </div>
-
-                    {/* Uncomment below to show "No attach file" when no files */}
-                    {/* <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-                  <p className="text-b2 text-gray-500">No attach file</p>
-                </div> */}
+                    ) : (
+                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+                        <p className="text-b2 text-gray-500">No attach file</p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -437,7 +538,7 @@ export default function CourseDetailPage() {
                   <div className="space-y-3 pt-10 border-t border-gray-400">
                     {isEnrolled ? (
                       <Button
-                        className="w-full py-6 bg-green-600 hover:bg-green-700 text-b2 text-white"
+                        className="w-full py-6 bg-blue-500 hover:bg-blue-600 text-b2 text-white"
                         onClick={() =>
                           router.push(`/user/courses/${course.id}/learning`)
                         }
@@ -481,8 +582,8 @@ export default function CourseDetailPage() {
             <h2 className="sm:text-h2 text-h3 font-semibold text-center mb-6 sm:mb-14">
               Other Interesting Courses
             </h2>
-            <div className="mt-0 sm:mt-10 px-2 sm:px-4 md:px-6 lg:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {otherCourses.slice(0, 3).map((c) => {
+            <div className="mt-0 sm:mt-10 px-4 md:px-6 lg:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {randomCourses.map((c) => {
                 const courseLessons = c.modules.reduce(
                   (acc, m) => acc + m.lessons.length,
                   0
@@ -498,7 +599,6 @@ export default function CourseDetailPage() {
                         width={400}
                         height={240}
                         className="w-full h-60 object-cover"
-                        style={{ width: "auto", height: "auto" }}
                       />
 
                       {/* Content */}
@@ -565,10 +665,12 @@ export default function CourseDetailPage() {
               </div>
               <AccordionContent className="pt-2 pb-0">
                 <div className="space-y-3">
-                  <p className="text-b4 text-gray-700">{course?.summary}</p>
+                  <p className="text-b4 !leading-snug text-gray-700">
+                    {course?.summary}
+                  </p>
                 </div>
               </AccordionContent>
-              <div className="pt-2">
+              <div className="pt-4">
                 <p className="text-b2 text-gray-700">
                   {course?.currency}{" "}
                   {course?.price?.toLocaleString() || "3,559.00"}
@@ -576,7 +678,7 @@ export default function CourseDetailPage() {
                 <div className="flex gap-3 mt-2">
                   {isEnrolled ? (
                     <Button
-                      className="flex-1 bg-green-600 hover:bg-green-700 !text-white text-b4"
+                      className="flex-1 bg-blue-500 hover:bg-blue-600 !text-white text-b4"
                       onClick={() =>
                         router.push(`/user/courses/${course?.id}/learning`)
                       }
