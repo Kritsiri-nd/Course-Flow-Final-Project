@@ -27,17 +27,16 @@ export default function CourseCard({
 
   return (
     <Link href={`/non-user/courses/${id}`} className="block">
-      <div className="w-[357px] h-[475px] bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden cursor-pointer flex flex-col relative">
+      <div className="w-[357px] h-[500px] bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden cursor-pointer flex flex-col relative">
 
-        {/* Thumbnail */}
-        <div className="relative w-full h-60">
-          <Image
-            src={image}
-            alt={title}
-            fill
-            className="object-cover"
-          />
-        </div>
+        {/* Thumbnail: enforce exact 357x235 dimensions */}
+        <Image
+          src={image}
+          alt={title}
+          width={357}
+          height={235}
+          className="object-cover"
+        />
 
         {/* Content */}
         <div className="flex flex-col flex-grow p-6 gap-6">

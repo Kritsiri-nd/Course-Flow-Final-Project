@@ -235,7 +235,6 @@ export default function AddCoursePage() {
       return result.url;
     } catch (error) {
       console.error('File upload error:', error);
-      alert(`File upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       return null;
     }
   };
