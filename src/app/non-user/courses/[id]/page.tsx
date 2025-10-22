@@ -96,6 +96,12 @@ function formatFileSize(bytes: number): string {
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
 }
 
+// Function to get random items from array
+function getRandomItems<T>(array: T[], count: number): T[] {
+  const shuffled = [...array].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, Math.min(count, array.length));
+}
+
 function mapApiCourseToUiCourse(api: ApiCourse): Course {
   const safeNumber = (value: unknown, fallback = 0): number => {
     if (typeof value === "number") return value;
@@ -143,6 +149,7 @@ export default function CourseDetailPage() {
   const id = params?.id as string;
   const [course, setCourse] = useState<Course | null>(null);
   const [otherCourses, setOtherCourses] = useState<Course[]>([]);
+  const [randomCourses, setRandomCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
@@ -215,6 +222,8 @@ export default function CourseDetailPage() {
           // Filter out current course
           const filtered = mapped.filter((c) => c.id !== parseInt(id));
           setOtherCourses(filtered);
+          // Random 3 courses to display
+          setRandomCourses(getRandomItems(filtered, 3));
         }
       } catch (error) {
         console.error("Error fetching course:", error);
@@ -396,7 +405,7 @@ export default function CourseDetailPage() {
                   <h2 className="sm:text-h2 text-h3 font-semibold">
                     Course Detail
                   </h2>
-                  <div className="text-b2 text-muted-foreground leading-relaxed space-y-4 mt-4 sm:mt-8">
+                  <div className="text-b2 text-muted-foreground !leading-snug space-y-4 mt-4 sm:mt-8">
                     <p>{course.description}</p>
                   </div>
                 </div>
@@ -411,6 +420,7 @@ export default function CourseDetailPage() {
                       <button
                         onClick={handleDownloadFile}
                         disabled={isDownloading}
+                        className="w-full md:w-auto"
                       >
                         <div className="bg-blue-100 border-none rounded-lg p-4 flex items-center gap-3">
                           <div className="w-14 h-14 bg-white rounded flex items-center justify-center">
@@ -528,7 +538,7 @@ export default function CourseDetailPage() {
                   <div className="space-y-3 pt-10 border-t border-gray-400">
                     {isEnrolled ? (
                       <Button
-                        className="w-full py-6 bg-green-600 hover:bg-green-700 text-b2 text-white"
+                        className="w-full py-6 bg-blue-500 hover:bg-blue-600 text-b2 text-white"
                         onClick={() =>
                           router.push(`/user/courses/${course.id}/learning`)
                         }
@@ -573,7 +583,7 @@ export default function CourseDetailPage() {
               Other Interesting Courses
             </h2>
             <div className="mt-0 sm:mt-10 px-4 md:px-6 lg:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {otherCourses.slice(0, 3).map((c) => {
+              {randomCourses.map((c) => {
                 const courseLessons = c.modules.reduce(
                   (acc, m) => acc + m.lessons.length,
                   0
@@ -655,10 +665,12 @@ export default function CourseDetailPage() {
               </div>
               <AccordionContent className="pt-2 pb-0">
                 <div className="space-y-3">
-                  <p className="text-b4 text-gray-700">{course?.summary}</p>
+                  <p className="text-b4 !leading-snug text-gray-700">
+                    {course?.summary}
+                  </p>
                 </div>
               </AccordionContent>
-              <div className="pt-2">
+              <div className="pt-4">
                 <p className="text-b2 text-gray-700">
                   {course?.currency}{" "}
                   {course?.price?.toLocaleString() || "3,559.00"}
@@ -666,7 +678,7 @@ export default function CourseDetailPage() {
                 <div className="flex gap-3 mt-2">
                   {isEnrolled ? (
                     <Button
-                      className="flex-1 bg-green-600 hover:bg-green-700 !text-white text-b4"
+                      className="flex-1 bg-blue-500 hover:bg-blue-600 !text-white text-b4"
                       onClick={() =>
                         router.push(`/user/courses/${course?.id}/learning`)
                       }
