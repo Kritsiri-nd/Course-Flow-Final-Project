@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 
 type SubLessonPayload = {
   title: string;
+  content?: string;
   video_url?: string | null;
   video_asset_id?: string | null;
 };
@@ -72,6 +73,7 @@ export async function POST(req: NextRequest) {
     const lessonsToInsert = subLessons.map((s, idx) => ({
       module_id: moduleId,
       title: s.title,
+      content: s.content ?? null,
       order_index: idx + 1,
       video_url: s.video_url ?? null,
       video_asset_id: s.video_asset_id ?? null,

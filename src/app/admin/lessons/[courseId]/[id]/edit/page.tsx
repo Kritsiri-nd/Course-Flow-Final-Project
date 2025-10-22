@@ -15,6 +15,7 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 type SubLessonState = {
   id: number;
   name: string;
+  content: string;
   file: File | null;
   previewUrl?: string | null;
   existingUrl?: string | null;
@@ -56,6 +57,7 @@ export default function EditLessonPage() {
             l: {
               id?: number;
               title?: string;
+              content?: string;
               video_url?: string;
               video_asset_id?: string | null;
             },
@@ -63,6 +65,7 @@ export default function EditLessonPage() {
           ) => ({
             id: typeof l?.id === "number" ? l.id : idx + 1,
             name: l?.title || "",
+            content: l?.content || "",
             file: null,
             previewUrl: l?.video_url || null,
             existingUrl: l?.video_url || null,
@@ -77,6 +80,7 @@ export default function EditLessonPage() {
                 {
                   id: 1,
                   name: "",
+                  content: "",
                   file: null,
                   previewUrl: null,
                   existingUrl: null,
@@ -196,12 +200,14 @@ export default function EditLessonPage() {
             const { url, assetId } = await res.json();
             return {
               title: s.name || "Untitled",
+              content: s.content || "",
               video_url: url,
               video_asset_id: assetId,
             };
           }
           return {
             title: s.name || "Untitled",
+            content: s.content || "",
             video_url: s.existingUrl ?? null,
             video_asset_id: s.videoAssetId ?? null,
           };
@@ -303,14 +309,14 @@ export default function EditLessonPage() {
         <div className="flex-1 overflow-auto p-8">
           <SubLessonForm
             lessonName={lessonName}
-            onLessonNameChange={(v) => {
+            onLessonNameChange={(v: string) => {
               setLessonName(v);
               if (errors.lessonName) {
                 setErrors((prev) => ({ ...prev, lessonName: "" }));
               }
             }}
             subLessons={subLessons}
-            onSubLessonsChange={(items) =>
+            onSubLessonsChange={(items: any) =>
               setSubLessons(items as SubLessonState[])
             }
             errors={errors}

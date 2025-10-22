@@ -27,10 +27,11 @@ export default function AddLessonPage() {
     {
       id: number;
       name: string;
+      content: string;
       file: File | null;
       previewUrl?: string | null;
     }[]
-  >([{ id: 1, name: "", file: null, previewUrl: null }]);
+  >([{ id: 1, name: "", content: "", file: null, previewUrl: null }]);
   const [lessonId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -118,17 +119,19 @@ export default function AddLessonPage() {
               throw new Error(msg);
             }
             const { url, assetId } = await res.json();
-            return {
-              title: s.name || "Untitled",
-              video_url: url,
-              video_asset_id: assetId,
-            };
-          }
           return {
             title: s.name || "Untitled",
-            video_url: null,
-            video_asset_id: null,
+            content: s.content || "",
+            video_url: url,
+            video_asset_id: assetId,
           };
+        }
+        return {
+          title: s.name || "Untitled",
+          content: s.content || "",
+          video_url: null,
+          video_asset_id: null,
+        };
         })
       );
 
