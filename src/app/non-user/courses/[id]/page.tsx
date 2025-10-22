@@ -81,6 +81,21 @@ function extractYouTubeId(url: string): string {
   return match && match[2].length === 11 ? match[2] : "";
 }
 
+// Function to check if URL is YouTube
+function isYouTubeUrl(url: string): boolean {
+  if (!url) return false;
+  return url.includes("youtube.com") || url.includes("youtu.be");
+}
+
+// Function to format file size
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+}
+
 function mapApiCourseToUiCourse(api: ApiCourse): Course {
   const safeNumber = (value: unknown, fallback = 0): number => {
     if (typeof value === "number") return value;
@@ -132,6 +147,7 @@ export default function CourseDetailPage() {
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [fileSize, setFileSize] = useState<string>("");
 
   // Check enrollment status
   useEffect(() => {
@@ -211,6 +227,35 @@ export default function CourseDetailPage() {
       fetchCourse();
     }
   }, [id]);
+
+  // Fetch file size
+  useEffect(() => {
+    const fetchFileSize = async () => {
+      if (!course?.attachmentUrl) {
+        setFileSize("");
+        return;
+      }
+
+      try {
+        const response = await fetch(course.attachmentUrl, {
+          method: "HEAD",
+        });
+
+        if (response.ok) {
+          const contentLength = response.headers.get("Content-Length");
+          if (contentLength) {
+            const sizeInBytes = parseInt(contentLength, 10);
+            setFileSize(formatFileSize(sizeInBytes));
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching file size:", error);
+        setFileSize("");
+      }
+    };
+
+    fetchFileSize();
+  }, [course?.attachmentUrl]);
 
   const handleAddToWishlist = async () => {
     if (!course || isAddingToWishlist) return;
@@ -330,21 +375,16 @@ export default function CourseDetailPage() {
               {/* Video/Image */}
               <div className="relative">
                 <Card className="overflow-hidden !p-0">
-                  <div
-                    className="relative aspect-video !m-0"
-                    style={{
-                      aspectRatio: "739/460",
-                    }}
-                  >
-                    <iframe
-                      src={`https://www.youtube.com/embed/${extractYouTubeId(
-                        course.videoUrl
-                      )}`}
-                      className="w-full h-full !m-0 !p-0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      title={course.title}
-                    />
+                  <div className="relative aspect-video !m-0">
+                    <video
+                      src={course.videoUrl}
+                      poster={course.thumbnail}
+                      controls
+                      className="w-full h-full aspect-video !m-0 !p-0 object-cover"
+                      controlsList="nodownload"
+                    >
+                      Your browser does not support the video tag.
+                    </video>
                   </div>
                 </Card>
               </div>
@@ -368,36 +408,43 @@ export default function CourseDetailPage() {
                   </h2>
                   <div className="mt-4 sm:mt-8">
                     {course.attachmentUrl ? (
-                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
-                          <svg
-                            className="w-4 h-4 text-blue-600"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                            />
-                          </svg>
+                      <button
+                        onClick={handleDownloadFile}
+                        disabled={isDownloading}
+                      >
+                        <div className="bg-blue-100 border-none rounded-lg p-4 flex items-center gap-3">
+                          <div className="w-14 h-14 bg-white rounded flex items-center justify-center">
+                            <svg
+                              className="w-6 h-6 text-blue-500"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                              />
+                            </svg>
+                          </div>
+                          <div className="flex flex-col gap-2 items-start">
+                            {isDownloading ? (
+                              "Downloading..."
+                            ) : (
+                              <p className="text-b2 font-medium text-gray-900">
+                                {course.attachmentUrl.split("/").pop() ||
+                                  "Attachment"}
+                              </p>
+                            )}
+                            {fileSize && (
+                              <p className="text-b4 text-blue-500">
+                                {fileSize}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex-1">
-                          <p className="text-b2 font-medium text-gray-900">
-                            {course.attachmentUrl.split("/").pop() ||
-                              "Attachment"}
-                          </p>
-                        </div>
-                        <button
-                          onClick={handleDownloadFile}
-                          disabled={isDownloading}
-                          className="text-blue-600 hover:text-blue-800 text-b2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {isDownloading ? "Downloading..." : "Download"}
-                        </button>
-                      </div>
+                      </button>
                     ) : (
                       <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
                         <p className="text-b2 text-gray-500">No attach file</p>
@@ -542,7 +589,6 @@ export default function CourseDetailPage() {
                         width={400}
                         height={240}
                         className="w-full h-60 object-cover"
-                        style={{ width: "auto", height: "auto" }}
                       />
 
                       {/* Content */}
