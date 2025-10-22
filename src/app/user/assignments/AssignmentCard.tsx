@@ -95,14 +95,14 @@ export default function AssignmentCard({ assignment, onSubmit, onAnswerChange }:
   };
 
   const handleOpenCourse = () => {
-    router.push(`/non-user/courses/${assignment.courseId}`);
+    router.push(`/user/courses/${assignment.courseId}/learning`);
   };
 
   const canEdit = assignment.status === 'pending' || assignment.status === 'in-progress' || assignment.status === 'overdue';
 
   return (
     <div className="bg-blue-50 rounded-lg p-4 sm:p-6 shadow-sm border border-blue-100">
-      <div className="flex justify-between items-start mb-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4">
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-black mb-1">
             Course: {assignment.courseTitle}
@@ -111,7 +111,7 @@ export default function AssignmentCard({ assignment, onSubmit, onAnswerChange }:
             {assignment.lessonTitle}
           </p>
         </div>
-        <span className={`px-3 py-1 text-sm font-medium ${getStatusStyle(assignment.status)}`}>
+        <span className={`px-3 py-1 text-sm font-medium self-start sm:self-auto mt-1 sm:mt-0 rounded ${getStatusStyle(assignment.status)}`}>
           {getStatusText(assignment.status)}
         </span>
       </div>
