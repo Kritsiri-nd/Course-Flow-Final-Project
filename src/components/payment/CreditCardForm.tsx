@@ -26,14 +26,14 @@ export default function CreditCardForm({
     errors = {}
 }: CreditCardFormProps) {
     return (
-        <div className="space-y-8 ">
+        <div className="space-y-8">
 
             {/* Card Number */}
             <div>
                 <label className="block text-b2 font-regular text-black mb-2">
                     Card number
                 </label>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <div className="flex flex-col lg:flex-row lg:items-center gap-3 ">
                     <div className="w-full max-w-[453px]">
                         <div className="relative">
                             <input

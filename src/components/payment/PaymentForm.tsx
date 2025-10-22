@@ -30,7 +30,7 @@ export default function PaymentForm({
     cardErrors = {}
 }: PaymentFormProps) {
     return (
-        <form id="payment-form" className="space-y-8">
+        <form id="payment-form" className="space-y-8 lg:max-w-full max-w-[500px]">
             {/* Select payment method heading */}
             <h2 className="text-b2 font-regular text-gray-700 mb-4">Select payment method</h2>
 
