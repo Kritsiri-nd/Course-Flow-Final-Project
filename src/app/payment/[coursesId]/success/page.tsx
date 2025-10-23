@@ -43,7 +43,7 @@ export default function PaymentSuccessPage() {
               <h1 className="text-h3 font-medium text-black mb-4">
                 Thank you for subscribing.
               </h1>
-              <p className="text-b2 font-regular  text-gray-700 mb-8">
+              <p className="text-b2 font-regular  text-gray-700 mb-8 !leading-normal">
                 Your payment is complete. You can start learning the course now.
               </p>
 

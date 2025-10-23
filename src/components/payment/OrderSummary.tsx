@@ -104,7 +104,7 @@ export default function OrderSummary({
     const discountAmount = appliedPromo ? appliedPromo.discountAmount : 0;
 
     return (
-        <div className="lg:col-span-1 max-w-[380px]">
+        <div className="lg:col-span-1 lg:max-w-[380px] max-w-[500px]">
             <div className="bg-white border border-gray-100 shadow-sm rounded-lg p-6 sticky top-8">
 
                 <h2 className="text-[14px] font-regular text-orange-500 mb-6">Summary</h2>
@@ -128,7 +128,7 @@ export default function OrderSummary({
                             type="button"
                             onClick={validatePromoCode}
                             disabled={validating || !promoCode.trim()}
-                            className="px-4 py-2 bg-gray-200 text-[16px] font-bold text-gray-600 rounded-md hover:bg-blue-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-4 py-2 bg-gray-200 text-[16px] font-bold text-gray-600 rounded-md hover:bg-blue-500 hover:text-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed "
                         >
                             {validating ? "..." : "Apply"}
                         </button>
@@ -189,7 +189,7 @@ export default function OrderSummary({
                         type="button"
                         onClick={handleSubmit}
                         disabled={loading || !omiseKey}
-                        className="w-full bg-blue-500 text-white py-4 px-4 rounded-lg hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+                        className="w-full bg-blue-500 text-white py-4 px-4 rounded-lg hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer mt-6"
                     >
                         {loading ? "Processing..." : "Place order"}
                     </button>

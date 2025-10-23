@@ -314,7 +314,7 @@ export default function QRDisplayPage() {
               <div className="border-none mb-3">
                 <div className="max-w-[1240px] mx-auto">
                   <Link href={`/payment/${courseId}`}>
-                    <Button variant="ghost" className="gap-2 text-b2 text-blue-500">
+                    <Button variant="ghost" className="gap-2 text-b2 text-blue-500 cursor-pointer">
                       <LuArrowLeft className="w-4 h-4" />
                       Back
                     </Button>
@@ -389,7 +389,7 @@ export default function QRDisplayPage() {
 
                   <button
                     onClick={saveQRImage}
-                    className="w-full max-w-[312px] bg-blue-600 text-white py-4 px-4 rounded-md hover:bg-blue-700"
+                    className="w-full max-w-[312px] bg-blue-600 text-white py-4 px-4 rounded-md hover:bg-blue-700 cursor-pointer"
                   >
                     Save QR image
                   </button>
