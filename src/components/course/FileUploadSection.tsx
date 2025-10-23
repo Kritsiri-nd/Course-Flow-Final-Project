@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import Image from "next/image";
-import { Plus, Upload, AlertCircle } from "lucide-react";
+import { Plus, AlertCircle } from "lucide-react";
 import { FILE_CONSTRAINTS } from "@/lib/constants";
 
 interface FileUploadSectionProps {
