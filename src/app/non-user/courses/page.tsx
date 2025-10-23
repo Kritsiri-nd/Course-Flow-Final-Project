@@ -3,17 +3,22 @@ import { useEffect, useState } from "react";
 import { PiBookOpenLight } from "react-icons/pi";
 import { LuClock3 } from "react-icons/lu";
 import Link from "next/link";
-// import Navbar from "@/components/ui/navbar";
 import SubFooter from "@/components/ui/subFooter";
 import Footer from "@/components/ui/footer";
 import BackgroundImage from "@/components/ui/background-image";
 import Image from "next/image";
+import PaginationUI from "@/components/layouts/pagination-ui";
 
 export default function CourseList() {
   const [courses, setCourses] = useState<unknown[]>([]);
   const [query, setQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12; // ✅ กำหนดจำนวนคอร์สต่อหน้า
+
+  // เพิ่มฟังก์ชัน handlePageChange
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -46,7 +51,8 @@ export default function CourseList() {
     }
   );
 
-  // ✅ Pagination logic
+ // ✅ Pagination logic
+  const totalItems = filteredCourses.length;
   const totalPages = Math.ceil(filteredCourses.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedCourses = filteredCourses.slice(
@@ -95,8 +101,6 @@ export default function CourseList() {
         <div className="mt-10 px-2 sm:px-4 md:px-6 lg:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {paginatedCourses.length > 0 ? (
             paginatedCourses.map((course: unknown) => {
-              // const firstSentence = course.description.split(".")[0] + ".";
-
               // คำนวณจำนวนบทเรียน
               interface Module {
                 lessons?: unknown[];
@@ -159,25 +163,13 @@ export default function CourseList() {
         </div>
 
         {/* ✅ Pagination Controls */}
-        <div className="flex justify-center items-center gap-4 mt-10">
-          <button
-            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
-            onClick={() => setCurrentPage((prev) => prev - 1)}
-            disabled={currentPage === 1}
-          >
-            Prev
-          </button>
-          <span className="text-gray-700">
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
-            onClick={() => setCurrentPage((prev) => prev + 1)}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </button>
-        </div>
+        <PaginationUI
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+            className="my-4"
+          />
       </div>
       <SubFooter />
       <Footer />
