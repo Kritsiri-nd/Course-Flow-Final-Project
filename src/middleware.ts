@@ -4,7 +4,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next()
-  
+
   // ส่ง pathname ไปยัง headers เพื่อให้ส่วนอื่นของแอปเข้าถึงได้
   response.headers.set('x-pathname', request.nextUrl.pathname)
 
@@ -52,21 +52,29 @@ export async function middleware(request: NextRequest) {
 
     const isAdminPath = pathname.startsWith('/admin');
     const isAdminLoginPath = pathname === '/admin/login';
-    
+
     // ตรวจสอบและรีเฟรช session หากจำเป็น
     if (session) {
       // ตรวจสอบว่า session หมดอายุหรือไม่
       const now = Math.floor(Date.now() / 1000) // current time in seconds
       const sessionExpiry = session.expires_at || 0
-      
+
       // หาก session จะหมดอายุใน 5 นาทีข้างหน้า ให้รีเฟรช
       if (sessionExpiry - now < 5 * 60) {
         await supabase.auth.refreshSession()
       }
     }
-    
+
     // 1. ตรวจสอบผู้ใช้ที่ยังไม่ได้ Login
     if (!session) {
+      // ตรวจสอบว่าพยายามเข้า Learning Page หรือไม่
+      const learningPathMatch = pathname.match(/^\/user\/courses\/(\d+)\/learning$/);
+      if (learningPathMatch) {
+        const loginUrl = new URL('/auth/login', request.url);
+        loginUrl.searchParams.set('redirect', pathname);
+        return NextResponse.redirect(loginUrl);
+      }
+
       // ถ้ายังไม่ login และพยายามเข้าหน้า admin อื่นๆ ที่ไม่ใช่หน้า login
       // ให้ redirect ไปที่หน้า login
       if (isAdminPath && !isAdminLoginPath) {
@@ -95,13 +103,33 @@ export async function middleware(request: NextRequest) {
       if (isAdminLoginPath) {
         return NextResponse.redirect(new URL('/admin/courses', request.url));
       }
-    } 
+    }
     // 2.2) กรณีเป็น User (หรือ Role อื่นๆ ที่ไม่ใช่ Admin)
     else {
       // ถ้าไม่ใช่ Admin แต่พยายามเข้าหน้า admin ใดๆ
       // ให้ redirect กลับไปที่หน้าแรก
       if (isAdminPath) {
         return NextResponse.redirect(new URL('/', request.url));
+      }
+    }
+
+    // 3. ตรวจสอบการเข้าถึง Learning Page (Enrollment Check)
+    const learningPathMatch = pathname.match(/^\/user\/courses\/(\d+)\/learning$/);
+
+    if (learningPathMatch) {
+      const courseId = learningPathMatch[1];
+
+      // ตรวจสอบว่า user ได้ enroll ในคอร์สนี้หรือยัง
+      const { data: enrollment } = await supabase
+        .from('enrollments')
+        .select('id')
+        .eq('user_id', session.user.id)
+        .eq('course_id', courseId)
+        .maybeSingle();
+
+      if (!enrollment) {
+        // ถ้ายัง enroll ให้ redirect ไปหน้า course detail
+        return NextResponse.redirect(new URL(`/non-user/courses/${courseId}`, request.url));
       }
     }
 
@@ -112,10 +140,14 @@ export async function middleware(request: NextRequest) {
     if (request.nextUrl.pathname.startsWith('/admin')) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
+    // หากเป็น learning path ให้ redirect กลับไปหน้าแรก
+    if (request.nextUrl.pathname.includes('/learning')) {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
   }
-  
+
   // --- END: ส่วนของ Logic การตรวจสอบสิทธิ์ ---
-  
+
   // หากผ่านเงื่อนไขทั้งหมด ให้ไปต่อตามปกติ
   return response;
 }

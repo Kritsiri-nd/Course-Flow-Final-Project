@@ -15,14 +15,18 @@ export default function UserCourseLearningPage() {
   const courseId = params?.id ? Number(params.id) : null;
 
   const [course, setCourse] = useState<Course | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
   const [progressRefreshTrigger, setProgressRefreshTrigger] = useState(0);
 
+  // Load course data
+  // Note: Access control is handled by middleware at server level
   useEffect(() => {
     let ignore = false;
+
     async function load() {
       if (!courseId) return;
+
       setLoading(true);
       try {
         const res = await fetch(`/api/courses/${courseId}`);
@@ -39,7 +43,9 @@ export default function UserCourseLearningPage() {
         if (!ignore) setLoading(false);
       }
     }
+
     load();
+
     return () => {
       ignore = true;
     };
@@ -68,8 +74,8 @@ export default function UserCourseLearningPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-1 w-full max-w-[1240px] mx-auto px-2 sm:px-6 md:px-8 py-4 sm:py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-          <div className="order-2 md:order-1 md:col-span-1">
+        <div className="lg:grid lg:grid-cols-3 gap-6 lg:gap-8">
+          <div className="order-2 md:order-1 md:col-span-1 mt-6 lg:mt-0">
             {course ? (
               <LearningSidebar
                 courseTitle={course.title}
@@ -93,21 +99,26 @@ export default function UserCourseLearningPage() {
               </div>
             )}
           </div>
-          <div className="order-1 md:order-2 md:col-span-2 space-y-6">
+          <div className="order-1 md:order-2 md:col-span-2 space-y-6 mt-6 lg:mt-0">
             <VideoSection
               title={selectedLesson?.title || ""}
               videoUrl={selectedLesson?.video_url || undefined}
               lessonId={selectedLessonId || undefined}
+              content={selectedLesson?.content || undefined}
               onProgressChange={handleProgressChange}
             />
             <AssignmentCard
               lessonId={selectedLessonId}
               onProgressChange={handleProgressChange}
             />
-            <BottomNav />
           </div>
         </div>
       </main>
+      <BottomNav
+        modules={course?.modules ?? []}
+        currentLessonId={selectedLessonId}
+        onLessonChange={setSelectedLessonId}
+      />
       <Footer />
     </div>
   );

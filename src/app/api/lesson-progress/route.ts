@@ -209,12 +209,8 @@ function calculateSingleLessonStatus(progressData: any) {
     }
 
     // กรณีมีวิดีโอ - ใช้ logic เดิม
-    const completed = isLessonCompleted(position, watched, duration);
-
-    // ถ้ามี completed_at แต่ไม่ผ่านเกณฑ์ = ลบ completed_at ออก
-    if (hasCompletedAt && !completed) {
-        console.log(`Lesson ${progressData.lesson_id}: Removing invalid completion`);
-    }
+    // ถ้ามี completed_at แล้ว = ให้ยึดถือว่าจบแล้ว ไม่ต้องคำนวณใหม่
+    const completed = hasCompletedAt ? true : isLessonCompleted(position, watched, duration);
 
     // คำนวณ percent
     const percent = completed ? 100 : calculateProgressPercent(position, watched, duration);
