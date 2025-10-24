@@ -30,13 +30,16 @@ export default function CourseCard({
       <div className="w-[357px] h-[500px] bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden cursor-pointer flex flex-col relative">
 
         {/* Thumbnail: enforce exact 357x235 dimensions */}
-        <Image
-          src={image}
-          alt={title}
-          width={357}
-          height={235}
-          className="object-cover"
-        />
+        <div className="w-full h-[235px] min-h-[235px] max-h-[235px] overflow-hidden relative bg-gray-200">
+          <Image
+            src={image}
+            alt={title}
+            fill
+            className="object-cover object-center"
+            sizes="357px"
+            priority={false}
+          />
+        </div>
 
         {/* Content */}
         <div className="flex flex-col flex-grow p-6 gap-6">
@@ -46,7 +49,9 @@ export default function CourseCard({
           </div>
 
           {/* Description */}
-          <p className="text-b2 text-gray-700 flex-grow leading-relaxed">{description}</p>
+          <p className="text-b2 text-gray-700 flex-grow leading-relaxed [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical] overflow-hidden text-ellipsis">
+            {description}
+          </p>
 
 
           <div className="border-t border-gray-200 w-full"></div>

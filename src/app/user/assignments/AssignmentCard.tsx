@@ -64,11 +64,9 @@ export default function AssignmentCard({ assignment, onSubmit, onAnswerChange }:
 
         if (response.ok) {
           onSubmit(assignment.id, answer);
-        } else {
-          console.error('Failed to submit assignment');
         }
       } catch (error) {
-        console.error('Error submitting assignment:', error);
+        // Handle error silently or show user-friendly message
       }
     }
   };
@@ -90,7 +88,7 @@ export default function AssignmentCard({ assignment, onSubmit, onAnswerChange }:
         }),
       });
     } catch (error) {
-      console.error('Error auto-saving answer:', error);
+      // Handle error silently
     }
   };
 

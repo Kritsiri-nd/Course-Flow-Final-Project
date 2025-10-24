@@ -35,7 +35,6 @@ export default function MyAssignmentsClient({ assignments }: MyAssignmentsClient
 
   // Filter assignments based on active tab
   const filteredAssignments = assignmentsState.filter(assignment => {
-    console.log(`🔍 Filtering assignment ${assignment.id}: status=${assignment.status}, activeTab=${activeTab}`);
     switch (activeTab) {
       case 'in-progress':
         return assignment.status === 'in-progress';
@@ -53,8 +52,6 @@ export default function MyAssignmentsClient({ assignments }: MyAssignmentsClient
     'in-progress': assignmentsState.filter(a => a.status === 'in-progress').length,
     submitted: assignmentsState.filter(a => a.status === 'submitted').length
   };
-  
-  console.log('🔍 Filtered assignments:', filteredAssignments);
 
   const handleSubmitAssignment = (assignmentId: string, answer: string) => {
     setAssignmentsState(prev => 

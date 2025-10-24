@@ -52,10 +52,7 @@ export default async function MyCoursesPage() {
     `)
     .eq('user_id', session.user.id);
 
-  // Debug logging
-  console.log('🔍 Debug - User ID:', session.user.id);
-  console.log('🔍 Debug - Enrollments Error:', enrollmentsError);
-  console.log('🔍 Debug - Enrollments Data:', enrollments);
+  // Debug logging removed
 
   // นับจำนวน courses แต่ละประเภท
   const coursesInProgress = enrollments?.filter(e => e.status === 'in-progress').length || 0;
