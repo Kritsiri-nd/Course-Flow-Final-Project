@@ -15,14 +15,18 @@ export default function UserCourseLearningPage() {
   const courseId = params?.id ? Number(params.id) : null;
 
   const [course, setCourse] = useState<Course | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
   const [progressRefreshTrigger, setProgressRefreshTrigger] = useState(0);
 
+  // Load course data
+  // Note: Access control is handled by middleware at server level
   useEffect(() => {
     let ignore = false;
+
     async function load() {
       if (!courseId) return;
+
       setLoading(true);
       try {
         const res = await fetch(`/api/courses/${courseId}`);
@@ -39,7 +43,9 @@ export default function UserCourseLearningPage() {
         if (!ignore) setLoading(false);
       }
     }
+
     load();
+
     return () => {
       ignore = true;
     };
@@ -67,7 +73,7 @@ export default function UserCourseLearningPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <main className="flex-1 w-full lg:max-w-3/4 mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-8">
+      <main className="flex-1 w-full max-w-[1240px] mx-auto px-2 sm:px-6 md:px-8 py-4 sm:py-8">
         <div className="lg:grid lg:grid-cols-3 gap-6 lg:gap-8">
           <div className="order-2 md:order-1 md:col-span-1 mt-6 lg:mt-0">
             {course ? (
