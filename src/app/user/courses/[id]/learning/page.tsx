@@ -56,7 +56,7 @@ export default function UserCourseLearningPage() {
   }, [course, selectedLessonId]);
 
   const handleProgressChange = () => {
-    console.log("Progress change triggered, incrementing refresh trigger");
+    // Progress change triggered
     setProgressRefreshTrigger((prev) => prev + 1);
   };
 

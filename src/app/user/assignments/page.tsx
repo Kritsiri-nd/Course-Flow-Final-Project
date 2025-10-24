@@ -21,13 +21,9 @@ export default async function UserAssignmentsPage() {
     .select('course_id')
     .eq('user_id', session.user.id);
   
-  console.log('🔍 Debug - User ID:', session.user.id);
-  console.log('🔍 Debug - Enrollments:', enrollments);
-
   // หาก user ไม่มี enrollments ให้สร้างให้อัตโนมัติ (สำหรับการทดสอบ)
   if (!enrollments || enrollments.length === 0) {
     try {
-      console.log('🔧 User has no enrollments, creating some for testing...');
       
       // สร้าง enrollments สำหรับ courses ที่มี assignments
       const { data: createdEnrollments, error: createError } = await supabase
@@ -49,13 +45,12 @@ export default async function UserAssignmentsPage() {
         .select('course_id');
       
       if (createError) {
-        console.error('Error creating enrollments:', createError);
+        // Handle error silently
       } else {
         enrollments = createdEnrollments;
-        console.log('✅ Created enrollments:', enrollments);
       }
     } catch (error) {
-      console.error('Error in auto-enrollment:', error);
+      // Handle error silently
     }
   }
 
@@ -105,39 +100,15 @@ export default async function UserAssignmentsPage() {
       .eq('user_assignment_submissions.user_id', session.user.id)
       .order('created_at', { ascending: false });
     
-    console.log('🔍 Debug - Course IDs:', courseIds);
-    console.log('🔍 Debug - Assignments data:', data);
-    console.log('🔍 Debug - Assignments error:', error);
+    // Debug logging removed
     
     assignmentsData = data || [];
     assignmentsError = error;
   }
 
   if (assignmentsError) {
-    console.error('Error fetching assignments:', assignmentsError);
+    // Handle error silently
   }
-
-  // Debug: ตรวจสอบว่ามี assignments ในระบบหรือไม่
-  const { data: allAssignments } = await supabase
-    .from('assignments')
-    .select('id, question, lesson_id')
-    .limit(5);
-  
-  console.log('🔍 Debug - All assignments in system:', allAssignments);
-
-  // Debug: ตรวจสอบโครงสร้าง lessons และ modules
-  const { data: lessonsData } = await supabase
-    .from('lessons')
-    .select('id, title, module_id')
-    .limit(5);
-  
-  const { data: modulesData } = await supabase
-    .from('modules')
-    .select('id, title, course_id')
-    .limit(5);
-  
-  console.log('🔍 Debug - Lessons data:', lessonsData);
-  console.log('🔍 Debug - Modules data:', modulesData);
 
   // แปลงข้อมูลจากฐานข้อมูลให้ตรงกับ interface ที่ต้องการ
   const transformedAssignments = (assignmentsData || []).map((assignment) => {
@@ -193,8 +164,7 @@ export default async function UserAssignmentsPage() {
   });
 
 
-  console.log('🔍 Debug - Transformed assignments:', transformedAssignments);
-  console.log('🔍 Debug - Assignments with status:', transformedAssignments.map(a => ({ id: a.id, status: a.status, courseTitle: a.courseTitle })));
+  // Debug logging removed
 
   return (
     <>

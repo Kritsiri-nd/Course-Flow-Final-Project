@@ -189,12 +189,10 @@ export default function CourseDetailPage() {
             );
             setIsEnrolled(isEnrolledInThisCourse);
           } else {
-            console.log("Enrollments data is not an array:", enrollments);
             setIsEnrolled(false);
           }
         }
       } catch (error) {
-        console.error("Error checking enrollment:", error);
         setIsEnrolled(false);
       }
     };
@@ -226,7 +224,7 @@ export default function CourseDetailPage() {
           setRandomCourses(getRandomItems(filtered, 3));
         }
       } catch (error) {
-        console.error("Error fetching course:", error);
+        // Handle error silently
       } finally {
         setLoading(false);
       }
@@ -258,7 +256,6 @@ export default function CourseDetailPage() {
           }
         }
       } catch (error) {
-        console.error("Error fetching file size:", error);
         setFileSize("");
       }
     };
@@ -284,15 +281,10 @@ export default function CourseDetailPage() {
         // Navigate to wishlist page
         router.push("/user/wishlist");
       } else {
-        const errorData = await response.json();
-        console.error("Failed to add to wishlist:", errorData);
-        alert(
-          `Failed to add to wishlist: ${errorData.error || "Unknown error"}`
-        );
+        // Handle error silently
       }
     } catch (error) {
-      console.error("Error adding to wishlist:", error);
-      alert("Network error. Please try again.");
+      // Handle error silently
     } finally {
       setIsAddingToWishlist(false);
     }
@@ -327,8 +319,7 @@ export default function CourseDetailPage() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
-      console.error("Error downloading file:", error);
-      alert("Failed to download file. Please try again.");
+      // Handle error silently
     } finally {
       setIsDownloading(false);
     }
