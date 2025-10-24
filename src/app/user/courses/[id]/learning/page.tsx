@@ -67,7 +67,7 @@ export default function UserCourseLearningPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <main className="flex-1 w-full max-w-[1240px] mx-auto px-2 sm:px-6 md:px-8 py-4 sm:py-8">
+      <main className="flex-1 w-full lg:max-w-3/4 mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-8">
         <div className="lg:grid lg:grid-cols-3 gap-6 lg:gap-8">
           <div className="order-2 md:order-1 md:col-span-1 mt-6 lg:mt-0">
             {course ? (
@@ -105,10 +105,14 @@ export default function UserCourseLearningPage() {
               lessonId={selectedLessonId}
               onProgressChange={handleProgressChange}
             />
-            <BottomNav />
           </div>
         </div>
       </main>
+      <BottomNav
+        modules={course?.modules ?? []}
+        currentLessonId={selectedLessonId}
+        onLessonChange={setSelectedLessonId}
+      />
       <Footer />
     </div>
   );
