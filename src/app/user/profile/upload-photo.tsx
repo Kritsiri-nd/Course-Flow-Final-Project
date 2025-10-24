@@ -8,11 +8,11 @@ export default function UploadPhoto({ profile }: { profile: unknown }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
-  
+
   interface ProfileData {
     photo_url?: string;
   }
-  
+
   const [photoUrl, setPhotoUrl] = useState<string>(
     (profile as ProfileData)?.photo_url || "/assets/defaultUser.png"
   );
@@ -20,7 +20,7 @@ export default function UploadPhoto({ profile }: { profile: unknown }) {
   // ✅ ฟังก์ชันตรวจสอบไฟล์
   const validateFile = (file: File): string | null => {
     // ตรวจสอบประเภทไฟล์
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
     if (!allowedTypes.includes(file.type)) {
       return "File type must be .jpg, .png, or .jpeg";
     }
@@ -69,10 +69,14 @@ export default function UploadPhoto({ profile }: { profile: unknown }) {
         setError(""); // ล้าง error เมื่อสำเร็จ
       } else {
         const data = await res.json();
-        setError("Upload failed. Ensure the file is .jpg, .png, or .jpeg and less than 5 MB.");
+        setError(
+          "Upload failed. Ensure the file is .jpg, .png, or .jpeg and less than 5 MB."
+        );
       }
     } catch (err) {
-      setError("Upload failed. Ensure the file is .jpg, .png, or .jpeg and less than 5 MB.");
+      setError(
+        "Upload failed. Ensure the file is .jpg, .png, or .jpeg and less than 5 MB."
+      );
     } finally {
       setLoading(false);
     }
@@ -81,7 +85,7 @@ export default function UploadPhoto({ profile }: { profile: unknown }) {
   const handleRemove = async () => {
     setLoading(true);
     setError(""); // ล้าง error เมื่อเริ่มลบ
-    
+
     try {
       const res = await fetch("/api/profile/photo", { method: "DELETE" });
 
@@ -135,7 +139,7 @@ export default function UploadPhoto({ profile }: { profile: unknown }) {
           <button
             onClick={handleUpload}
             disabled={loading}
-            className="bg-blue-500 hover:bg-blue-600 text-[18px] font-bold text-white sm:px-6 px-8 sm:py-2 py-4 rounded-md"
+            className="btn-blue-500 hover:btn-blue-600 text-[18px] font-bold text-white sm:px-6 px-8 sm:py-2 py-4 rounded-md"
           >
             {loading ? "Uploading..." : "Upload photo"}
           </button>
@@ -144,7 +148,7 @@ export default function UploadPhoto({ profile }: { profile: unknown }) {
             <button
               onClick={handleUpload}
               disabled={loading}
-              className="bg-blue-500 hover:bg-blue-600 text-[18px] font-bold text-white sm:px-6 px-8 sm:py-2 py-4 rounded-md"
+              className="btn-blue-500 hover:btn-blue-600 text-[18px] font-bold text-white sm:px-6 px-8 sm:py-2 py-4 rounded-md"
             >
               {loading ? "Uploading..." : "Change photo"}
             </button>

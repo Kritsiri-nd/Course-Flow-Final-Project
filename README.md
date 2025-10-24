@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CourseFlow 📚
 
-## Getting Started
+A modern, full-featured online course platform built with Next.js, designed to streamline course management, sales, and enrollment.
 
-First, run the development server:
+## Deployed Website
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+You can check the project at : https://course-flow-final-project.vercel.app/
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Landing Page
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+<img width="1903" height="1079" alt="landing-page" src="https://github.com/user-attachments/assets/5bfb1449-02ce-4219-9170-fe618d430f84" />
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### My Courses
 
-## Learn More
+<img width="1905" height="1062" alt="My courses" src="https://github.com/user-attachments/assets/6f694fa2-d3ff-4d7c-900f-ea6aaca6539b" />
 
-To learn more about Next.js, take a look at the following resources:
+### Admin Dashboard
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+<img width="1909" height="1075" alt="admin-dashboard" src="https://github.com/user-attachments/assets/6c398aba-16c9-4066-b554-ef999334109a" />
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🌟 Features
 
-## Deploy on Vercel
+### Core Functionality
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Course Management**: Comprehensive course creation, content uploading, and curriculum management.
+- **User Authentication**: Secure user registration and login system.
+- **Payment Processing**: Secure payment integration with Omise payment gateway for credit/debit cards and QR payments.
+- **Promo Codes**: Flexible promotion and discount code system.
+- **Real-time Updates**: Live data synchronization using Supabase real-time capabilities.
+- **Admin Dashboard**: Centralized dashboard for managing courses, users, and payments.
+- **Video Tracking**: Monitors video watch progress to ensure 100% completion by users.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### User Experience
+
+- **Responsive Design**: Modern UI built with MUI and Tailwind CSS.
+- **Intuitive Interface**: User-friendly design for both students and instructors.
+- **Mobile Optimized**: Full functionality across all device types.
+
+## 🛠️ Tech Stack
+
+### Frontend
+
+- **Framework**: Next.js (App Router)
+- **Styling**: Tailwind CSS + MUI
+- **UI Components**: MUI for a consistent, accessible design.
+
+### Backend & Database
+
+- **Database**: Supabase (PostgreSQL)
+- **Real-time**: Supabase Realtime for live features.
+- **API**: Next.js API routes
+
+### Payment & Integration
+
+- **Payment Gateway**: Omise for secure payment processing.
