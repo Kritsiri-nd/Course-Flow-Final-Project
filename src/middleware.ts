@@ -67,6 +67,14 @@ export async function middleware(request: NextRequest) {
 
     // 1. ตรวจสอบผู้ใช้ที่ยังไม่ได้ Login
     if (!session) {
+      // ตรวจสอบว่าพยายามเข้า Learning Page หรือไม่
+      const learningPathMatch = pathname.match(/^\/user\/courses\/(\d+)\/learning$/);
+      if (learningPathMatch) {
+        const loginUrl = new URL('/auth/login', request.url);
+        loginUrl.searchParams.set('redirect', pathname);
+        return NextResponse.redirect(loginUrl);
+      }
+
       // ถ้ายังไม่ login และพยายามเข้าหน้า admin อื่นๆ ที่ไม่ใช่หน้า login
       // ให้ redirect ไปที่หน้า login
       if (isAdminPath && !isAdminLoginPath) {
