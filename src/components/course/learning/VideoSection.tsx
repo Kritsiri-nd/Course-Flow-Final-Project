@@ -7,11 +7,12 @@ type Props = {
   title: string;
   videoUrl?: string | null;
   lessonId?: number | null;
+  content?: string | null;
   onProgressChange?: () => void;
 };
 
 export default function VideoSection(props: Props) {
-  const { title, videoUrl, lessonId, onProgressChange } = props;
+  const { title, videoUrl, lessonId, content, onProgressChange } = props;
 
   const playerRef = useRef<any>(null);
   const [playbackId, setPlaybackId] = useState<string | null>(null);
@@ -208,38 +209,42 @@ export default function VideoSection(props: Props) {
     <div className="space-y-4">
       <h1 className="text-h2">{title}</h1>
 
-      <div className="relative aspect-video overflow-hidden rounded-xl bg-black">
-        {playbackId ? (
-          // Mux Player (track progress ได้)
-          // @ts-expect-error custom element
-          <mux-player
-            ref={playerRef}
-            class="absolute inset-0 w-full h-full"
-            playback-id={playbackId}
-            stream-type="on-demand"
-            playsinline
-            accent-color="linear-gradient(90deg, #95BEFF, #0040E5)"
+      {/* Show video player if video exists */}
+      {(playbackId || videoUrl) && (
+        <div className="relative aspect-video overflow-hidden rounded-xl bg-black">
+          {playbackId ? (
+            // Mux Player (track progress ได้)
+            // @ts-expect-error custom element
+            <mux-player
+              ref={playerRef}
+              class="absolute inset-0 w-full h-full"
+              playback-id={playbackId}
+              stream-type="on-demand"
+              playsinline
+              accent-color="linear-gradient(90deg, #95BEFF, #0040E5)"
+            />
+          ) : (
+            // Fallback: iframe (ไม่ track progress)
+            <iframe
+              className="absolute inset-0 w-full h-full"
+              src={videoUrl!}
+              title="Course Video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          )}
+        </div>
+      )}
+
+      {/* Show lesson content if it exists */}
+      {content && (
+        <div className="prose prose-slate max-w-none dark:prose-invert">
+          <div
+            className="text-body1 leading-relaxed whitespace-pre-wrap"
+            dangerouslySetInnerHTML={{ __html: content }}
           />
-        ) : videoUrl ? (
-          // Fallback: iframe (ไม่ track progress)
-          <iframe
-            className="absolute inset-0 w-full h-full"
-            src={videoUrl}
-            title="Course Video"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        ) : (
-          // ไม่มีวิดีโอ - แสดงข้อความที่เหมาะสม
-          <div className="w-full h-full grid place-items-center text-muted-foreground">
-            <div className="text-center">
-              <div className="text-4xl mb-4">📖</div>
-              <div className="text-lg font-medium">Reading Material</div>
-              <div className="text-sm mt-2">No video for this lesson</div>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
