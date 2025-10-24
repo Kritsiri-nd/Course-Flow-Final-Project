@@ -7,6 +7,8 @@ import Image from "next/image";
 export default function UploadPhoto({ profile }: { profile: unknown }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>("");
+  
   interface ProfileData {
     photo_url?: string;
   }
@@ -15,7 +17,25 @@ export default function UploadPhoto({ profile }: { profile: unknown }) {
     (profile as ProfileData)?.photo_url || "/assets/defaultUser.png"
   );
 
+  // ✅ ฟังก์ชันตรวจสอบไฟล์
+  const validateFile = (file: File): string | null => {
+    // ตรวจสอบประเภทไฟล์
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+      return "File type must be .jpg, .png, or .jpeg";
+    }
+
+    // ตรวจสอบขนาดไฟล์ (5 MB = 5 * 1024 * 1024 bytes)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      return "File size must be less than 5 MB";
+    }
+
+    return null;
+  };
+
   const handleUpload = () => {
+    setError(""); // ล้าง error เมื่อเริ่มอัพโหลดใหม่
     fileInputRef.current?.click();
   };
 
@@ -23,38 +43,59 @@ export default function UploadPhoto({ profile }: { profile: unknown }) {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // ✅ ตรวจสอบไฟล์ก่อนอัพโหลด
+    const validationError = validateFile(file);
+    if (validationError) {
+      setError(`Upload failed. ${validationError}`);
+      return;
+    }
+
     setLoading(true);
+    setError(""); // ล้าง error เมื่อเริ่มอัพโหลด
 
     const formData = new FormData();
     formData.append("avatar", file);
 
-    const res = await fetch("/api/profile/photo", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const res = await fetch("/api/profile/photo", {
+        method: "POST",
+        body: formData,
+      });
 
-    setLoading(false);
-
-    if (res.ok) {
-      const data = await res.json();
-      // ✅ กัน cache + update state
-      setPhotoUrl(`${data.url}?t=${Date.now()}`);
-    } else {
-      const data = await res.json();
-      alert("❌ Upload failed: " + data.error);
+      if (res.ok) {
+        const data = await res.json();
+        // ✅ กัน cache + update state
+        setPhotoUrl(`${data.url}?t=${Date.now()}`);
+        setError(""); // ล้าง error เมื่อสำเร็จ
+      } else {
+        const data = await res.json();
+        setError("Upload failed. Ensure the file is .jpg, .png, or .jpeg and less than 5 MB.");
+      }
+    } catch (err) {
+      setError("Upload failed. Ensure the file is .jpg, .png, or .jpeg and less than 5 MB.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleRemove = async () => {
     setLoading(true);
-    const res = await fetch("/api/profile/photo", { method: "DELETE" });
-    setLoading(false);
+    setError(""); // ล้าง error เมื่อเริ่มลบ
+    
+    try {
+      const res = await fetch("/api/profile/photo", { method: "DELETE" });
 
-    if (res.ok) {
-      setPhotoUrl("/assets/defaultUser.png");
-    } else {
-      const data = await res.json();
-      alert("❌ Remove failed: " + data.error);
+      if (res.ok) {
+        setPhotoUrl("/assets/defaultUser.png");
+        setError(""); // ล้าง error เมื่อสำเร็จ
+      } else {
+        const data = await res.json();
+        setError("Remove failed: " + data.error);
+      }
+    } catch (err) {
+      setError("Remove failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,11 +115,18 @@ export default function UploadPhoto({ profile }: { profile: unknown }) {
         />
       </div>
 
+      {/* ✅ แสดงข้อความ error ใต้ภาพ */}
+      {error && (
+        <div className="mt-4 px-4 py-2 bg-red-100 border border-red-300 rounded-md">
+          <p className="text-red-600 text-sm text-center">{error}</p>
+        </div>
+      )}
+
       <input
         type="file"
         ref={fileInputRef}
         className="hidden"
-        accept="image/*"
+        accept="image/jpeg,image/jpg,image/png"
         onChange={handleFileChange}
       />
 

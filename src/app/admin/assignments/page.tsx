@@ -16,12 +16,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit, Plus, Search } from "lucide-react";
+import { Edit } from "lucide-react";
 import Link from "next/link";
 import { Assignment } from "@/types";
 import { assignmentService } from "@/services/assignmentService";
 import DeleteModalAlert from "@/components/ui/delete-modal-alert";
 import PaginationUI from "@/components/layouts/pagination-ui";
+import AdminHeader from "@/components/ui/AdminHeader";
 
 export default function Assignments() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -111,30 +112,14 @@ export default function Assignments() {
     <SidebarProvider>
       <AdminPanel />
       <SidebarInset className="bg-gray-100">
-        {/* header */}
-        <header className="flex h-23 shrink-0 items-center gap-2 bg-white border-b border-gray-300 px-4 pr-12 sticky top-0 z-20">
-          
-          <h1 className="text-h3 font-semibold ml-7">Assignments</h1>
-
-          {/* searchbar & add course button */}
-          <div className="ml-auto gap-4 flex items-center">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search assignments..."
-                className="h-12 w-64 rounded-lg border border-gray-300 pl-10 pr-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <Link href="/admin/assignments/create">
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground h-15 rounded-lg px-8 cursor-pointer">
-                <Plus className="h-4 w-4" />
-                Add Assignment
-              </Button>
-            </Link>
-          </div>
-        </header>
+        <AdminHeader
+          title="Assignments"
+          query={query}
+          setQuery={setQuery}
+          placeholder="Search assignments..."
+          addButtonText="Add Assignment"
+          addButtonHref="/admin/assignments/create"
+        />
 
         {/* table */}
         <div className="rounded-lg border border-none overflow-x-auto bg-white m-10">

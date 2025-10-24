@@ -1,13 +1,12 @@
 "use client";
 
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams} from "next/navigation";
 import Link from "next/link";
 import Footer from "@/components/ui/footer";
 import BackgroundImage from "@/components/ui/background-image";
 
 export default function PaymentFailPage() {
   const params = useParams();
-  const searchParams = useSearchParams();
   const courseId = params?.coursesId;
 
   return (

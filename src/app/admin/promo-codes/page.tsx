@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { Edit, Plus, Search } from 'lucide-react';
+import { Edit } from 'lucide-react';
 import { getPromoCodesWithCourseNames } from './action';
 import DeleteModalAlert from '@/components/ui/delete-modal-alert';
+import AdminHeader from '@/components/ui/AdminHeader';
 import { useEffect, useState } from 'react';
 import {
   SidebarProvider,
@@ -77,30 +78,14 @@ export default function PromoCodeListPage() {
     <SidebarProvider>
       <AdminPanel />
       <SidebarInset className="bg-gray-100">
-        {/* header */}
-        <header className="flex h-23 shrink-0 items-center gap-2 bg-white border-b border-gray-300 px-4 pr-12 sticky top-0 z-20">
-         
-          <h1 className="text-h3 font-semibold ml-7">Promo code</h1>
-
-          {/* searchbar & add promo code button */}
-          <div className="ml-auto gap-4 flex items-center">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search promo codes..."
-                className="h-12 w-64 rounded-lg border border-gray-300 pl-10 pr-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <Link href="/admin/promo-codes/new">
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground h-15 rounded-lg px-8 cursor-pointer">
-                <Plus className="h-4 w-4" />
-                Add promo code
-              </Button>
-            </Link>
-          </div>
-        </header>
+        <AdminHeader
+          title="Promo code"
+          query={query}
+          setQuery={setQuery}
+          placeholder="Search promo codes..."
+          addButtonText="Add promo code"
+          addButtonHref="/admin/promo-codes/new"
+        />
 
         {/* table */}
         <div className="rounded-lg border border-none overflow-x-auto bg-white m-10">
