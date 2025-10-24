@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AssignmentCard from './AssignmentCard';
+import { LoadingPage } from '@/components/ui/loading';
 
 interface Assignment {
   id: string;
@@ -75,14 +76,7 @@ export default function MyAssignmentsClient({ assignments }: MyAssignmentsClient
 
   // Loading component
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 relative overflow-hidden flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading your assignments...</p>
-        </div>
-      </div>
-    );
+    return <LoadingPage message="Loading your assignments..." />;
   }
 
   return (

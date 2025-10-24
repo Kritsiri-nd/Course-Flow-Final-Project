@@ -325,7 +325,7 @@ export default function EditAssignmentPage() {
               variant="outline"
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="w-[119px] h-[60px] px-8 py-[18px] gap-[10px] rounded-xl bg-[#2F5FAC] text-white shadow-[4px_4px_24px_0px_#00000014] opacity-100 text-center font-inter font-bold text-base leading-[150%] tracking-normal hover:bg-[#2F5FAC] hover:text-white cursor-pointer disabled:opacity-50"
+              className="w-[119px] h-[60px] px-8 py-[18px] gap-[10px] rounded-xl btn-blue-500 shadow-[4px_4px_24px_0px_#00000014] opacity-100 text-center font-inter font-bold text-base leading-[150%] tracking-normal cursor-pointer disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
@@ -538,7 +538,7 @@ export default function EditAssignmentPage() {
                       {isDeleting ? "Deleting..." : "Yes, I want to delete this assignment"}
                     </button>
                   </AlertDialogAction>
-                  <AlertDialogCancel className="h-15 w-1/3 bg-[#2F5FAC] hover:bg-[#2F5FAC] !text-white px-4 py-2 rounded-lg text-b2 font-medium">
+                  <AlertDialogCancel className="h-15 w-1/3 btn-blue-500 px-4 py-2 rounded-lg text-b2 font-medium">
                     No, keep it
                   </AlertDialogCancel>
                 </AlertDialogFooter>

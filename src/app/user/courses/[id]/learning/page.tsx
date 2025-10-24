@@ -8,6 +8,7 @@ import Footer from "@/components/ui/footer";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import type { Course, Lesson, Module } from "@/types";
+import { LoadingPage } from "@/components/ui/loading";
 
 export default function UserCourseLearningPage() {
   const params = useParams<{ id: string }>();
@@ -59,6 +60,10 @@ export default function UserCourseLearningPage() {
     // Progress change triggered
     setProgressRefreshTrigger((prev) => prev + 1);
   };
+
+  if (loading) {
+    return <LoadingPage message="Loading course content..." />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col">

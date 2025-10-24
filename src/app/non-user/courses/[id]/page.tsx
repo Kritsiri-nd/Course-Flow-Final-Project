@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/accordion";
 import Footer from "@/components/ui/footer";
 import SubscribeModalAlert from "@/components/ui/subscribe-modal-alert";
+import { LoadingPage } from "@/components/ui/loading";
 
 // Shape used in the UI
 interface Course {
@@ -325,15 +326,9 @@ export default function CourseDetailPage() {
     }
   };
 
-  if (loading)
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading course...</p>
-        </div>
-      </div>
-    );
+  if (loading) {
+    return <LoadingPage message="Loading course details..." />;
+  }
 
   if (!course)
     return (
@@ -529,7 +524,7 @@ export default function CourseDetailPage() {
                   <div className="space-y-3 pt-10 border-t border-gray-400">
                     {isEnrolled ? (
                       <Button
-                        className="w-full py-6 bg-blue-500 hover:bg-blue-600 text-b2 text-white"
+                        className="w-full py-6 btn-blue-500 text-b2"
                         onClick={() =>
                           router.push(`/user/courses/${course.id}/learning`)
                         }
@@ -540,7 +535,7 @@ export default function CourseDetailPage() {
                       <>
                         <Button
                           variant="outline"
-                          className="w-full py-6 bg-white border-orange-500 text-b2 text-orange-500 hover:bg-blue-50"
+                          className="w-full py-6 btn-outline-orange-500 text-b2 hover:bg-orange-50"
                           onClick={handleAddToWishlist}
                           disabled={isAddingToWishlist}
                         >
@@ -552,7 +547,7 @@ export default function CourseDetailPage() {
                             router.push(`/payment/${course.id}`);
                           }}
                         >
-                          <Button className="w-full py-6 bg-primary hover:bg-primary/90 text-b2 text-primary-foreground">
+                          <Button className="w-full py-6 btn-blue-500 text-b2">
                             Subscribe This Course
                           </Button>
                         </SubscribeModalAlert>
@@ -669,7 +664,7 @@ export default function CourseDetailPage() {
                 <div className="flex gap-3 mt-2">
                   {isEnrolled ? (
                     <Button
-                      className="flex-1 bg-blue-500 hover:bg-blue-600 !text-white text-b4"
+                      className="flex-1 btn-blue-500 text-b4"
                       onClick={() =>
                         router.push(`/user/courses/${course?.id}/learning`)
                       }
@@ -680,7 +675,7 @@ export default function CourseDetailPage() {
                     <>
                       <Button
                         variant="outline"
-                        className="flex-1 border-orange-500 !text-orange-500 hover:bg-orange-50 text-b4"
+                        className="flex-1 btn-outline-orange-500 hover:bg-orange-50 text-b4"
                         onClick={handleAddToWishlist}
                         disabled={isAddingToWishlist}
                       >
@@ -694,7 +689,7 @@ export default function CourseDetailPage() {
                           router.push(`/payment/${course?.id}`);
                         }}
                       >
-                        <Button className="flex-1 bg-primary hover:bg-primary/90 !text-primary-foreground text-b4">
+                        <Button className="flex-1 btn-blue-500 text-b4">
                           Subscribe This Course
                         </Button>
                       </SubscribeModalAlert>

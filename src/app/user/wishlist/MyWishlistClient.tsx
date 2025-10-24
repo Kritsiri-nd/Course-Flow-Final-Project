@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import CourseCard from '@/components/ui/CourseCard';
+import { LoadingPage } from '@/components/ui/loading';
 
 interface CourseData {
   id: string;
@@ -40,14 +41,7 @@ export default function MyWishlistClient({ wishlistCourses }: MyWishlistClientPr
 
   // Loading component
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 relative overflow-hidden flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading your wishlist...</p>
-        </div>
-      </div>
-    );
+    return <LoadingPage message="Loading your wishlist..." />;
   }
 
   return (
@@ -104,7 +98,7 @@ export default function MyWishlistClient({ wishlistCourses }: MyWishlistClientPr
                 </p>
                 <button 
                   onClick={() => window.location.href = '/non-user/courses'}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-6 py-3 btn-blue-500 rounded-lg transition-colors"
                 >
                   Browse Courses
                 </button>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import UserProfileCard from '@/components/ui/UserProfileCard';
 import CourseCard from '@/components/ui/CourseCard';
+import { LoadingPage } from '@/components/ui/loading';
 
 type TabType = 'all' | 'in-progress' | 'completed';
 
@@ -55,14 +56,7 @@ export default function MyCoursesClient({ userData, courses }: MyCoursesClientPr
 
   // Loading component
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 relative overflow-hidden flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading your courses...</p>
-        </div>
-      </div>
-    );
+    return <LoadingPage message="Loading your courses..." />;
   }
 
   return (

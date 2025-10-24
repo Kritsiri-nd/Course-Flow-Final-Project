@@ -157,14 +157,14 @@ export default function AssignmentCard({ assignment, onSubmit, onAnswerChange }:
              {assignment.status !== 'submitted' && (
                <button
                  onClick={handleSubmit}
-                 className="w-[279px] sm:w-[119px] h-[60px] pt-[18px] pr-[32px] pb-[18px] pl-[32px] sm:px-8 sm:py-[18px] gap-[10px] rounded-[12px] sm:rounded-xl bg-[#2F5FAC] text-white text-center font-medium hover:bg-blue-600 transition-colors"
+                 className="w-[279px] sm:w-[119px] h-[60px] pt-[18px] pr-[32px] pb-[18px] pl-[32px] sm:px-8 sm:py-[18px] gap-[10px] rounded-[12px] sm:rounded-xl btn-blue-500 text-center font-medium transition-colors"
                >
                  Submit
                </button>
              )}
               <button
                 onClick={handleOpenCourse}
-                className="text-blue-500 text-center font-bold text-base leading-6 tracking-normal hover:text-blue-600 transition-colors"
+                className="text-[#2F5FAC] text-center font-bold text-base leading-6 tracking-normal hover:text-[#234781] transition-colors"
               >
                 Open in Course
             </button>

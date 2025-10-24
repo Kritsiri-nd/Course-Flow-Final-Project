@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { createClient } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { LoadingButton } from '@/components/ui/loading';
 // import { sign } from 'crypto';
 
 export default function LoginForm() {
@@ -93,13 +94,14 @@ export default function LoginForm() {
           
           {/* --- Group 3: Submit Button --- */}
           <div>
-            <button
+            <LoadingButton
               type="submit"
+              loading={isLoading}
               disabled={isLoading}
-              className="flex w-full justify-center rounded-md border border-transparent bg-blue-500 px-4 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
+              className="w-full justify-center rounded-md border border-transparent btn-blue-500 px-4 py-3 text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
-              {isLoading ? 'Logging in...' : 'Log In'}
-            </button>
+              Log In
+            </LoadingButton>
           </div>
         </form>
 

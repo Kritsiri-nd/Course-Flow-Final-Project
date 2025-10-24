@@ -20,7 +20,7 @@ export default function Navbar() {
             Our Courses
           </div>
           <div
-            className="w-[90px] h-[50px] sm:w-[112px] sm:h-[60px] rounded-[12px] bg-[#2F5FAC] text-white font-semibold text-sm sm:text-base cursor-pointer hover:scale-105 transition-transform flex items-center justify-center"
+            className="w-[90px] h-[50px] sm:w-[112px] sm:h-[60px] rounded-[12px] btn-blue-500 font-semibold text-sm sm:text-base cursor-pointer hover:scale-105 transition-transform flex items-center justify-center"
             onClick={() => router.push("/auth/login")}
           >
             Log in

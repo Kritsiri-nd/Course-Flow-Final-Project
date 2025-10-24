@@ -8,11 +8,13 @@ import Footer from "@/components/ui/footer";
 import BackgroundImage from "@/components/ui/background-image";
 import Image from "next/image";
 import PaginationUI from "@/components/layouts/pagination-ui";
+import { LoadingPage } from "@/components/ui/loading";
 
 export default function CourseList() {
   const [courses, setCourses] = useState<unknown[]>([]);
   const [query, setQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
   const itemsPerPage = 12; // ✅ กำหนดจำนวนคอร์สต่อหน้า
 
   // เพิ่มฟังก์ชัน handlePageChange
@@ -22,15 +24,22 @@ export default function CourseList() {
 
   useEffect(() => {
     const fetchCourses = async () => {
-      const res = await fetch("/api/courses");
-      if (!res.ok) return;
-      const data = await res.json();
-      setCourses(data);
+      try {
+        setLoading(true);
+        const res = await fetch("/api/courses");
+        if (!res.ok) return;
+        const data = await res.json();
+        setCourses(data);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchCourses();
   }, []);
 
-  if (!courses.length) return <p>Loading...</p>;
+  if (loading) {
+    return <LoadingPage message="Loading courses..." />;
+  }
 
   interface Course {
     id: string;

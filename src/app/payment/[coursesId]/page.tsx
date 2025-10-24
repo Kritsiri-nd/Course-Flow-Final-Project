@@ -9,6 +9,7 @@ import Footer from "@/components/ui/footer";
 import { Button } from "@/components/ui/button";
 import { LuArrowLeft } from "react-icons/lu";
 import { validateCardData } from "@/lib/validators";
+import { LoadingPage } from "@/components/ui/loading";
 
 type PaymentMethod = 'card' | 'qr';
 
@@ -265,14 +266,7 @@ export default function PaymentPage() {
     };
 
     if (!course) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-muted-foreground">Loading...</p>
-                </div>
-            </div>
-        );
+        return <LoadingPage message="Loading payment information..." />;
     }
 
     return (
