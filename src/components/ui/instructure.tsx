@@ -272,7 +272,7 @@ export default function Instructure() {
             </p>
             <div
               onClick={() => router.push("/non-user/courses")}
-              className="w-[193px] h-[60px] rounded-[12px] bg-[#2F5FAC] text-white font-semibold text-base cursor-pointer hover:scale-105 transition-transform flex items-center justify-center"
+              className="w-[193px] h-[60px] rounded-[12px] btn-blue-500 font-semibold text-base cursor-pointer hover:scale-105 transition-transform flex items-center justify-center"
             >
               Explore Courses
             </div>
@@ -290,7 +290,7 @@ export default function Instructure() {
             </p>
             <button
               onClick={() => router.push("/non-user/courses")}
-              className="w-[180px] h-[52px] rounded-[12px] bg-[#2F5FAC] text-white font-semibold text-base cursor-pointer hover:scale-105 transition-transform flex items-center justify-center"
+              className="w-[180px] h-[52px] rounded-[12px] btn-blue-500 font-semibold text-base cursor-pointer hover:scale-105 transition-transform flex items-center justify-center"
             >
               Explore Courses
             </button>

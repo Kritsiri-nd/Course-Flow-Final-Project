@@ -201,7 +201,7 @@ export default function AddLessonPage() {
               variant="outline"
               onClick={handleCreate}
               disabled={isSubmitting}
-              className="w-[119px] h-[60px] px-8 py-[18px] gap-[10px] rounded-xl bg-[#2F5FAC] text-white shadow-[4px_4px_24px_0px_#00000014] opacity-100 text-center font-inter font-bold text-base leading-[150%] tracking-normal hover:bg-[#2F5FAC] hover:text-white cursor-pointer disabled:opacity-50"
+              className="w-[119px] h-[60px] px-8 py-[18px] gap-[10px] rounded-xl btn-blue-500 shadow-[4px_4px_24px_0px_#00000014] opacity-100 text-center font-inter font-bold text-base leading-[150%] tracking-normal cursor-pointer disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>

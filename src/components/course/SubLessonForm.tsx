@@ -490,7 +490,7 @@ export function SubLessonForm({
                       : "Yes, I want to delete this lesson"}
                   </button>
                 </AlertDialogAction>
-                <AlertDialogCancel className="h-15 w-1/3 bg-[#2F5FAC] hover:bg-[#2F5FAC] !text-white px-4 py-2 rounded-lg text-b2 font-medium">
+                <AlertDialogCancel className="h-15 w-1/3 btn-blue-500 px-4 py-2 rounded-lg text-b2 font-medium">
                   No, keep it
                 </AlertDialogCancel>
               </AlertDialogFooter>

@@ -289,7 +289,7 @@ export default function AssignmentCard({
                   {!isSubmitted && (
                     <button
                       onClick={() => handleSubmit(assignment.id)}
-                      className="px-6 py-4 bg-[#2F5FAC] text-white font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
+                      className="px-6 py-4 btn-blue-500 font-medium rounded-lg transition-colors cursor-pointer"
                     >
                       Send Assignment
                     </button>
