@@ -236,7 +236,7 @@ export default function RegisterPage() {
               type="submit"
               loading={isLoading}
               disabled={isLoading}
-              className="w-full rounded-lg bg-blue-500 py-3.5 font-semibold text-white shadow-lg hover:bg-blue-700"
+              className="w-full rounded-lg btn-blue-500 py-3.5 font-semibold shadow-lg"
             >
               Register
             </LoadingButton>

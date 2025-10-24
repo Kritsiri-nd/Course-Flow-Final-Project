@@ -98,7 +98,7 @@ export default function LoginForm() {
               type="submit"
               loading={isLoading}
               disabled={isLoading}
-              className="w-full justify-center rounded-md border border-transparent bg-blue-500 px-4 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              className="w-full justify-center rounded-md border border-transparent btn-blue-500 px-4 py-3 text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
               Log In
             </LoadingButton>

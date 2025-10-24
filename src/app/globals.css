@@ -104,6 +104,55 @@
     color: #22269E;
   }
 
+  /* Button color utilities */
+  .btn-blue-500 {
+    background-color: var(--blue-500);
+    color: var(--white);
+  }
+  
+  .btn-blue-500:hover {
+    background-color: var(--blue-600);
+  }
+  
+  .btn-orange-500 {
+    background-color: var(--orange-500);
+    color: var(--white);
+  }
+  
+  .btn-orange-500:hover {
+    background-color: var(--orange-100);
+  }
+  
+  .btn-outline-blue-500 {
+    background-color: transparent;
+    color: var(--blue-500);
+    border: 1px solid var(--blue-500);
+  }
+  
+  .btn-outline-blue-500:hover {
+    background-color: var(--blue-500);
+    color: var(--white);
+  }
+  
+  .btn-outline-orange-500 {
+    background-color: transparent;
+    color: var(--orange-500);
+    border: 1px solid var(--orange-500);
+  }
+  
+  .btn-outline-orange-500:hover {
+    background-color: var(--orange-500);
+    color: var(--white);
+  }
+  
+  .btn-gray-100 {
+    background-color: var(--gray--100);
+    color: var(--gray--800);
+  }
+  
+  .btn-gray-100:hover {
+    background-color: var(--gray--200);
+  }
 
 .box-shadow1 {
   box-shadow: 2px 2px 12px 0 rgba(0, 0, 0, 0.08);

@@ -98,7 +98,7 @@ export default function MyWishlistClient({ wishlistCourses }: MyWishlistClientPr
                 </p>
                 <button 
                   onClick={() => window.location.href = '/non-user/courses'}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-6 py-3 btn-blue-500 rounded-lg transition-colors"
                 >
                   Browse Courses
                 </button>
