@@ -43,7 +43,7 @@ export default function BottomNav({
       )}
       {hasNext && (
         <Button
-          className="bg-blue-500 hover:bg-blue-600 px-6 py-6 font-medium"
+          className="btn-blue-500 hover:bg-blue-600 px-6 py-6 font-medium"
           onClick={() => handleNavigate(allLessons[currentIndex + 1].id)}
         >
           Next Lesson

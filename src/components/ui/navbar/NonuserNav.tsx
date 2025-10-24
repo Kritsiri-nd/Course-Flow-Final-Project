@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
 import { useRouter } from "next/navigation";
 import CourseFlowIcon from "../../../assets/courseFlowIcon";
 
 export default function NonuserNav() {
-  const router = useRouter()
+  const router = useRouter();
 
   return (
     <header className="h-[88px] bg-white shadow-md flex items-center justify-center">
@@ -14,13 +14,13 @@ export default function NonuserNav() {
         </div>
         <div className="flex items-center justify-between gap-6 sm:gap-15">
           <div
-            className="font-inter font-bold text-[16px] leading-[150%] text-center text-dark-blue-500 cursor-pointer hover:scale-105 transition-transform"
+            className="font-inter font-bold text-[16px] leading-[150%] text-center text-blue-500 cursor-pointer hover:scale-105 transition-transform"
             onClick={() => router.push("/non-user/courses")}
           >
             Our Courses
           </div>
           <div
-            className="w-[90px] h-[50px] sm:w-[112px] sm:h-[60px] rounded-[12px] bg-blue-500 text-white font-semibold text-sm sm:text-base cursor-pointer hover:scale-105 transition-transform flex items-center justify-center"
+            className="w-[90px] h-[50px] sm:w-[112px] sm:h-[60px] rounded-[12px] btn-blue-500 text-white font-semibold text-sm sm:text-base cursor-pointer hover:scale-105 transition-transform flex items-center justify-center"
             onClick={() => router.push("/auth/login")}
           >
             Log in
@@ -28,5 +28,5 @@ export default function NonuserNav() {
         </div>
       </nav>
     </header>
-  )
+  );
 }

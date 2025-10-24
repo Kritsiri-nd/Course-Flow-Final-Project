@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams} from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import Footer from "@/components/ui/footer";
 import BackgroundImage from "@/components/ui/background-image";
@@ -21,11 +21,23 @@ export default function PaymentFailPage() {
             />
             <div className="bg-white rounded-xl shadow-md p-8 w-full max-w-[739px] text-center">
               <div className="w-16 h-16 bg-[#9B2FAC] rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </div>
-              <h3 className="text-h3 font-medium text-black mb-2">Payment failed</h3>
+              <h3 className="text-h3 font-medium text-black mb-2">
+                Payment failed
+              </h3>
               <p className="text-b2 font-regular text-gray-700 mb-6 !leading-normal">
                 {"Please check your payment details and try again"}
               </p>

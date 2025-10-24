@@ -8,7 +8,9 @@ import Footer from "@/components/ui/footer";
 export default function ConfirmEmailChangePage() {
   const params = useSearchParams();
   const token = params.get("token");
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [status, setStatus] = useState<"loading" | "success" | "error">(
+    "loading"
+  );
   const [message, setMessage] = useState("");
 
   useEffect(() => {
