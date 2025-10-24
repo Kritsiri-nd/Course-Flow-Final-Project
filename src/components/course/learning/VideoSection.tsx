@@ -205,6 +205,12 @@ export default function VideoSection(props: Props) {
   }, [lessonId, playbackId, videoUrl]);
 
   // ====== 8. Render UI ======
+  console.log("Lesson content:", {
+    lessonId,
+    contentLength: content?.length,
+    hasContent: !!content,
+  });
+
   return (
     <div className="space-y-4">
       <h1 className="text-h2">{title}</h1>
@@ -238,11 +244,10 @@ export default function VideoSection(props: Props) {
 
       {/* Show lesson content if it exists */}
       {content && (
-        <div className="prose prose-slate max-w-none dark:prose-invert">
-          <div
-            className="text-body1 leading-relaxed whitespace-pre-wrap"
-            dangerouslySetInnerHTML={{ __html: content }}
-          />
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border">
+          <div className="text-b1 leading-relaxed whitespace-pre-wrap">
+            {content}
+          </div>
         </div>
       )}
     </div>
