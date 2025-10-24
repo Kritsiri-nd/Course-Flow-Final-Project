@@ -205,12 +205,6 @@ export default function VideoSection(props: Props) {
   }, [lessonId, playbackId, videoUrl]);
 
   // ====== 8. Render UI ======
-  console.log("Lesson content:", {
-    lessonId,
-    contentLength: content?.length,
-    hasContent: !!content,
-  });
-
   return (
     <div className="space-y-4">
       <h1 className="text-h2">{title}</h1>
