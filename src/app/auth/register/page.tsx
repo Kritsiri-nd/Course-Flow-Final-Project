@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabaseClient";
+import { LoadingButton } from "@/components/ui/loading";
 // import { useRouter } from "next/navigation";
 
 
@@ -231,13 +232,14 @@ export default function RegisterPage() {
             {message && <p className="text-green-500">{message}</p>}
             {error && <p className="text-red-500">{error}</p>}
 
-            <button
+            <LoadingButton
               type="submit"
-              className="w-full rounded-lg bg-blue-500 py-3.5 font-semibold text-white shadow-lg hover:bg-blue-700 disabled:opacity-60"
-                disabled={isLoading}
-              >
-              {isLoading ? 'Registering...' : 'Register'}
-              </button>
+              loading={isLoading}
+              disabled={isLoading}
+              className="w-full rounded-lg bg-blue-500 py-3.5 font-semibold text-white shadow-lg hover:bg-blue-700"
+            >
+              Register
+            </LoadingButton>
           </div>
             <p className="mt-6 text-center text-sm text-gray-600">
               Already have an account?{' '}

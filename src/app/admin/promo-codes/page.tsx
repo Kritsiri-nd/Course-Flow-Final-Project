@@ -21,6 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { LoadingTableRow } from '@/components/ui/loading';
 
 interface PromoCode {
   id: string;
