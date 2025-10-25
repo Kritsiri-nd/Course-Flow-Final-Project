@@ -1,8 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useFormState } from "react-dom";
 import { addPromoCode, type FormState } from "./action";
-import { useRouter } from 'next/navigation'; 
 import { useState } from "react";
 import { MultiSelect } from "@/components/ui/multi-select";
 
@@ -17,33 +16,18 @@ type AddCouponFormProps = {
   totalCourses: number;
 };
 
-// Submit Button Component
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  
-  return (
-    <button 
-      type="submit" 
-      disabled={pending}
-      className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-    >
-      {pending ? "Creating..." : "Create Promo Code"}
-    </button>
-  );
-}
-
 export default function AddCouponForm({ courses, totalCourses }: AddCouponFormProps) {
-  const router = useRouter(); 
   const initialState: FormState = { message: "" };
   const [state, dispatch] = useFormState(addPromoCode, initialState);
   const [discountType, setDiscountType] = useState<"fixed" | "percent">("percent");
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
+  const [courseError, setCourseError] = useState<string>("");
 
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white border border-gray-300 rounded-xl">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Add New Promo Code</h1>
       
-      <form action={dispatch} className="space-y-6">
+      <form id="promo-form" action={dispatch} className="space-y-6">
         {/* Promo Code & Minimum Purchase */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Promo Code */}
@@ -133,21 +117,40 @@ export default function AddCouponForm({ courses, totalCourses }: AddCouponFormPr
               <input
                 type="number"
                 name="percent_amount"
-                min="0.01"
+                min="1"
                 max="100"
-                step="0.01"
+                step="1"
                 placeholder="Percent"
                 disabled={discountType !== "percent"}
                 onInput={(e) => {
-                  const value = parseFloat(e.currentTarget.value);
-                  if (value > 100) {
+                  // Remove decimal points and non-numeric characters except numbers
+                  const value = e.currentTarget.value.replace(/[^\d]/g, '');
+                  
+                  // Convert to number and validate range
+                  const numValue = parseInt(value, 10);
+                  
+                  if (isNaN(numValue)) {
+                    e.currentTarget.value = "";
+                  } else if (numValue > 100) {
                     e.currentTarget.value = "100";
+                  } else if (numValue < 1 && value !== "") {
+                    e.currentTarget.value = "1";
+                  } else {
+                    e.currentTarget.value = value;
+                  }
+                }}
+                onKeyDown={(e) => {
+                  // Prevent decimal point, plus, minus, and 'e' key
+                  if (e.key === '.' || e.key === '+' || e.key === '-' || e.key === 'e' || e.key === 'E') {
+                    e.preventDefault();
                   }
                 }}
                 onBlur={(e) => {
-                  const value = parseFloat(e.currentTarget.value);
-                  if (value < 0.01 && e.currentTarget.value !== "") {
-                    e.currentTarget.value = "0.01";
+                  const value = parseInt(e.currentTarget.value, 10);
+                  if (isNaN(value) || value < 1) {
+                    e.currentTarget.value = "";
+                  } else if (value > 100) {
+                    e.currentTarget.value = "100";
                   }
                 }}
                 className="no-spinner ml-3 block w-32 rounded-md border border-gray-400 shadow-sm focus:border-orange-500 focus:ring-indigo-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed px-3 py-2.5"
@@ -162,7 +165,7 @@ export default function AddCouponForm({ courses, totalCourses }: AddCouponFormPr
         </div>
 
         {/* Courses Included */}
-        <div>
+        <div className="courses-section">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Courses Included
           </label>
@@ -171,13 +174,21 @@ export default function AddCouponForm({ courses, totalCourses }: AddCouponFormPr
               value: course.id.toString(),
               label: course.title
             }))}
-            onValueChange={setSelectedCourses}
+            onValueChange={(values) => {
+              setSelectedCourses(values);
+              // Clear error when courses are selected
+              if (values.length > 0) {
+                setCourseError("");
+              }
+            }}
             defaultValue={[]}
             placeholder="Select courses..."
             variant="inverted"
             maxCount={3}
             hideSelectAll={false}
-            className="focus:border-orange-500 focus:ring-orange-500 data-[state=open]:border-orange-500 data-[state=open]:ring-orange-500"
+            className={`focus:border-orange-500 focus:ring-orange-500 data-[state=open]:border-orange-500 data-[state=open]:ring-orange-500 ${
+              courseError ? 'border-red-500' : ''
+            }`}
           />
           <input 
             type="hidden" 
@@ -189,25 +200,13 @@ export default function AddCouponForm({ courses, totalCourses }: AddCouponFormPr
             name="total_courses" 
             value={totalCourses} 
           />
-          {state.errors?.course_ids && (
+          {(state.errors?.course_ids || courseError) && (
             <p className="mt-1 text-sm text-red-600">
-              {state.errors.course_ids[0]}
+              {courseError || (state.errors?.course_ids && state.errors.course_ids[0])}
             </p>
           )}
         </div>
-        
-        {/* Action Buttons */}
-        <div className="flex justify-end items-center space-x-3 pt-4">
-          <button 
-            type="button" 
-            onClick={() => router.push("/admin/promo-codes")}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Cancel
-          </button>
 
-          <SubmitButton />
-        </div>
       </form>
     </div>
   );
