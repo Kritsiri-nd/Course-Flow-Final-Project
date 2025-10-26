@@ -143,7 +143,7 @@ export default function RegisterPage() {
     <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 font-sans">
       <div className="w-full max-w-lg space-y-8 rounded-lg bg-white p-8 ">
         <div>
-          <h1 className="text-center text-h2 font-medium text-dark-blue-500"> Register to start leaning! </h1>
+          <h1 className="text-center text-h2 font-medium text-dark-blue-500"> Register to start learning! </h1>
         </div>
         <form onSubmit={handleRegister} className="mt-8 space-y-6">
           <div className="grid grid-cols-1 gap-y-6 sm:gap-x-4">

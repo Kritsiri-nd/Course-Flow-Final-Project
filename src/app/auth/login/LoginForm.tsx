@@ -11,18 +11,15 @@ export default function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  // const [message, setMessage] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
-    // setMessage('');
     setIsLoading(true);
 
     const supabase = createClient();
-
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -31,63 +28,59 @@ export default function LoginForm() {
     if (signInError) {
       setError(`Please check your email and password.`);
     } else {
-      // setMessage('Login successful! Redirecting...');
       router.refresh();
-      // router.push('/');
     }
-
     setIsLoading(false);
   };
 
+  // 👇 **จุดแก้ไขหลัก:** ลบ <main> ออก ให้ return แค่ div ที่เป็นกล่องฟอร์ม
+  // div นี้มีหน้าที่กำหนด "ความกว้างสูงสุด" ของตัวเอง ไม่ให้ถูกบีบ
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 font-sans">
-      <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-10 shadow-lg">
+    <div className="space-y-8 rounded-lg bg-white p-10 shadow-lg">
+      <div>
+        <h1 className="text-left text-3xl font-semibold text-blue-500">
+          Welcome back!
+        </h1>
+      </div>
+
+      <form onSubmit={handleLogin} className="space-y-6">
+        {/* --- Email Input --- */}
         <div>
-          <h1 className="text-center text-h2 text-dark-blue-500"
-          
-          >Welcome back!</h1>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            Email
+          </label>
+          <div className="mt-1">
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="Enter Email"
+              className="w-full rounded-lg border border-gray-300 p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              disabled={isLoading}
+            />
+          </div>
         </div>
 
-        
-        <form onSubmit={handleLogin} className="space-y-6">
-          
-          
-          <div>
-            <label htmlFor="email" className="block text-b2 font-medium  text-gray-700">
-              Email
-            </label>
-            <div className="mt-1">
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="Enter Email"
-                className="w-full rounded-lg border border-gray-300 p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-b2"
-                disabled={isLoading}
-              />
-            </div>
+        {/* --- Password Input --- */}
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            Password
+          </label>
+          <div className="mt-1">
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="Enter Password"
+              className="w-full rounded-lg border border-gray-300 p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              disabled={isLoading}
+            />
           </div>
-
-          {/* --- Group 2: Password Input --- */}
-          <div>
-            <label htmlFor="password" className="block text-b2 font-medium  text-gray-700">
-              Password
-            </label>
-            <div className="mt-1">
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="Enter Password"
-                className="w-full rounded-lg border border-gray-300 p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-b2"
-                disabled={isLoading}
-              />
-            </div>
-          </div>
+        </div>
 
           {/* Display Error Message */}
           {error && <p className="text-sm text-red-500">{error}</p>}
@@ -105,14 +98,12 @@ export default function LoginForm() {
           </div>
         </form>
 
-        <p className="text-center text-sm text-gray-500">
-         Do you have an Account{' '}
-          <Link href="/auth/register" className="font-medium text-blue-500 hover:text-blue-600">
-            Register
-          </Link>
-        </p>
-
-      </div>
-    </main>
+      <p className="text-center text-sm text-left text-gray-500">
+        Don&apos;t have an account ?{' '}
+        <Link href="/auth/register" className="font-medium text-blue-500 hover:text-blue-600">
+          Register
+        </Link>
+      </p>
+    </div>
   );
 }
