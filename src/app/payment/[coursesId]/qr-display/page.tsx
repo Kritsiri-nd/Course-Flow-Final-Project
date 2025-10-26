@@ -213,6 +213,12 @@ export default function QRDisplayPage() {
            if (response.ok && data.enrolled) {
              setPaymentStatus('success');
 
+             // Clear QR data from localStorage
+             if (userId && courseId) {
+               const existingQrKey = `qr_${courseId}_${userId}`;
+               localStorage.removeItem(existingQrKey);
+             }
+
              // Auto redirect to success page after 2 seconds
              setTimeout(() => {
                router.push(`/payment/${courseId}/success`);
@@ -220,6 +226,12 @@ export default function QRDisplayPage() {
 
              clearInterval(interval);
            } else if (response.ok && data.paymentStatus === 'failed') {
+             // Clear QR data from localStorage
+             if (userId && courseId) {
+               const existingQrKey = `qr_${courseId}_${userId}`;
+               localStorage.removeItem(existingQrKey);
+             }
+
              // Redirect to fail page instead of setting status
              window.location.href = `/payment/${courseId}/fail?error=${encodeURIComponent("Payment failed")}&method=qr`;
              clearInterval(interval);
@@ -253,6 +265,12 @@ export default function QRDisplayPage() {
     setQrCreatedAt(null);
     setIsQrExpired(false);
     setPaymentStatus('pending');
+
+    // Clear localStorage before generating new QR
+    if (userId && courseId) {
+      const existingQrKey = `qr_${courseId}_${userId}`;
+      localStorage.removeItem(existingQrKey);
+    }
 
     // Clear URL parameters
     const newUrl = new URL(window.location.href);

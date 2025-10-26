@@ -127,8 +127,39 @@ export default function PaymentPage() {
 
     const handlePromptPay = async (promoCodeData?: any) => {
         if (!userId || !courseId || !course) {
-            alert("Please wait for the system to load completely.");
-            return;
+            return; // Remove alert - just return silently
+        }
+    
+        // Check if there's an existing QR code in localStorage
+        const existingQrKey = `qr_${courseId}_${userId}`;
+        const existingQr = localStorage.getItem(existingQrKey);
+        
+        if (existingQr) {
+            try {
+                const qrData = JSON.parse(existingQr);
+                const createdAt = qrData.createdAt;
+                const now = Date.now();
+                const qrAge = now - createdAt;
+                const expirationTime = 15 * 60 * 1000; // 15 minutes
+                
+                // If QR is still valid, use the existing one
+                if (qrAge < expirationTime) {
+                    const qrDisplayUrl = new URL(`/payment/${courseId}/qr-display`, window.location.origin);
+                    qrDisplayUrl.searchParams.set('chargeId', qrData.chargeId);
+                    qrDisplayUrl.searchParams.set('referenceNo', qrData.referenceNo);
+                    qrDisplayUrl.searchParams.set('qrUrl', qrData.qrUrl);
+                    qrDisplayUrl.searchParams.set('createdAt', createdAt.toString());
+                    if (qrData.promoCodeId) {
+                        qrDisplayUrl.searchParams.set('promoCodeId', qrData.promoCodeId);
+                    }
+                    
+                    window.location.href = qrDisplayUrl.toString();
+                    return;
+                }
+            } catch (error) {
+                console.error('Error parsing existing QR:', error);
+                // Continue to create new QR
+            }
         }
     
         setLoading(true);
@@ -160,9 +191,20 @@ export default function PaymentPage() {
             const qrImageUrl = data.source?.scannable_code?.image?.download_uri;
     
             if (data.id && qrImageUrl) {
-                // Redirect to QR display page, passing all necessary data via URL params
+                // Save QR data to localStorage
                 const refNo = `CF${Date.now()}`;
                 const createdAt = Date.now();
+                
+                const qrDataToSave = {
+                    chargeId: data.id,
+                    referenceNo: refNo,
+                    qrUrl: qrImageUrl,
+                    createdAt: createdAt,
+                    promoCodeId: promoCodeData?.id || null
+                };
+                localStorage.setItem(existingQrKey, JSON.stringify(qrDataToSave));
+                
+                // Redirect to QR display page, passing all necessary data via URL params
                 const qrDisplayUrl = new URL(`/payment/${courseId}/qr-display`, window.location.origin);
                 
                 qrDisplayUrl.searchParams.set('chargeId', data.id);
