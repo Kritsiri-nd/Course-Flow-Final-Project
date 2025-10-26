@@ -74,7 +74,13 @@ export async function middleware(request: NextRequest) {
         loginUrl.searchParams.set('redirect', pathname);
         return NextResponse.redirect(loginUrl);
       }
-
+      // ตรวจสอบว่าพยายามเข้า Payment Page หรือไม่
+      const paymentPathMatch = pathname.match(/^\/payment\/(\d+)/);
+      if (paymentPathMatch) {
+        const loginUrl = new URL('/auth/login', request.url);
+        loginUrl.searchParams.set('redirect', pathname);
+        return NextResponse.redirect(loginUrl);
+      }
       // ถ้ายังไม่ login และพยายามเข้าหน้า admin อื่นๆ ที่ไม่ใช่หน้า login
       // ให้ redirect ไปที่หน้า login
       if (isAdminPath && !isAdminLoginPath) {
