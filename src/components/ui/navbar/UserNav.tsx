@@ -161,7 +161,7 @@ export default function UserNav({ userProfile }: { userProfile: Profile }) {
                   alt={userProfile?.first_name || "User Avatar"}
                   width={40}
                   height={40}
-                  className="rounded-full border-2 border-gray-200 object-cover"
+                  className="rounded-full border-2 border-gray-200 object-cover h-9 w-9"
                 />
                 <span className="hidden font-semibold sm:block">
                   {userProfile?.first_name} {userProfile?.last_name}
