@@ -63,7 +63,6 @@ export async function GET(
 
         const normalized = {
             ...data,
-<<<<<<< HEAD
             modules: (data?.modules ?? [])
                 .map((m: { lessons?: unknown[] }) => ({
                     ...m,
@@ -78,12 +77,6 @@ export async function GET(
                     const bIndex = b.order_index ?? b.id;
                     return aIndex - bIndex;
                 }),
-=======
-            modules: (data?.modules ?? []).map((m: { lessons?: unknown[] }) => ({
-                ...m,
-                lessons: (m.lessons ?? []).sort((a: any, b: any) => (a.order_index || 0) - (b.order_index || 0)),
-            })),
->>>>>>> ce67ee5 (feat: Enhance lesson deletion functionality in LessonManagement component)
         };
 
         return NextResponse.json(normalized, { status: 200 });
