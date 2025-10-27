@@ -232,13 +232,36 @@ export function LessonManagement({ lessons, errors, onLessonsChange, courseId, m
     setShowAddLessonForm(false);
   };
 
-  const deleteLesson = (lessonId: number) => {
+  const deleteLesson = async (lessonId: number) => {
     if (lessons.length <= 1) {
-      alert('Course must have at least 1 lesson');
       return;
     }
 
-    onLessonsChange(lessons.filter(lesson => lesson.id !== lessonId));
+    // If we have a courseId and we're not in mock mode, delete from database
+    if (courseId && !mockOnly) {
+      try {
+        const response = await fetch(`/api/lessons/${lessonId}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          let message = 'Failed to delete lesson';
+          try {
+            const errorData = await response.json();
+            message = errorData?.error || message;
+          } catch {}
+          throw new Error(message);
+        }
+
+        // Only update local state if database deletion was successful
+        onLessonsChange(lessons.filter(lesson => lesson.id !== lessonId));
+      } catch (error) {
+        console.error('Error deleting lesson:', error);
+      }
+    } else {
+      // For mock mode or when no courseId, just update local state
+      onLessonsChange(lessons.filter(lesson => lesson.id !== lessonId));
+    }
   };
 
   /*
