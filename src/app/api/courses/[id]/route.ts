@@ -50,6 +50,7 @@ export async function GET(
         )
       `)
             .eq("id", courseId)
+            .order("order_index", { referencedTable: "modules" })
             .single();
 
         if (error) {
