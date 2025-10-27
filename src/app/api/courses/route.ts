@@ -47,10 +47,20 @@ export async function GET() {
   // normalize: modules, lessons ต้องเป็น array เสมอ
   const normalized = (data ?? []).map((course) => ({
     ...course,
-    modules: (course.modules ?? []).map((m: { lessons?: unknown[] }) => ({
-      ...m,
-      lessons: m.lessons ?? [],
-    })),
+    modules: (course.modules ?? [])
+      .map((m: { lessons?: unknown[] }) => ({
+        ...m,
+        lessons: (m.lessons ?? []).sort((a: any, b: any) => {
+          const aIndex = a.order_index ?? a.id;
+          const bIndex = b.order_index ?? b.id;
+          return aIndex - bIndex;
+        }),
+      }))
+      .sort((a: any, b: any) => {
+        const aIndex = a.order_index ?? a.id;
+        const bIndex = b.order_index ?? b.id;
+        return aIndex - bIndex;
+      }),
   }));
 
   return NextResponse.json(normalized, { status: 200 });

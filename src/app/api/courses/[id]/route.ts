@@ -62,10 +62,20 @@ export async function GET(
 
         const normalized = {
             ...data,
-            modules: (data?.modules ?? []).map((m: { lessons?: unknown[] }) => ({
-                ...m,
-                lessons: m.lessons ?? [],
-            })),
+            modules: (data?.modules ?? [])
+                .map((m: { lessons?: unknown[] }) => ({
+                    ...m,
+                    lessons: (m.lessons ?? []).sort((a: any, b: any) => {
+                        const aIndex = a.order_index ?? a.id;
+                        const bIndex = b.order_index ?? b.id;
+                        return aIndex - bIndex;
+                    }),
+                }))
+                .sort((a: any, b: any) => {
+                    const aIndex = a.order_index ?? a.id;
+                    const bIndex = b.order_index ?? b.id;
+                    return aIndex - bIndex;
+                }),
         };
 
         return NextResponse.json(normalized, { status: 200 });
