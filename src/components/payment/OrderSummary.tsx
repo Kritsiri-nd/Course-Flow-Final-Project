@@ -97,11 +97,7 @@ export default function OrderSummary({
     onSubmit(appliedPromo || undefined);
   };
 
-  const removePromoCode = () => {
-    setPromoCode("");
-    setPromoValidation(null);
-    setAppliedPromo(null);
-  };
+  
 
   const displayPrice = appliedPromo ? appliedPromo.finalAmount : course.price;
   const discountAmount = appliedPromo ? appliedPromo.discountAmount : 0;
@@ -160,13 +156,6 @@ export default function OrderSummary({
               <div className="flex justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-b2 font-regular">Discount</span>
-                  <button
-                    type="button"
-                    onClick={removePromoCode}
-                    className="text-red-600 hover:text-red-800 underline text-xs"
-                  >
-                    Remove
-                  </button>
                 </div>
                 <span className="text-b2 font-regular text-[#9B2FAC]">
                   -{discountAmount.toLocaleString()}.00
